@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-33 -48 66 96" data-id="logo">
+  <style>
+    [data-id="logo"][data-animated] .logo-draw,
+    [data-id="logo"]:hover .logo-draw {
+      animation: logo-draw 2s linear infinite both;
+      animation-delay: var(--delay);
+      stroke-dasharray: var(--length);
+    }
+
+    @keyframes logo-draw {
+      0% {
+        stroke-dashoffset: calc(2px * var(--length));
+      }
+      20% {
+        stroke-dashoffset: calc(2px * var(--length));
+      }
+      40% {
+        stroke-dashoffset: calc(1px * var(--length));
+      }
+      60% {
+        stroke-dashoffset: calc(1px * var(--length));
+      }
+      80% {
+        stroke-dashoffset: 0;
+      }
+      100% {
+        stroke-dashoffset: 0;
+      }
+    }
+  </style>
+
+  <g
+    fill="none"
+    stroke="currentColor"
+    stroke-linejoin="round"
+    stroke-linecap="round"
+    stroke-width="var(--stroke, 5)"
+  >
+    <!-- helix -->
+    <path
+      class="logo-draw"
+      style="--length: 41.6174240112; --delay: 0s"
+      d="
+        M -30 -45
+        C -30 -25 -10 -10 -10 -10
+      "
+    />
+    <path
+      class="logo-draw"
+      style="--length: 41.6174316406; --delay: 0.5s"
+      d="
+        M 10 10
+        C 10 10 30 25 30 45
+      "
+    />
+    <!-- slash -->
+    <path
+      class="logo-draw"
+      style="--length: 84.8528137207; --delay: 0.2s"
+      d="
+        M 30 -30
+        L -30 30
+      "
+    />
+    <!-- pairs -->
+    <path
+      class="logo-draw"
+      style="--length: 47; --delay: 0.1s"
+      d="
+        M -28 -35
+        L 16 -35
+      "
+    />
+    <path
+      class="logo-draw"
+      style="--length: 25; --delay: 0.3s"
+      d="
+        M -20 -21
+        L 2 -21
+      "
+    />
+    <path
+      class="logo-draw"
+      style="--length: 25; --delay: 0.6s"
+      d="
+        M 20 21
+        L -2 21
+      "
+    />
+    <path
+      class="logo-draw"
+      style="--length: 47; --delay: 0.8s"
+      d="
+        M 28 35
+        L -16 35
+      "
+    />
+  </g>
+</svg>
