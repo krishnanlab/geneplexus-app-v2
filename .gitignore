@@ -1,3 +1,3 @@
 *DS_Store
-functions_zoo/ml/ml/data/
-functions_zoo/convert_ids_all/convert_ids/data/
+functions/ml/ml_deploy/data/
+functions/convert_ids/convert_ids_deploy/data/
