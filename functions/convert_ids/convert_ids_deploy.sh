@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd convert_ids
+cd convert_ids_deploy
 
 gcloud functions deploy gpz-convert-ids \
     --gen2 \

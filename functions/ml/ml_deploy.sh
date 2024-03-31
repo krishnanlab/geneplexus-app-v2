@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ml
+cd ml_deploy
 
 gcloud functions deploy gpz-ml \
     --gen2 \
