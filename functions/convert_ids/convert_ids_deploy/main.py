@@ -43,7 +43,7 @@ def convert_ids(request):
         json_out["convert_ids"] = gp.convert_ids
         json_out["table_summary"] = gp.table_summary
         json_out["input_count"] = gp.input_count
-        json_out["df_convert_out"] = gp.df_convert_out.to_json(orient="split")
+        json_out["df_convert_out"] = gp.df_convert_out.to_dict(orient="split")
         return (json_out, 200, headers)
     except:
         return "problem with geneplexus"

@@ -58,13 +58,13 @@ def run_pipeline(request):
         # save outputs in json format
         json_out = {}
         json_out["avgps"] = gp.avgps
-        json_out["df_probs"] = gp.df_probs.to_json(orient="split")
-        json_out["df_sim"] = gp.df_sim.to_json(orient="split")
-        json_out["df_edge"] = gp.df_edge.to_json(orient="split")
+        json_out["df_probs"] = gp.df_probs.to_dict(orient="split")
+        json_out["df_sim"] = gp.df_sim.to_dict(orient="split")
+        json_out["df_edge"] = gp.df_edge.to_dict(orient="split")
         json_out["isolated_genes"] = gp.isolated_genes
-        json_out["df_edge_sym"] = gp.df_edge_sym.to_json(orient="split")
+        json_out["df_edge_sym"] = gp.df_edge_sym.to_dict(orient="split")
         json_out["isolated_genes_sym"] = gp.isolated_genes_sym
-        json_out["df_convert_out_subset"] = gp.df_convert_out_subset.to_json(orient="split")
+        json_out["df_convert_out_subset"] = gp.df_convert_out_subset.to_dict(orient="split")
         json_out["positive_genes"] = gp.positive_genes
         return (json_out, 200, headers)
     except:
