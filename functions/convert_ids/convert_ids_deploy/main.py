@@ -5,6 +5,7 @@ import geneplexus
 def convert_ids(request):
     """HTTP Cloud Function.
     set function up for CORS headers so function can be called from js
+    
     """
     if request.method == "OPTIONS":
         headers = {
@@ -17,6 +18,13 @@ def convert_ids(request):
     
     # Set CORS headers for the main request
     headers = {"Access-Control-Allow-Origin": "*"}
+    
+    """"Function Inputs
+    geneids: if request_json list of strings
+             if request_args genes are in comma separated string
+    species: str; options are ["Human","Mouse","Fly","Zebrafish","Worm","Yeast"]
+    
+    """
         
     try:
         # get info from the requests
@@ -33,6 +41,24 @@ def convert_ids(request):
             species = request_args["species"]
     except:
         return "problem with input"
+        
+    """"Function Outputs
+    convert_ids: List[str] Entrez IDs in string format
+    input_count: int The number of user input genes
+    table_summary: List of Dicts. Each element of the list is a 
+        different network
+        Keys: Network: str options ["BioGRID","STRING","IMP"]
+                Note if species == Zebrafish, BioGRID is not included
+              NetworkGenes: int Number of genes in network
+              Positive Genes: int Number of user genes in network
+    df_convert_out: Dict repreenstation of a dataframe
+        Keys: columns: List[str] column headers of the data frame
+                note: if species == Zebrafish the "In BioGRID"
+                      will be missing
+              data: List of Lists[str] the data the files the dataframe
+              index: List[str] row indicies (not used at any point)
+        
+    """
     
     try:
         # set the gp object
