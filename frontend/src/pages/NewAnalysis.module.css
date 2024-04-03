@@ -1,0 +1,19 @@
+.summary {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  align-items: center;
+  width: unset;
+  gap: 10px;
+}
+
+.divider {
+  grid-column: 1 / -1;
+}
+
+.success {
+  color: var(--success);
+}
+
+.error {
+  color: var(--error);
+}
