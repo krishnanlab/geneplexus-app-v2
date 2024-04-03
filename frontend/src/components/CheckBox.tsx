@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { HTMLAttributes, PropsWithoutRef, ReactNode } from "react";
 import { useId } from "react";
 import { FaRegSquare, FaRegSquareCheck } from "react-icons/fa6";
 import * as checkbox from "@zag-js/checkbox";
@@ -49,9 +49,15 @@ const CheckBox = ({ label, tooltip, value, onChange, name }: Props) => {
   /** check icon */
   const Check = api.isChecked ? FaRegSquareCheck : FaRegSquare;
 
+  console.log(api.controlProps);
+
   return (
     <label {...api.rootProps} className={classes.label}>
-      <Check {...api.controlProps} className={classes.check} />
+      <Check
+        /** https://github.com/chakra-ui/zag/discussions/1393 */
+        {...(api.controlProps as PropsWithoutRef<HTMLAttributes<Element>>)}
+        className={classes.check}
+      />
       <span {...api.labelProps}>{label}</span>
       <input {...api.hiddenInputProps} name={undefined} />
 
