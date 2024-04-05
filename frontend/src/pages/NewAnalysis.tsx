@@ -109,13 +109,6 @@ const NewAnalysis = () => {
         />
 
         <div className="flex-row gap-sm">
-          <Select
-            label="Species"
-            layout="horizontal"
-            options={speciesOptions}
-            value={species}
-            onChange={setSpecies}
-          />
           <Button
             text="Example"
             icon={<FaLightbulb />}
@@ -136,12 +129,21 @@ const NewAnalysis = () => {
           </div>
         </div>
 
-        <Button
-          text="Convert IDs"
-          icon={<MdConveyorBelt />}
-          design="accent"
-          onClick={() => splitGeneIds.length && runConvertGeneIds()}
-        />
+        <div className="flex-row gap-sm">
+          <Select
+            label="Species"
+            layout="horizontal"
+            options={speciesOptions}
+            value={species}
+            onChange={setSpecies}
+          />
+          <Button
+            text="Convert IDs"
+            icon={<MdConveyorBelt />}
+            design="accent"
+            onClick={() => splitGeneIds.length && runConvertGeneIds()}
+          />
+        </div>
       </Section>
 
       <Section>

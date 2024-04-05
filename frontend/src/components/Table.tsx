@@ -12,7 +12,7 @@ import {
   FaSortDown,
   FaSortUp,
 } from "react-icons/fa6";
-import { clamp, isEqual, pick, sortBy } from "lodash";
+import { clamp, isEqual, pick, sortBy, sum } from "lodash";
 import type { Column, FilterFn, NoInfer, RowData } from "@tanstack/react-table";
 import {
   createColumnHelper,
@@ -166,11 +166,11 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
         const cell = row.getValue(columnId);
         if (typeof cell !== "boolean") return true;
 
-        /** if filtering with multi-select (column filter) */
-        if (Array.isArray(filterValue)) {
-          const value = filterValue as Option[];
-          if (!value.length) return true;
-          return !!value.find((option) => option.id === String(cell));
+        /** if filtering with single-select (column filter) */
+        if (typeof filterValue === "object") {
+          const value = filterValue as Option;
+          if (value.id === "all") return true;
+          else return String(cell) === value.id;
         }
 
         /** if filtering with plain text (global search) */
@@ -550,6 +550,11 @@ const Filter = <Datum extends object>({ column }: FilterProps<Datum>) => {
     /** get options */
     const options: Option[] = [
       {
+        id: "all",
+        text: "All",
+        info: String(sum(Array.from(column.getFacetedUniqueValues().values()))),
+      },
+      {
         id: "true",
         text: "True/Yes",
         info: String(column.getFacetedUniqueValues().get(true) ?? 0),
@@ -564,14 +569,11 @@ const Filter = <Datum extends object>({ column }: FilterProps<Datum>) => {
     return (
       <Select
         options={options}
-        value={(column.getFilterValue() as Option[]) ?? options}
-        onChange={(value, count) =>
-          /** return as "unfiltered" if all or none are selected */
-          column.setFilterValue(
-            count === "all" || count === "none" ? undefined : value,
-          )
+        value={(column.getFilterValue() as Option) ?? options[0]!}
+        onChange={(value) =>
+          /** return as "unfiltered" if all are selected */
+          column.setFilterValue(value.id === "all" ? undefined : value)
         }
-        multi={true}
       />
     );
   }

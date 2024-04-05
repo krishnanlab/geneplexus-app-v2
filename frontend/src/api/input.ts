@@ -6,10 +6,12 @@ export const convertGeneIds = async (ids: string[], species = "Human") => {
   const params = { geneids: ids, species };
   const response = await request<ConvertIds>(`${api}/gpz-convert-ids`, params);
 
+  /** map "couldn't convert" status to easier-to-work-with value */
   for (const row of response.df_convert_out)
     if (row["Entrez ID"].match(/Could Not be mapped to Entrez/i))
       row["Entrez ID"] = "";
 
+  /** transform response into format more convenient for UI */
   const transformed = {
     count: response.input_count,
     success: response.df_convert_out.filter((row) => row["Entrez ID"]).length,
