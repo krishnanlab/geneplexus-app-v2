@@ -49,8 +49,6 @@ const CheckBox = ({ label, tooltip, value, onChange, name }: Props) => {
   /** check icon */
   const Check = api.isChecked ? FaRegSquareCheck : FaRegSquare;
 
-  console.log(api.controlProps);
-
   return (
     <label {...api.rootProps} className={classes.label}>
       <Check

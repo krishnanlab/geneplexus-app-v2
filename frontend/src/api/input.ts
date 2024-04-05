@@ -6,24 +6,23 @@ export const convertGeneIds = async (ids: string[], species = "Human") => {
   const params = { geneids: ids, species };
   const response = await request<ConvertIds>(`${api}/gpz-convert-ids`, params);
 
-  response.df_convert_out.data.forEach(
-    (d) => (d[1] = d[1].match(/Could Not be mapped to Entrez/i) ? "" : d[1]),
-  );
+  for (const row of response.df_convert_out)
+    if (row["Entrez ID"].match(/Could Not be mapped to Entrez/i))
+      row["Entrez ID"] = "";
 
   const transformed = {
     count: response.input_count,
-    success: response.df_convert_out.data.filter(([, entrez]) => entrez).length,
-    error: response.df_convert_out.data.filter(([, entrez]) => !entrez).length,
+    success: response.df_convert_out.filter((row) => row["Entrez ID"]).length,
+    error: response.df_convert_out.filter((row) => !row["Entrez ID"]).length,
     summary: response.table_summary,
-    table: response.df_convert_out.data.map(
-      ([original, entrez, biogrid, imp, string]) => ({
-        original,
-        entrez,
-        biogrid: biogrid === "Y",
-        imp: imp === "Y",
-        string: string === "Y",
-      }),
-    ),
+    table: response.df_convert_out.map((row) => ({
+      input: row["Original ID"],
+      entrez: row["Entrez ID"],
+      biogrid: row["In BioGRID?"] === "Y",
+      imp: row["In IMP?"] === "Y",
+      string: row["In STRING?"] === "Y",
+    })),
   };
+
   return transformed;
 };

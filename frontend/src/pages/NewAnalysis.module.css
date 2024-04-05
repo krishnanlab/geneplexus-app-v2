@@ -10,6 +10,12 @@
   grid-column: 1 / -1;
 }
 
+.mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
 .success {
   color: var(--success);
 }

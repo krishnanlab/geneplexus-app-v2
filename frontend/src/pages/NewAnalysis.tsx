@@ -14,8 +14,8 @@ import {
   FaXmark,
 } from "react-icons/fa6";
 import { GiFly, GiRat } from "react-icons/gi";
+import { MdConveyorBelt } from "react-icons/md";
 import { useDebounce } from "use-debounce";
-import { useQuery } from "@tanstack/react-query";
 import { convertGeneIds } from "@/api/input";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
@@ -29,6 +29,7 @@ import Tabs, { Tab } from "@/components/Tabs";
 import TextBox from "@/components/TextBox";
 import UploadButton from "@/components/UploadButton";
 import { scrollTo } from "@/util/dom";
+import { useQuery } from "@/util/hooks";
 import { formatNumber } from "@/util/string";
 import classes from "./NewAnalysis.module.css";
 
@@ -66,18 +67,21 @@ const NewAnalysis = () => {
   /** gene id conversion */
   const {
     data: genes,
-    isLoading: genesLoading,
-    isError: genesError,
-  } = useQuery({
-    queryKey: ["get-gene-ids", splitGeneIds, species.id],
-    queryFn: () => convertGeneIds(splitGeneIds, species.id),
-    enabled: !!splitGeneIds.length,
-  });
+    status: genesStatus,
+    query: runConvertGeneIds,
+  } = useQuery(
+    async () =>
+      splitGeneIds.length
+        ? await convertGeneIds(splitGeneIds, species.id)
+        : undefined,
+    [splitGeneIds, species.id],
+    false,
+  );
 
   /** scroll down to section */
   useEffect(() => {
-    if (genesLoading || genesError) scrollTo("#review-genes");
-  }, [genesLoading, genesError]);
+    if (genesStatus !== "idle") scrollTo("#review-genes");
+  }, [genesStatus]);
 
   return (
     <>
@@ -104,7 +108,7 @@ const NewAnalysis = () => {
           placeholder="Comma, tab, or line-separated list of entrez IDs, symbols, or ensembl gene/protein/transcript IDs"
         />
 
-        <div className="flex-row gap-md">
+        <div className="flex-row gap-sm">
           <Select
             label="Species"
             layout="horizontal"
@@ -115,7 +119,6 @@ const NewAnalysis = () => {
           <Button
             text="Example"
             icon={<FaLightbulb />}
-            design="accent"
             onClick={() => setGeneIds(example)}
           />
           <div className="flex-row gap-sm">
@@ -132,6 +135,13 @@ const NewAnalysis = () => {
             {filename}
           </div>
         </div>
+
+        <Button
+          text="Convert IDs"
+          icon={<MdConveyorBelt />}
+          design="accent"
+          onClick={() => splitGeneIds.length && runConvertGeneIds()}
+        />
       </Section>
 
       <Section>
@@ -179,8 +189,8 @@ const NewAnalysis = () => {
               <Table
                 cols={[
                   {
-                    key: "original",
-                    name: "Original ID",
+                    key: "input",
+                    name: "Input ID",
                     filterable: true,
                     filterType: "string",
                   },
@@ -189,28 +199,26 @@ const NewAnalysis = () => {
                     name: "Entrez ID",
                     filterable: true,
                     filterType: "enum",
+                    render: (cell) => cell || Mark(false, "Fail"),
                   },
                   {
                     key: "biogrid",
                     name: "In BioGRID",
-                    render: YesNo,
-                    align: "center",
+                    render: Mark,
                     filterable: true,
                     filterType: "boolean",
                   },
                   {
                     key: "imp",
                     name: "In IMP",
-                    render: YesNo,
-                    align: "center",
+                    render: Mark,
                     filterable: true,
                     filterType: "boolean",
                   },
                   {
                     key: "string",
                     name: "In STRING",
-                    render: YesNo,
-                    align: "center",
+                    render: Mark,
                     filterable: true,
                     filterType: "boolean",
                   },
@@ -221,12 +229,12 @@ const NewAnalysis = () => {
           </Tabs>
         )}
 
-        {genesLoading && (
+        {genesStatus === "loading" && (
           <Alert type="loading">
             Converting {formatNumber(splitGeneIds.length)} genes to Entrez
           </Alert>
         )}
-        {genesError && (
+        {genesStatus === "error" && (
           <Alert type="error">Error converting genes to Entrez</Alert>
         )}
       </Section>
@@ -254,19 +262,13 @@ const NewAnalysis = () => {
 
 export default NewAnalysis;
 
-const YesNo = (yes: boolean) => {
-  if (yes)
-    return (
-      <span className="flex-row gap-xs">
-        <FaCheck className={classes.success} />
-        Yes
-      </span>
-    );
-  else
-    return (
-      <span className="flex-row gap-xs">
-        <FaXmark className={classes.error} />
-        No
-      </span>
-    );
+const Mark = (yes: boolean, text?: string) => {
+  const Icon = yes ? FaCheck : FaXmark;
+
+  return (
+    <span className={classes.mark}>
+      <Icon className={yes ? classes.success : classes.error} />
+      {text || (yes ? "Yes" : "No")}
+    </span>
+  );
 };

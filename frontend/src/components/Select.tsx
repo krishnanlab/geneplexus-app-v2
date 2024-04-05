@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
 import { cloneElement, useId } from "react";
-import { FaCaretDown, FaCheck, FaCircle } from "react-icons/fa6";
+import { FaCaretDown, FaCheck } from "react-icons/fa6";
+import { VscCircleFilled } from "react-icons/vsc";
 import classNames from "classnames";
 import { omit } from "lodash";
 import { normalizeProps, Portal, useMachine } from "@zag-js/react";
@@ -112,7 +113,7 @@ const Select = <O extends Option>({
   else selectedLabel = count + " selected";
 
   /** check icon */
-  const Check = multi ? FaCheck : FaCircle;
+  const Check = multi ? FaCheck : VscCircleFilled;
 
   /** all selected */
   const allSelected = api.selectedItems.length === options.length;
