@@ -1,0 +1,16 @@
+FROM oven/bun:latest
+
+# copy in the requirements first and install them, so that these cached layers
+# don't get invalidated by changes to the frontend code
+COPY ./frontend/package.json ./
+COPY ./frontend/bun.lockb ./
+
+RUN bun install
+
+# copy the entire frontend (other examples copy in just "src", but we need the
+# "public" folder as well)
+COPY ./frontend/ ./
+
+# run the vite dev server with the `--host` option, which allows it to accept
+# connections from non-local (i.e., outside the container) clients
+CMD ["bun", "run", "dev", "--", "--host"]

@@ -1,0 +1,8 @@
+{
+	auto_https disable_redirects
+}
+
+http:// {
+	reverse_proxy /gpz-convert-ids localhost:8080
+	reverse_proxy /gpz-ml localhost:8081
+}
