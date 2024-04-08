@@ -2,6 +2,8 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 
+console.debug(import.meta);
+
 (async () => {
   /** mock api */
   if (new URL(window.location.href).searchParams.get("mock") === "true") {

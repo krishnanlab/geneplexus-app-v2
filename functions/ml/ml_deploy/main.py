@@ -132,4 +132,4 @@ def run_pipeline(request):
         json_out["positive_genes"] = gp.positive_genes
         return (json_out, 200, headers)
     except:
-        "problem with geneplexus"
+        return ("problem with geneplexus", 500, headers)

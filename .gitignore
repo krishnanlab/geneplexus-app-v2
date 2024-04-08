@@ -1,3 +1,12 @@
 *DS_Store
 functions/ml/ml_deploy/data/
 functions/convert_ids/convert_ids_deploy/data/
+
+# ignore typical python caching files, compilation intermediates
+__pycache__/
+*.py[cod]
+*$py.class
+
+# ignore sensitive items
+.env
+/.keys/*

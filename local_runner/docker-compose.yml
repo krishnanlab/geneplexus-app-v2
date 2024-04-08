@@ -1,0 +1,24 @@
+name: geneplexus-local
+
+services:
+  frontend:
+    ports:
+      - 5175:5175
+    build:
+      context: ..
+      dockerfile: local_runner/Dockerfile.frontend
+    environment:
+      - VITE_API=http://localhost:9035
+    volumes:
+      # allows the vite dev server to pick up source changes
+      - ../frontend/src/:/app/src
+
+  backend:
+    ports:
+      - 9035:80
+    build:
+      context: ..
+      dockerfile: local_runner/backend/Dockerfile
+    volumes:
+      # allows watchdog to restart functions-framework when there are changes
+      - ../functions/:/app/functions/
