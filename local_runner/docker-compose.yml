@@ -3,7 +3,7 @@ name: geneplexus-local
 services:
   frontend:
     ports:
-      - 5175:5173
+      - 5175:5175
     build:
       context: ..
       dockerfile: local_runner/Dockerfile.frontend

@@ -12,5 +12,7 @@ RUN bun install
 COPY ./frontend/ ./
 
 # run the vite dev server with the `--host` option, which allows it to accept
-# connections from non-local (i.e., outside the container) clients
-CMD ["bun", "run", "dev", "--", "--host"]
+# connections from non-local (i.e., outside the container) clients.
+# we also run it internally on port 5175 rather than remap 5173 (the default)
+# to 5175 on the host via docker, so the frontend URL in the logs is accurate.
+CMD ["bun", "run", "dev", "--", "--host", "--port", "5175"]
