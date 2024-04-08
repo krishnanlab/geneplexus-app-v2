@@ -4,6 +4,7 @@ FROM oven/bun:latest
 # don't get invalidated by changes to the frontend code
 COPY ./frontend/package.json ./
 COPY ./frontend/bun.lockb ./
+
 RUN bunx msw init
 RUN bun install
 
@@ -15,4 +16,4 @@ COPY ./frontend/ ./
 # connections from non-local (i.e., outside the container) clients.
 # we also run it internally on port 5175 rather than remap 5173 (the default)
 # to 5175 on the host via docker, so the frontend URL in the logs is accurate.
-CMD ["bun", "run", "dev", "--", "--host", "--port", "5175"]
+CMD ["bun", "run", "dev", "--host", "--port", "5175"]
