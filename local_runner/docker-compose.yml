@@ -11,7 +11,7 @@ services:
       - VITE_API=http://localhost:9035
     volumes:
       # allows the vite dev server to pick up source changes
-      - ../frontend/src/:/home/bun/app/src/
+      - ../frontend/src/:/app/src
 
   backend:
     ports:

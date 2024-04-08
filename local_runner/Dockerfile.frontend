@@ -1,5 +1,7 @@
 FROM oven/bun:latest
 
+WORKDIR /app
+
 # copy in the requirements first and install them, so that these cached layers
 # don't get invalidated by changes to the frontend code
 COPY ./frontend/package.json ./
