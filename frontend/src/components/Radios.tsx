@@ -8,39 +8,43 @@ import type { LabelProps } from "@/components/Label";
 import Label, { forwardLabelProps } from "@/components/Label";
 import classes from "./Radios.module.css";
 
-type Base<Value extends string> = {
+export type Option = {
+  /** unique id */
+  id: string;
+  /** primary content */
+  primary: ReactNode;
+  /** secondary content */
+  secondary?: ReactNode;
+  /** tertiary content */
+  tertiary?: ReactNode;
+  /** icon next to content */
+  icon?: ReactElement;
+};
+
+type Base<O extends Option> = {
   /** selected option id */
-  value?: Value;
+  value?: O["id"];
   /** when selected option changes */
-  onChange?: (value: Value) => void;
-  /** list of options */
-  options: readonly {
-    /** unique id to identify option */
-    id: Value;
-    /** primary content */
-    primary: ReactNode;
-    /** secondary content */
-    secondary?: ReactNode;
-    /** icon next to content */
-    icon?: ReactElement;
-  }[];
+  onChange?: (value: O["id"]) => void;
+  /** pass with "as const" */
+  options: readonly O[];
   /** field name */
   name?: string;
 };
 
-type Props<Value extends string> = Base<Value> & LabelProps;
+type Props<O extends Option> = Base<O> & LabelProps;
 
 /**
  * group of mutually-exclusive options. only use for 2-4 very important options
  * that all need to be simultaneously visible, otherwise use select.
  */
-const Radios = <Value extends string>({
+const Radios = <O extends Option>({
   value,
   onChange,
   options,
   name,
   ...props
-}: Props<Value>) => {
+}: Props<O>) => {
   /** set up zag */
   const [state, send] = useMachine(
     radio.machine({
@@ -49,11 +53,16 @@ const Radios = <Value extends string>({
       /** link field and form */
       name,
       form: useForm(),
-      /** initialize selected value state */
-      value: String(value || options[0]?.id || 0),
-      /** when selected value changes */
-      onValueChange: (details) => onChange?.(details.value as Value),
     }),
+    /** https://zagjs.com/overview/programmatic-control#controlled-usage-in-reacts */
+    {
+      context: {
+        /** initialize selected value state */
+        value: String(value || options[0]?.id || 0),
+        /** when selected value changes */
+        onValueChange: (details) => onChange?.(details.value),
+      },
+    },
   );
 
   /** interact with zag */
@@ -85,11 +94,16 @@ const Radios = <Value extends string>({
             />
 
             {/* text content */}
-            <div {...api.getItemTextProps({ value: option.id })}>
+            <div
+              className={classes.text}
+              {...api.getItemTextProps({ value: option.id })}
+            >
               <span className="primary">{option.primary}</span>
-              <br />
               {option.secondary && (
                 <span className="secondary">{option.secondary}</span>
+              )}
+              {option.tertiary && (
+                <span className="secondary">{option.tertiary}</span>
               )}
             </div>
 

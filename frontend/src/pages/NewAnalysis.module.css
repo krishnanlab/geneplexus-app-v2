@@ -23,3 +23,10 @@
 .error {
   color: var(--error);
 }
+
+.parameters {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 40px;
+}

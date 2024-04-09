@@ -34,17 +34,17 @@ type Single<O extends Option> = {
   /** multiple selected values allowed */
   multi?: false;
   /** selected option state */
-  value?: O;
+  value?: O["id"];
   /** on selected option state change */
-  onChange?: (value: O) => void;
+  onChange?: (value: O["id"]) => void;
 };
 
 type Multi<O extends Option> = {
   multi: true;
   /** selected options state */
-  value?: O[];
+  value?: O["id"][];
   /** on selected options state change */
-  onChange?: (value: O[], count: number | "all" | "none") => void;
+  onChange?: (value: O["id"][], count: number | "all" | "none") => void;
 };
 
 type Props<O extends Option> = Base<O> & LabelProps & (Single<O> | Multi<O>);
@@ -77,27 +77,32 @@ const Select = <O extends Option>({
         /** string to use for type-ahead */
         itemToString: (option) => option.text,
       }),
-      /** initialize selected values (array of ids) */
-      value: value
-        ? [value].flat().map((value) => value.id)
-        : multi
-          ? []
-          : options[0]
-            ? [options[0].id]
-            : [],
-      /** when selected items change */
-      onValueChange: (details) =>
-        multi
-          ? onChange?.(
-              details.items,
-              details.items.length === 0
-                ? "none"
-                : details.items.length === options.length
-                  ? "all"
-                  : details.items.length,
-            )
-          : details.items[0] && onChange?.(details.items[0]),
     }),
+    /** https://zagjs.com/overview/programmatic-control#controlled-usage-in-reacts */
+    {
+      context: {
+        /** selected values (array of ids) */
+        value: value
+          ? [value].flat()
+          : multi
+            ? []
+            : options[0]
+              ? [options[0].id]
+              : [],
+        /** when selected items change */
+        onValueChange: (details) =>
+          multi
+            ? onChange?.(
+                details.items.map((item) => item.id),
+                details.items.length === 0
+                  ? "none"
+                  : details.items.length === options.length
+                    ? "all"
+                    : details.items.length,
+              )
+            : details.items[0] && onChange?.(details.items[0].id),
+      },
+    },
   );
 
   /** interact with zag */

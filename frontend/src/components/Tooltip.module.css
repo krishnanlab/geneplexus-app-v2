@@ -5,11 +5,13 @@
 .content {
   max-width: 300px;
   padding: 10px 15px;
+  background: var(--off-black);
+  color: var(--white);
 }
 
 .arrow {
   --arrow-size: 10px;
-  --arrow-background: var(--white);
+  --arrow-background: var(--off-black);
 }
 
 .arrow div {

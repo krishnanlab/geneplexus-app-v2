@@ -48,11 +48,16 @@ const NumberBox = ({
       min: min ?? 0,
       max: max ?? 100,
       step: step ?? 1,
-      /** initialize value state */
-      value: String(value || 0),
-      /** when value changes */
-      onValueChange: (details) => onChange?.(details.valueAsNumber),
     }),
+    /** https://zagjs.com/overview/programmatic-control#controlled-usage-in-reacts */
+    {
+      context: {
+        /** initialize value state */
+        value: String(value || 0),
+        /** when value changes */
+        onValueChange: (details) => onChange?.(details.valueAsNumber),
+      },
+    },
   );
 
   /** interact with zag */

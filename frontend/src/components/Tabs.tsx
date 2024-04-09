@@ -34,11 +34,16 @@ const Tabs = ({ syncWithUrl = "", children }: Props) => {
     tabs.machine({
       /** unique id for component instance */
       id: useId(),
-      /** initialize selected tab state */
-      value: syncWithUrl ? value || tabProps[0]?.id : tabProps[0]?.id,
-      /** when selected tab changes */
-      onValueChange: (details) => syncWithUrl && setValue(details.value),
     }),
+    /** https://zagjs.com/overview/programmatic-control#controlled-usage-in-reacts */
+    {
+      context: {
+        /** initialize selected tab state */
+        value: syncWithUrl ? value || tabProps[0]?.id : tabProps[0]?.id,
+        /** when selected tab changes */
+        onValueChange: (details) => syncWithUrl && setValue(details.value),
+      },
+    },
   );
 
   /** interact with zag */

@@ -7,6 +7,7 @@ import {
   FaEye,
   FaFish,
   FaLightbulb,
+  FaPaperPlane,
   FaPerson,
   FaPlus,
   FaTable,
@@ -14,15 +15,16 @@ import {
   FaXmark,
 } from "react-icons/fa6";
 import { GiFly, GiRat } from "react-icons/gi";
-import { MdConveyorBelt } from "react-icons/md";
+import { useNavigate } from "react-router";
 import { useDebounce } from "use-debounce";
 import { convertGeneIds } from "@/api/input";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Heading from "@/components/Heading";
 import Meta from "@/components/Meta";
+import Radios, { type Option as RadioOption } from "@/components/Radios";
 import Section from "@/components/Section";
-import type { Option } from "@/components/Select";
+import type { Option as SelectOption } from "@/components/Select";
 import Select from "@/components/Select";
 import Table from "@/components/Table";
 import Tabs, { Tab } from "@/components/Tabs";
@@ -36,7 +38,7 @@ import classes from "./NewAnalysis.module.css";
 const example =
   "CASP3,CYP1A2,CYP1A1,NFE2L2,CYP2C19,CYP2D6,CYP7A1,NR1H4,TP53,CYP19A1";
 
-const speciesOptions: Option[] = [
+const speciesOptions: SelectOption[] = [
   { id: "Human", text: "Human", icon: <FaPerson /> },
   { id: "Mouse", text: "Mouse", icon: <GiRat /> },
   { id: "Fly", text: "Fly", icon: <GiFly /> },
@@ -44,6 +46,50 @@ const speciesOptions: Option[] = [
   { id: "Worm", text: "Worm", icon: <FaWorm /> },
   { id: "Yeast", text: "Yeast", icon: <FaBacteria /> },
 ] as const;
+
+const networkOptions: RadioOption[] = [
+  {
+    id: "BioGRID",
+    primary: "BioGRID",
+    secondary: "Physical interactions",
+    tertiary: `${formatNumber(19000, true)} nodes`,
+  },
+  {
+    id: "STRING",
+    primary: "STRING",
+    secondary: "Derived from a variety of sources",
+    tertiary: `${formatNumber(17000, true)} nodes`,
+  },
+  {
+    id: "IMP",
+    primary: "IMP",
+    secondary: "Expression-derived interactions",
+    tertiary: `${formatNumber(25000, true)} nodes`,
+  },
+] as const;
+
+const negativesOptions: RadioOption[] = [
+  {
+    id: "GO",
+    primary: "GO",
+    secondary: "Lorem ipsum dolor sit amet",
+  },
+  {
+    id: "Monarch",
+    primary: "Monarch",
+    secondary: "Lorem ipsum dolor sit amet",
+  },
+  {
+    id: "DisGeNet",
+    primary: "DisGeNet",
+    secondary: "Lorem ipsum dolor sit amet",
+  },
+  {
+    id: "Combined",
+    primary: "Combined",
+    secondary: "Lorem ipsum dolor sit amet",
+  },
+];
 
 const NewAnalysis = () => {
   /** raw text list of gene ids */
@@ -56,32 +102,61 @@ const NewAnalysis = () => {
     .map((id) => id.trim())
     .filter(Boolean);
 
-  /** selected species */
-  const [species, setSpecies] = useState<(typeof speciesOptions)[number]>(
-    speciesOptions[0]!,
-  );
-
   /** filename when file uploaded */
   const [filename, setFilename] = useState("");
 
-  /** gene id conversion */
+  /** selected species */
+  const [species, setSpecies] = useState<(typeof speciesOptions)[number]["id"]>(
+    speciesOptions[0]!.id,
+  );
+
+  /** selected network type */
+  const [network, setNetwork] = useState<(typeof networkOptions)[number]["id"]>(
+    networkOptions[0]!.id,
+  );
+
+  /** selected negative source */
+  const [negatives, setNegatives] = useState<
+    (typeof negativesOptions)[number]["id"]
+  >(negativesOptions[0]!.id);
+
+  /** gene id conversion data */
   const {
-    data: genes,
+    data: geneData,
     status: genesStatus,
     query: runConvertGeneIds,
   } = useQuery(
     async () =>
       splitGeneIds.length
-        ? await convertGeneIds(splitGeneIds, species.id)
+        ? await convertGeneIds(splitGeneIds, species)
         : undefined,
-    [splitGeneIds, species.id],
+    [splitGeneIds, species],
     false,
   );
+
+  /** converted list of gene ids */
+  const genes =
+    geneData?.table.map((entry) => entry.entrez).filter(Boolean) || [];
 
   /** scroll down to section */
   useEffect(() => {
     if (genesStatus !== "idle") scrollTo("#review-genes");
   }, [genesStatus]);
+
+  /** submit analysis */
+  const navigate = useNavigate();
+  const submitAnalysis = () => {
+    if (!genes.length) {
+      window.alert("Please enter some genes first!");
+      scrollTo("#enter-genes");
+      return;
+    }
+    if (!window.confirm("Submit analysis?")) return;
+
+    navigate("/analysis", {
+      state: { genes, species, network, negatives },
+    });
+  };
 
   return (
     <>
@@ -109,11 +184,20 @@ const NewAnalysis = () => {
         />
 
         <div className="flex-row gap-sm">
+          <Select
+            label="Species"
+            layout="horizontal"
+            options={speciesOptions}
+            value={species}
+            onChange={setSpecies}
+          />
+
           <Button
             text="Example"
             icon={<FaLightbulb />}
             onClick={() => setGeneIds(example)}
           />
+
           <div className="flex-row gap-sm">
             <UploadButton
               accept="text/plain, text/csv, text/tsv, text/tab-separated-values"
@@ -129,21 +213,13 @@ const NewAnalysis = () => {
           </div>
         </div>
 
-        <div className="flex-row gap-sm">
-          <Select
-            label="Species"
-            layout="horizontal"
-            options={speciesOptions}
-            value={species}
-            onChange={setSpecies}
-          />
-          <Button
-            text="Convert IDs"
-            icon={<MdConveyorBelt />}
-            design="accent"
-            onClick={() => splitGeneIds.length && runConvertGeneIds()}
-          />
-        </div>
+        <Button
+          text="Enter Genes"
+          icon={<FaPaperPlane />}
+          design="accent"
+          tooltip="Converts your genes to Entrez IDs in preparation for analysis."
+          onClick={() => splitGeneIds.length && runConvertGeneIds()}
+        />
       </Section>
 
       <Section>
@@ -151,23 +227,23 @@ const NewAnalysis = () => {
           Review Genes
         </Heading>
 
-        {genes && (
+        {geneData && (
           <Tabs>
             <Tab text="Summary" icon={<FaEye />} className={classes.summary}>
               <FaCheck className={classes.success} />
               <span>
                 <strong className={classes.success}>
-                  {formatNumber(genes.success)} genes
+                  {formatNumber(geneData.success)} genes
                 </strong>{" "}
                 converted to Entrez
               </span>
 
-              {!!genes.error && (
+              {!!geneData.error && (
                 <>
                   <FaXmark className={classes.error} />
                   <span>
                     <strong className={classes.error}>
-                      {formatNumber(genes.error)} genes
+                      {formatNumber(geneData.error)} genes
                     </strong>{" "}
                     couldn't be converted
                   </span>
@@ -176,7 +252,7 @@ const NewAnalysis = () => {
 
               <span className={classes.divider} />
 
-              {genes.summary.map((row, index) => (
+              {geneData.summary.map((row, index) => (
                 <Fragment key={index}>
                   <FaDna />
                   <span>
@@ -225,7 +301,7 @@ const NewAnalysis = () => {
                     filterType: "boolean",
                   },
                 ]}
-                rows={genes.table}
+                rows={geneData.table}
               />
             </Tab>
           </Tabs>
@@ -239,24 +315,52 @@ const NewAnalysis = () => {
         {genesStatus === "error" && (
           <Alert type="error">Error converting genes to Entrez</Alert>
         )}
+        {genesStatus === "idle" && "No genes entered"}
       </Section>
 
       <Section>
         <Heading level={2} icon="3">
-          Analysis Questions
+          Choose Parameters
         </Heading>
+
+        <div className={classes.parameters}>
+          <Radios
+            value={network}
+            onChange={setNetwork}
+            label="Network"
+            options={networkOptions}
+            tooltip="The network the machine learning features are from and which edge list is used to make the final graph."
+          />
+          <Radios
+            value={negatives}
+            onChange={setNegatives}
+            label="Negatives source"
+            options={negativesOptions}
+            tooltip="Source used to select negative genes and which sets to compare the trained model to."
+          />
+        </div>
+
+        <Select
+          label="Species"
+          layout="vertical"
+          options={speciesOptions}
+          value={species}
+          onChange={setSpecies}
+          tooltip="The species for which model predictions will be made."
+        />
       </Section>
 
       <Section>
         <Heading level={2} icon="4">
-          Review Parameters
-        </Heading>
-      </Section>
-
-      <Section>
-        <Heading level={2} icon="5">
           Submit Analysis
         </Heading>
+
+        <Button
+          text="Submit Analysis"
+          icon={<FaPaperPlane />}
+          design="accent"
+          onClick={submitAnalysis}
+        />
       </Section>
     </>
   );

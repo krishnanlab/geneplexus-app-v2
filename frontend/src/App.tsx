@@ -111,7 +111,7 @@ const routes = [
         loader: () => ({ toc: true }) satisfies Meta,
       },
       {
-        path: "analysis/:id",
+        path: "analysis",
         element: <Analysis />,
         loader: () => ({ toc: true }) satisfies Meta,
       },

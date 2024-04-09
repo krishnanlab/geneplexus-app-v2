@@ -74,22 +74,28 @@ const Slider = ({
       min: _min,
       max: _max,
       step: _step,
-      /** initialize value state */
-      value: multi
-        ? value === undefined
-          ? [_min, _max]
-          : value
-        : value === undefined
-          ? [_min]
-          : [value],
-      /** when value changes */
-      onValueChange: (details) =>
-        multi
-          ? onChange?.(details.value)
-          : details.value[0] && onChange?.(details.value[0]),
+
       /** when focused thumb changes */
       onFocusChange: (details) => setFocused(details.focusedIndex),
     }),
+    /** https://zagjs.com/overview/programmatic-control#controlled-usage-in-reacts */
+    {
+      context: {
+        /** initialize value state */
+        value: multi
+          ? value === undefined
+            ? [_min, _max]
+            : value
+          : value === undefined
+            ? [_min]
+            : [value],
+        /** when value changes */
+        onValueChange: (details) =>
+          multi
+            ? onChange?.(details.value)
+            : details.value[0] && onChange?.(details.value[0]),
+      },
+    },
   );
 
   /** interact with zag */
