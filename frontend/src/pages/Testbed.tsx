@@ -680,7 +680,6 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
                   { id: "three", primary: "Three" },
                 ]}
                 name="order"
-                value=""
               />
               <Select
                 label="Select"
