@@ -8,9 +8,9 @@ import type { LabelProps } from "@/components/Label";
 import Label, { forwardLabelProps } from "@/components/Label";
 import classes from "./Radios.module.css";
 
-export type Option = {
+export type Option<ID = string> = {
   /** unique id */
-  id: string;
+  id: ID;
   /** primary content */
   primary: ReactNode;
   /** secondary content */

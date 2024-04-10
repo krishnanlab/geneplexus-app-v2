@@ -18,6 +18,7 @@ import { GiFly, GiRat } from "react-icons/gi";
 import { useNavigate } from "react-router";
 import { useDebounce } from "use-debounce";
 import { convertGeneIds } from "@/api/input";
+import type { Input, Negatives, Network, Species } from "@/api/types";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Heading from "@/components/Heading";
@@ -29,16 +30,18 @@ import Select from "@/components/Select";
 import Table from "@/components/Table";
 import Tabs, { Tab } from "@/components/Tabs";
 import TextBox from "@/components/TextBox";
+import { toast } from "@/components/Toasts";
 import UploadButton from "@/components/UploadButton";
 import { scrollTo } from "@/util/dom";
 import { useQuery } from "@/util/hooks";
 import { formatNumber } from "@/util/string";
+import meta from "./meta.json";
 import classes from "./NewAnalysis.module.css";
 
 const example =
   "CASP3,CYP1A2,CYP1A1,NFE2L2,CYP2C19,CYP2D6,CYP7A1,NR1H4,TP53,CYP19A1";
 
-const speciesOptions: SelectOption[] = [
+const speciesOptions: SelectOption<Species>[] = [
   { id: "Human", text: "Human", icon: <FaPerson /> },
   { id: "Mouse", text: "Mouse", icon: <GiRat /> },
   { id: "Fly", text: "Fly", icon: <GiFly /> },
@@ -47,47 +50,44 @@ const speciesOptions: SelectOption[] = [
   { id: "Yeast", text: "Yeast", icon: <FaBacteria /> },
 ] as const;
 
-const networkOptions: RadioOption[] = [
+const networkOptions: RadioOption<Network>[] = [
   {
     id: "BioGRID",
     primary: "BioGRID",
     secondary: "Physical interactions",
-    tertiary: `${formatNumber(19000, true)} nodes`,
   },
   {
     id: "STRING",
     primary: "STRING",
     secondary: "Derived from a variety of sources",
-    tertiary: `${formatNumber(17000, true)} nodes`,
   },
   {
     id: "IMP",
     primary: "IMP",
     secondary: "Expression-derived interactions",
-    tertiary: `${formatNumber(25000, true)} nodes`,
   },
 ] as const;
 
-const negativesOptions: RadioOption[] = [
+const negativesOptions: RadioOption<Negatives>[] = [
   {
     id: "GO",
     primary: "GO",
-    secondary: "Lorem ipsum dolor sit amet",
+    secondary: "Biological Processes",
   },
   {
     id: "Monarch",
     primary: "Monarch",
-    secondary: "Lorem ipsum dolor sit amet",
+    secondary: "Phenotypes",
   },
   {
     id: "DisGeNet",
     primary: "DisGeNet",
-    secondary: "Lorem ipsum dolor sit amet",
+    secondary: "Diseases",
   },
   {
     id: "Combined",
     primary: "Combined",
-    secondary: "Lorem ipsum dolor sit amet",
+    secondary: "All sets",
   },
 ];
 
@@ -120,6 +120,12 @@ const NewAnalysis = () => {
     (typeof negativesOptions)[number]["id"]
   >(negativesOptions[0]!.id);
 
+  /** update meta counts */
+  networkOptions.forEach((option) => {
+    const { nodes, edges } = meta[species][option.id];
+    option.tertiary = `${formatNumber(nodes, true)} nodes – ${formatNumber(edges, true)} edges`;
+  });
+
   /** gene id conversion data */
   const {
     data: geneData,
@@ -131,7 +137,6 @@ const NewAnalysis = () => {
         ? await convertGeneIds(splitGeneIds, species)
         : undefined,
     [splitGeneIds, species],
-    false,
   );
 
   /** converted list of gene ids */
@@ -151,12 +156,25 @@ const NewAnalysis = () => {
       scrollTo("#enter-genes");
       return;
     }
-    if (!window.confirm("Submit analysis?")) return;
 
-    navigate("/analysis", {
-      state: { genes, species, network, negatives },
+    /** send inputs to load analysis page */
+    navigate("/load-analysis", {
+      state: { input: { genes, species, network, negatives } satisfies Input },
     });
   };
+
+  /** restrict species options based on other params */
+  const filteredSpeciesOptions = speciesOptions.filter((option) => {
+    if (negatives === "DisGeNet" && option.id !== "Human") return false;
+    if (network === "BioGRID" && option.id === "Zebrafish") return false;
+    return true;
+  });
+
+  /** warn about param restrictions */
+  if (network === "BioGRID" && species === "Zebrafish")
+    toast("BioGRID does not support Zebrafish.", "warning", "warn1");
+  if (negatives === "DisGeNet" && species !== "Human")
+    toast("DisGeNet only supports Human genes.", "warning", "warn2");
 
   return (
     <>
@@ -187,7 +205,7 @@ const NewAnalysis = () => {
           <Select
             label="Species"
             layout="horizontal"
-            options={speciesOptions}
+            options={filteredSpeciesOptions}
             value={species}
             onChange={setSpecies}
           />
@@ -217,7 +235,7 @@ const NewAnalysis = () => {
           text="Enter Genes"
           icon={<FaPaperPlane />}
           design="accent"
-          tooltip="Converts your genes to Entrez IDs in preparation for analysis."
+          tooltip="Converts and checks your genes in preparation for analysis."
           onClick={() => splitGeneIds.length && runConvertGeneIds()}
         />
       </Section>
@@ -343,7 +361,7 @@ const NewAnalysis = () => {
         <Select
           label="Species"
           layout="vertical"
-          options={speciesOptions}
+          options={filteredSpeciesOptions}
           value={species}
           onChange={setSpecies}
           tooltip="The species for which model predictions will be made."

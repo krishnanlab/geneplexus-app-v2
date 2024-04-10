@@ -1,0 +1,86 @@
+{
+  "Human": {
+    "BioGRID": {
+      "nodes": 19937,
+      "edges": 838114
+    },
+    "STRING": {
+      "nodes": 19156,
+      "edges": 6698456
+    },
+    "IMP": {
+      "nodes": 28265,
+      "edges": 75623284
+    }
+  },
+  "Mouse": {
+    "BioGRID": {
+      "nodes": 11078,
+      "edges": 64037
+    },
+    "STRING": {
+      "nodes": 20992,
+      "edges": 6196354
+    },
+    "IMP": {
+      "nodes": 35938,
+      "edges": 244273824
+    }
+  },
+  "Worm": {
+    "BioGRID": {
+      "nodes": 8611,
+      "edges": 38776
+    },
+    "STRING": {
+      "nodes": 17922,
+      "edges": 4379456
+    },
+    "IMP": {
+      "nodes": 20924,
+      "edges": 55033858
+    }
+  },
+  "Fly": {
+    "BioGRID": {
+      "nodes": 9491,
+      "edges": 64963
+    },
+    "STRING": {
+      "nodes": 13518,
+      "edges": 2501808
+    },
+    "IMP": {
+      "nodes": 20366,
+      "edges": 112445540
+    }
+  },
+  "Zebrafish": {
+    "BioGRID": {
+      "nodes": 454,
+      "edges": 464
+    },
+    "STRING": {
+      "nodes": 21762,
+      "edges": 6125266
+    },
+    "IMP": {
+      "nodes": 22829,
+      "edges": 66434144
+    }
+  },
+  "Yeast": {
+    "BioGRID": {
+      "nodes": 6173,
+      "edges": 598706
+    },
+    "STRING": {
+      "nodes": 5797,
+      "edges": 1361178
+    },
+    "IMP": {
+      "nodes": 6290,
+      "edges": 4086147
+    }
+  }
+}

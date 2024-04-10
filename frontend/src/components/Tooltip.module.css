@@ -3,10 +3,11 @@
 }
 
 .content {
-  max-width: 300px;
+  max-width: 320px;
   padding: 10px 15px;
   background: var(--off-black);
   color: var(--white);
+  text-wrap: pretty;
 }
 
 .arrow {

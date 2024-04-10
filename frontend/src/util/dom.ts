@@ -68,3 +68,14 @@ export const firstInView = (elements: HTMLElement[]) => {
   for (const element of elements.reverse())
     if (element.getBoundingClientRect()?.top < offset + 10) return element;
 };
+
+/** shrink width to wrapped text https://stackoverflow.com/a/73706430/2180570 */
+export const shrinkWrap = (element?: HTMLElement | null) => {
+  if (!element) return;
+  const range = document.createRange();
+  range.setStartBefore(element.firstChild!);
+  range.setEndAfter(element.firstChild!);
+  const { width } = range.getBoundingClientRect();
+  element.style.width = width + 1 + "px";
+  element.style.boxSizing = "content-box";
+};

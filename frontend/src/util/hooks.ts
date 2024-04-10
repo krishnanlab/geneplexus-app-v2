@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { sleep } from "@/util/misc";
 
 /** listen for changes to dom */
 export const useMutation = (
@@ -30,7 +31,7 @@ export const useMutation = (
 export const useQuery = <Data>(
   func: () => Promise<Data>,
   dependencies: unknown,
-  auto = true,
+  auto = false,
 ) => {
   /** status */
   const [status, setStatus] = useState<
@@ -55,6 +56,10 @@ export const useQuery = <Data>(
       /** unique id for current query function run */
       const current = Symbol();
       latest.current = current;
+
+      /** account for react strict mode double render */
+      await sleep();
+      if (current !== latest.current) return console.debug("Double render");
 
       /** reset state */
       setStatus("loading");

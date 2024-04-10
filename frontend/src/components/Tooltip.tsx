@@ -9,7 +9,7 @@ import {
 import classNames from "classnames";
 import { mergeProps, normalizeProps, Portal, useMachine } from "@zag-js/react";
 import * as tooltip from "@zag-js/tooltip";
-import { renderText } from "@/util/dom";
+import { renderText, shrinkWrap } from "@/util/dom";
 import classes from "./Tooltip.module.css";
 
 type Props = {
@@ -58,6 +58,12 @@ const Tooltip = forwardRef<Handle, Props>(({ content, children, id }, ref) => {
   /** force reposition after every render (change to contents) */
   useEffect(() => {
     api.reposition();
+  });
+
+  /** shrink to fit */
+  useEffect(() => {
+    if (api.isOpen)
+      shrinkWrap(document.getElementById(api.contentProps.id || ""));
   });
 
   /** expose ability to close tooltip */

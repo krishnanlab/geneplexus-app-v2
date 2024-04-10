@@ -23,7 +23,6 @@ import Header from "@/components/Header";
 import TableOfContents from "@/components/TableOfContents";
 import Toasts from "@/components/Toasts";
 import About from "@/pages/About";
-import Analysis from "@/pages/Analysis";
 import Home from "@/pages/Home";
 import LoadAnalysis from "@/pages/LoadAnalysis";
 import NewAnalysis from "@/pages/NewAnalysis";
@@ -102,23 +101,25 @@ const routes = [
         element: <NewAnalysis />,
       },
       {
-        path: "load-analysis",
-        element: <LoadAnalysis />,
-      },
-      {
         path: "about",
         element: <About />,
         loader: () => ({ toc: true }) satisfies Meta,
       },
       {
-        path: "analysis",
-        element: <Analysis />,
+        path: "load-analysis",
+        element: <LoadAnalysis />,
         loader: () => ({ toc: true }) satisfies Meta,
       },
       {
         path: "testbed",
         element: <Testbed />,
         loader: () => ({ toc: true }) satisfies Meta,
+      },
+      {
+        path: "*",
+        loader: async () => {
+          return redirect("/");
+        },
       },
     ],
   },

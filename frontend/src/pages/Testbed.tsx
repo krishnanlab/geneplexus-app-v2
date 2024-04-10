@@ -473,13 +473,18 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
           <Button
             text="Overwriting Toast"
             design="accent"
-            onClick={() =>
+            onClick={() => {
               toast(
                 `ABC`,
                 sample(["info", "loading", "success", "warning", "error"]),
                 "abc",
-              )
-            }
+              );
+              toast(
+                `ABC`,
+                sample(["info", "loading", "success", "warning", "error"]),
+                "abc",
+              );
+            }}
           />
         </div>
       </Section>

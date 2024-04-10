@@ -13,6 +13,7 @@ import { uniqueId } from "lodash";
 import { normalizeProps, Portal, useActor, useMachine } from "@zag-js/react";
 import * as toast from "@zag-js/toast";
 import Loading from "@/assets/loading.svg?react";
+import { sleep } from "@/util/misc";
 import classes from "./Toasts.module.css";
 
 /** list of "toasts" (notifications) in corner of screen. singleton. */
@@ -98,11 +99,12 @@ type ToastProps = {
 } & toast.ToastOptions;
 
 /** emit global toast event for toast component to listen for */
-const makeToast = (
+const makeToast = async (
   text: ToastProps["text"],
   type?: ToastProps["_type"],
   id?: ToastProps["id"],
-) =>
+) => {
+  await sleep();
   window.dispatchEvent(
     new CustomEvent("toast", {
       detail: {
@@ -113,5 +115,6 @@ const makeToast = (
       } satisfies ToastProps,
     }),
   );
+};
 
 export { makeToast as toast };

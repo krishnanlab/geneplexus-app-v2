@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { cloneElement, useId } from "react";
+import { cloneElement, useEffect, useId } from "react";
 import { FaCaretDown, FaCheck } from "react-icons/fa6";
 import { VscCircleFilled } from "react-icons/vsc";
 import classNames from "classnames";
@@ -12,9 +12,9 @@ import type { LabelProps } from "@/components/Label";
 import Label, { forwardLabelProps } from "@/components/Label";
 import classes from "./Select.module.css";
 
-export type Option = {
+export type Option<ID = string> = {
   /** unique id */
-  id: string;
+  id: ID;
   /** text label */
   text: string;
   /** secondary text */
@@ -127,6 +127,12 @@ const Select = <O extends Option>({
   let cols = 2;
   if (options.some((option) => option.info)) cols++;
   if (options.some((option) => option.icon)) cols++;
+
+  /** if single, auto-select first option if value not in options anymore */
+  useEffect(() => {
+    if (!multi && !options.find((option) => option.id === value))
+      api.setValue([options[0]!.id]);
+  });
 
   return (
     <>

@@ -1,8 +1,11 @@
 import { api, request } from "@/api";
-import type { ConvertIds } from "@/api/types";
+import type { ConvertIds, Species } from "@/api/types";
 
 /** convert input list of genes into entrez */
-export const convertGeneIds = async (ids: string[], species = "Human") => {
+export const convertGeneIds = async (
+  ids: string[],
+  species: Species = "Human",
+) => {
   const params = { geneids: ids, species };
   const response = await request<ConvertIds>(`${api}/gpz-convert-ids`, params);
 
