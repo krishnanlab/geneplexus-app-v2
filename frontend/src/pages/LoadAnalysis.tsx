@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   FaArrowDown,
   FaArrowUp,
@@ -12,8 +12,11 @@ import Button from "@/components/Button";
 import Heading from "@/components/Heading";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
+import { toast } from "@/components/Toasts";
 import UploadButton from "@/components/UploadButton";
+import { downloadJson } from "@/util/download";
 import { useQuery } from "@/util/hooks";
+import { formatNumber } from "@/util/string";
 
 const LoadAnalysis = () => {
   /** get info and state from route */
@@ -56,6 +59,10 @@ const LoadAnalysis = () => {
               icon={<FaArrowDown />}
               design="accent"
               tooltip="Save results to your device"
+              onClick={() => {
+                const filename = window.prompt("Choose a filename:");
+                if (filename) downloadJson(results, filename);
+              }}
             />
           )}
           <UploadButton
@@ -66,15 +73,31 @@ const LoadAnalysis = () => {
             tooltip="Upload previously saved results"
             onUpload={async (file, filename) => {
               const text = await file.text();
-              const json = JSON.parse(text) as AnalysisResults;
-              setUpload(json);
-              setFilename(filename);
+              try {
+                const json = JSON.parse(text) as AnalysisResults;
+                setUpload(json);
+                setFilename(filename);
+              } catch (error) {
+                toast("Error parsing file", "error");
+              }
             }}
           />
           {filename}
         </div>
 
-        {results && <>{JSON.stringify(results).slice(0, 100)}</>}
+        {/* placeholder results display */}
+        {results && (
+          <div className="mini-table">
+            {Object.entries(results).map(([key, value]) => (
+              <Fragment key={key}>
+                <span>{key}</span>
+                <span>
+                  {formatNumber(Array.isArray(value) ? value.length : value)}
+                </span>
+              </Fragment>
+            ))}
+          </div>
+        )}
 
         {queryStatus === "loading" && (
           <Alert type="loading">

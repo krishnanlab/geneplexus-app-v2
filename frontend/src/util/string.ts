@@ -41,3 +41,9 @@ export const formatDate = (date: string | Date | undefined) => {
     });
   return null;
 };
+
+/** make label (e.g. aria label) from html string */
+export const makeLabel = (string: string) =>
+  (
+    new DOMParser().parseFromString(string, "text/html").body.textContent || ""
+  ).replaceAll(/\s+/g, " ");

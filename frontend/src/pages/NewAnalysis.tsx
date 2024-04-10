@@ -143,7 +143,7 @@ const NewAnalysis = () => {
   const genes =
     geneData?.table.map((entry) => entry.entrez).filter(Boolean) || [];
 
-  /** scroll down to section */
+  /** scroll down to review section after entering genes */
   useEffect(() => {
     if (genesStatus !== "idle") scrollTo("#review-genes");
   }, [genesStatus]);
@@ -151,6 +151,7 @@ const NewAnalysis = () => {
   /** submit analysis */
   const navigate = useNavigate();
   const submitAnalysis = () => {
+    /** check for sufficient inputs */
     if (!genes.length) {
       window.alert("Please enter some genes first!");
       scrollTo("#enter-genes");
@@ -386,6 +387,7 @@ const NewAnalysis = () => {
 
 export default NewAnalysis;
 
+/** yes/no check/x */
 const Mark = (yes: boolean, text?: string) => {
   const Icon = yes ? FaCheck : FaXmark;
 
