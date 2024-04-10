@@ -58,6 +58,15 @@ const Select = <O extends Option>({
   name,
   ...props
 }: Props<O>) => {
+  const collection = select.collection({
+    /** options */
+    items: options.map((option) => omit(option, "icon")),
+    /** for uniquely identifying option */
+    itemToValue: (option) => option.id,
+    /** string to use for type-ahead */
+    itemToString: (option) => option.text,
+  });
+
   /** set up zag */
   const [state, send] = useMachine(
     select.machine<O>({
@@ -69,18 +78,12 @@ const Select = <O extends Option>({
       /** multiple selections allowed */
       multiple: !!multi,
       /** options */
-      collection: select.collection({
-        /** options */
-        items: options.map((option) => omit(option, "icon")),
-        /** for uniquely identifying option */
-        itemToValue: (option) => option.id,
-        /** string to use for type-ahead */
-        itemToString: (option) => option.text,
-      }),
+      collection,
     }),
     /** https://zagjs.com/overview/programmatic-control#controlled-usage-in-reacts */
     {
       context: {
+        collection,
         /** selected values (array of ids) */
         value: value
           ? [value].flat()

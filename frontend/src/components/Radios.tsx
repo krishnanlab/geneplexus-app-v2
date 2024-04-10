@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
-import { cloneElement, useId } from "react";
+import { cloneElement, useEffect, useId } from "react";
 import { FaRegCircle, FaRegCircleDot } from "react-icons/fa6";
 import * as radio from "@zag-js/radio-group";
 import { normalizeProps, useMachine } from "@zag-js/react";
@@ -67,6 +67,12 @@ const Radios = <O extends Option>({
 
   /** interact with zag */
   const api = radio.connect(state, send, normalizeProps);
+
+  /** auto-select first option if value not in options anymore */
+  useEffect(() => {
+    if (!options.find((option) => option.id === value))
+      api.setValue(options[0]!.id);
+  });
 
   /** check icon */
   const Check = ({ selected = false, ...props }) =>
