@@ -18,7 +18,7 @@ import { GiFly, GiRat } from "react-icons/gi";
 import { useNavigate } from "react-router";
 import { useDebounce } from "use-debounce";
 import { convertGeneIds } from "@/api/input";
-import type { Input, Negatives, Network, Species } from "@/api/types";
+import type { GenesetContext, Input, Network, Species } from "@/api/types";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Heading from "@/components/Heading";
@@ -68,7 +68,7 @@ const networkOptions: RadioOption<Network>[] = [
   },
 ] as const;
 
-const negativesOptions: RadioOption<Negatives>[] = [
+const genesetContextOptions: RadioOption<GenesetContext>[] = [
   {
     id: "GO",
     primary: "GO",
@@ -115,10 +115,10 @@ const NewAnalysis = () => {
     networkOptions[0]!.id,
   );
 
-  /** selected negative source */
-  const [negatives, setNegatives] = useState<
-    (typeof negativesOptions)[number]["id"]
-  >(negativesOptions[0]!.id);
+  /** selected geneset context */
+  const [genesetContext, setGenesetContext] = useState<
+    (typeof genesetContextOptions)[number]["id"]
+  >(genesetContextOptions[0]!.id);
 
   /** update meta counts */
   networkOptions.forEach((option) => {
@@ -160,13 +160,15 @@ const NewAnalysis = () => {
 
     /** send inputs to load analysis page */
     navigate("/load-analysis", {
-      state: { input: { genes, species, network, negatives } satisfies Input },
+      state: {
+        input: { genes, species, network, genesetContext } satisfies Input,
+      },
     });
   };
 
   /** restrict species options based on other params */
   const filteredSpeciesOptions = speciesOptions.filter((option) => {
-    if (negatives === "DisGeNet" && option.id !== "Human") return false;
+    if (genesetContext === "DisGeNet" && option.id !== "Human") return false;
     if (network === "BioGRID" && option.id === "Zebrafish") return false;
     return true;
   });
@@ -174,7 +176,7 @@ const NewAnalysis = () => {
   /** warn about param restrictions */
   if (network === "BioGRID" && species === "Zebrafish")
     toast("BioGRID does not support Zebrafish.", "warning", "warn1");
-  if (negatives === "DisGeNet" && species !== "Human")
+  if (genesetContext === "DisGeNet" && species !== "Human")
     toast("DisGeNet only supports Human genes.", "warning", "warn2");
 
   return (
@@ -351,10 +353,10 @@ const NewAnalysis = () => {
             tooltip="The network the machine learning features are from and which edge list is used to make the final graph."
           />
           <Radios
-            value={negatives}
-            onChange={setNegatives}
-            label="Negatives source"
-            options={negativesOptions}
+            value={genesetContext}
+            onChange={setGenesetContext}
+            label="Geneset Context"
+            options={genesetContextOptions}
             tooltip="Source used to select negative genes and which sets to compare the trained model to."
           />
         </div>

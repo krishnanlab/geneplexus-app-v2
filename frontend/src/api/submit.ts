@@ -8,7 +8,7 @@ export const submitAnalysis = async (input: Input) => {
     sp_trn: input.species,
     sp_tst: input.species,
     net_type: input.network,
-    gsc: input.negatives,
+    gsc: input.genesetContext,
   };
   const response = await request<AnalysisResults>(`${api}/gpz-ml`, params);
 

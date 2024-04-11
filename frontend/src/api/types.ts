@@ -56,11 +56,11 @@ export type Species =
 
 export type Network = "BioGRID" | "STRING" | "IMP";
 
-export type Negatives = "GO" | "Monarch" | "DisGeNet" | "Combined";
+export type GenesetContext = "GO" | "Monarch" | "DisGeNet" | "Combined";
 
 export type Input = {
   genes: string[];
   species: Species;
   network: Network;
-  negatives: Negatives;
+  genesetContext: GenesetContext;
 };
