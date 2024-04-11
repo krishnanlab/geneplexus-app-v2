@@ -69,12 +69,14 @@ export const firstInView = (elements: HTMLElement[]) => {
     if (element.getBoundingClientRect()?.top < offset + 10) return element;
 };
 
-/** shrink width to wrapped text https://stackoverflow.com/a/73706430/2180570 */
-export const shrinkWrap = (element?: HTMLElement | null) => {
+/** shrink width to wrapped text https://stackoverflow.com/questions/14596213 */
+export const shrinkWrap = (element: HTMLElement | null) => {
   if (!element) return;
+  const { firstChild, lastChild } = element;
+  if (!firstChild || !lastChild) return;
   const range = document.createRange();
-  range.setStartBefore(element.firstChild!);
-  range.setEndAfter(element.lastChild!);
+  range.setStartBefore(firstChild);
+  range.setEndAfter(lastChild);
   const { width } = range.getBoundingClientRect();
   element.style.width = width + 1 + "px";
   element.style.boxSizing = "content-box";
