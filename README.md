@@ -1,2 +1,1 @@
-# gp-gcp-functions
-Repo for launching google functions that will run parts of geneplexus
+# GenePlexus App v2.0
