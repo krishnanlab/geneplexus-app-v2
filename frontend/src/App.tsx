@@ -26,6 +26,7 @@ import About from "@/pages/About";
 import Home from "@/pages/Home";
 import LoadAnalysis from "@/pages/LoadAnalysis";
 import NewAnalysis from "@/pages/NewAnalysis";
+import NotFound from "@/pages/NotFound";
 import Testbed from "@/pages/Testbed";
 import { scrollTo } from "@/util/dom";
 
@@ -117,9 +118,7 @@ const routes = [
       },
       {
         path: "*",
-        loader: async () => {
-          return redirect("/");
-        },
+        element: <NotFound />,
       },
     ],
   },

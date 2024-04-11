@@ -14,6 +14,8 @@ import classes from "./Button.module.css";
 type Base = {
   /** icon to show next to text */
   icon?: ReactElement;
+  /** whether to flip text/icon sides */
+  flip?: boolean;
   /** look */
   design?: "normal" | "accent" | "critical";
   /** class */
@@ -45,16 +47,22 @@ type Props = Base & Description & (_Link | _Button);
  */
 const Button = forwardRef(
   (
-    { text, icon, design = "normal", className, tooltip, ...props }: Props,
+    {
+      text,
+      icon,
+      flip = false,
+      design = "normal",
+      className,
+      tooltip,
+      ...props
+    }: Props,
     ref,
   ) => {
     /** contents of main element */
-    const children = (
-      <>
-        {text}
-        {icon && cloneElement(icon, { className: "icon" })}
-      </>
-    );
+    const children = [text, icon && cloneElement(icon, { className: "icon" })];
+
+    /** flip icon/text */
+    if (flip) children.reverse();
 
     /** class name string */
     const _class = classNames(className, classes.button, classes[design], {
