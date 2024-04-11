@@ -12,10 +12,12 @@ export const shortenUrl = (value: string) => {
 export const formatNumber = (value: number | undefined, compact = false) =>
   value === undefined
     ? null
-    : value.toLocaleString(undefined, {
-        notation: compact ? "compact" : undefined,
-        maximumFractionDigits: Math.abs(value) < 1 ? 2 : undefined,
-      });
+    : value
+        .toLocaleString(undefined, {
+          notation: compact ? "compact" : undefined,
+          maximumFractionDigits: Math.abs(value) < 1 ? 2 : undefined,
+        })
+        .toLowerCase();
 
 /** parse date string with fallback */
 export const parseDate = (date: string | Date | undefined) => {
@@ -39,3 +41,9 @@ export const formatDate = (date: string | Date | undefined) => {
     });
   return null;
 };
+
+/** make label (e.g. aria label) from html string */
+export const makeLabel = (string: string) =>
+  (
+    new DOMParser().parseFromString(string, "text/html").body.textContent || ""
+  ).replaceAll(/\s+/g, " ");

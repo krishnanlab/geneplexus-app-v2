@@ -50,8 +50,8 @@ type Col<
   /** whether col is individually filterable */
   filterable?: boolean;
   /**
-   * how to treat cell value when filtering individually or globally (default
-   * string)
+   * how to treat cell value when filtering individually or searching globally
+   * (default string)
    */
   filterType?: "string" | "number" | "enum" | "boolean";
   /** horizontal alignment */
@@ -104,10 +104,11 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
   /** column visibility options for multi-select */
   const visibleOptions = cols.map(colToOption);
   /** visible columns */
-  const [visible, setVisible] = useState<Option[]>(
+  const [visible, setVisible] = useState<Option["id"][]>(
     cols
       .filter((col) => col.show === true || col.show === undefined)
-      .map(colToOption),
+      .map(colToOption)
+      .map((option) => option.id),
   );
 
   /** table-wide search */
@@ -122,7 +123,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
     { id: "500", text: "500" },
   ];
 
-  /** custom filter func */
+  /** individual column filter func */
   const filterFunc = useMemo<FilterFn<Datum>>(
     () => (row, columnId, filterValue: unknown) => {
       const type = cols[Number(columnId)]?.filterType;
@@ -147,57 +148,34 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
       /** enumerated col */
       if (type === "enum") {
         const cell = row.getValue(columnId) as string;
-
-        /** if filtering with multi-select (column filter) */
-        if (Array.isArray(filterValue)) {
-          const value = filterValue as Option[];
-          if (!value.length) return true;
-          return !!value.find((option) => option.text === cell);
-        }
-
-        /** if filtering with plain text (global search) */
-        if (typeof filterValue === "string") {
-          return !!cell.match(new RegExp(filterValue, "i"));
-        }
+        const value = filterValue as Option["id"][];
+        if (!value.length) return true;
+        return !!value.find((option) => option === cell);
       }
 
       /** boolean col */
       if (type === "boolean") {
         const cell = row.getValue(columnId);
-        if (typeof cell !== "boolean") return true;
-
-        /** if filtering with single-select (column filter) */
-        if (typeof filterValue === "object") {
-          const value = filterValue as Option;
-          if (value.id === "all") return true;
-          else return String(cell) === value.id;
-        }
-
-        /** if filtering with plain text (global search) */
-        if (typeof filterValue === "string") {
-          const value = filterValue.trim().toLowerCase();
-          if (!value) return true;
-
-          /** map search string to boolean */
-          const boolMap: Record<string, boolean> = {
-            true: true,
-            false: false,
-            t: true,
-            f: false,
-            yes: true,
-            no: false,
-            y: true,
-            n: false,
-          };
-          const bool = boolMap[value];
-          if (bool === undefined) return true;
-          return bool === cell;
-        }
+        const value = filterValue as Option["id"];
+        if (value === "all") return true;
+        else return String(cell) === value;
       }
 
       return true;
     },
     [cols],
+  );
+
+  /** global search func */
+  const searchFunc = useMemo<FilterFn<Datum>>(
+    () => (row, columnId, filterValue: unknown) => {
+      const value = (filterValue as string).trim();
+      if (!value) return true;
+      const cell = String(row.getValue(columnId)).trim();
+      if (!cell) return true;
+      return !!cell.match(new RegExp(value, "i"));
+    },
+    [],
   );
 
   const columnHelper = createColumnHelper<Datum>();
@@ -212,17 +190,15 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
       enableSorting: col.sortable ?? true,
       /** individually filterable */
       enableColumnFilter: col.filterable ?? false,
-      /** include in table-wide search if column is visible */
-      enableGlobalFilter: !!visible.find(
-        (visible) => visible.id === String(index),
-      ),
+      /** only include in table-wide search if column is visible */
+      // enableGlobalFilter: visible.includes(String(index)),
       /** type of column */
       meta: {
         filterable: col.filterable ?? false,
         filterType: col.filterType ?? "string",
         align: col.align ?? "left",
       },
-      /** func to use for filtering */
+      /** func to use for filtering individual column */
       filterFn: filterFunc,
       /** render func for cell */
       cell: (cell) =>
@@ -241,7 +217,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues(),
-    globalFilterFn: filterFunc,
+    globalFilterFn: searchFunc,
     getColumnCanGlobalFilter: () => true,
     autoResetPageIndex: true,
     columnResizeMode: "onChange",
@@ -261,7 +237,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
       columnVisibility: Object.fromEntries(
         cols.map((col, index) => [
           String(index),
-          !!visible.find((visible) => visible.id === String(index)),
+          !!visible.includes(String(index)),
         ]),
       ),
     },
@@ -297,7 +273,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
           text="CSV"
           onClick={() => {
             /** get col defs that are visible */
-            const defs = visible.map((visible) => cols[Number(visible.id)]!);
+            const defs = visible.map((visible) => cols[Number(visible)]!);
 
             /** visible keys */
             const keys = defs.map((def) => def.key);
@@ -480,7 +456,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
           label="Per page"
           layout="horizontal"
           options={perPageOptions}
-          onChange={(option) => table.setPageSize(Number(option.id))}
+          onChange={(option) => table.setPageSize(Number(option))}
           width={70}
         />
       </div>
@@ -533,7 +509,7 @@ const Filter = <Datum extends object>({ column }: FilterProps<Datum>) => {
     return (
       <Select
         options={options}
-        value={(column.getFilterValue() as Option[]) ?? options}
+        value={(column.getFilterValue() as Option["id"][]) ?? options}
         onChange={(value, count) =>
           /** return as "unfiltered" if all or none are selected */
           column.setFilterValue(
@@ -569,10 +545,10 @@ const Filter = <Datum extends object>({ column }: FilterProps<Datum>) => {
     return (
       <Select
         options={options}
-        value={(column.getFilterValue() as Option) ?? options[0]!}
+        value={(column.getFilterValue() as Option["id"]) ?? options[0]!}
         onChange={(value) =>
           /** return as "unfiltered" if all are selected */
-          column.setFilterValue(value.id === "all" ? undefined : value)
+          column.setFilterValue(value === "all" ? undefined : value)
         }
       />
     );

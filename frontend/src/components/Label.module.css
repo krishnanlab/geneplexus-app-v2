@@ -21,6 +21,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  font-weight: var(--medium);
 }
 
 .required {
@@ -28,7 +29,4 @@
   height: 10px;
   margin-left: -5px;
   color: var(--accent);
-}
-
-.help {
 }

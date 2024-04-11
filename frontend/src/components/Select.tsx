@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { cloneElement, useId } from "react";
+import { cloneElement, useEffect, useId } from "react";
 import { FaCaretDown, FaCheck } from "react-icons/fa6";
 import { VscCircleFilled } from "react-icons/vsc";
 import classNames from "classnames";
@@ -12,9 +12,9 @@ import type { LabelProps } from "@/components/Label";
 import Label, { forwardLabelProps } from "@/components/Label";
 import classes from "./Select.module.css";
 
-export type Option = {
+export type Option<ID = string> = {
   /** unique id */
-  id: string;
+  id: ID;
   /** text label */
   text: string;
   /** secondary text */
@@ -34,17 +34,17 @@ type Single<O extends Option> = {
   /** multiple selected values allowed */
   multi?: false;
   /** selected option state */
-  value?: O;
+  value?: O["id"];
   /** on selected option state change */
-  onChange?: (value: O) => void;
+  onChange?: (value: O["id"]) => void;
 };
 
 type Multi<O extends Option> = {
   multi: true;
   /** selected options state */
-  value?: O[];
+  value?: O["id"][];
   /** on selected options state change */
-  onChange?: (value: O[], count: number | "all" | "none") => void;
+  onChange?: (value: O["id"][], count: number | "all" | "none") => void;
 };
 
 type Props<O extends Option> = Base<O> & LabelProps & (Single<O> | Multi<O>);
@@ -58,6 +58,15 @@ const Select = <O extends Option>({
   name,
   ...props
 }: Props<O>) => {
+  const collection = select.collection({
+    /** options */
+    items: options.map((option) => omit(option, "icon")),
+    /** for uniquely identifying option */
+    itemToValue: (option) => option.id,
+    /** string to use for type-ahead */
+    itemToString: (option) => option.text,
+  });
+
   /** set up zag */
   const [state, send] = useMachine(
     select.machine<O>({
@@ -69,35 +78,34 @@ const Select = <O extends Option>({
       /** multiple selections allowed */
       multiple: !!multi,
       /** options */
-      collection: select.collection({
-        /** options */
-        items: options.map((option) => omit(option, "icon")),
-        /** for uniquely identifying option */
-        itemToValue: (option) => option.id,
-        /** string to use for type-ahead */
-        itemToString: (option) => option.text,
-      }),
-      /** initialize selected values (array of ids) */
-      value: value
-        ? [value].flat().map((value) => value.id)
-        : multi
-          ? []
-          : options[0]
-            ? [options[0].id]
-            : [],
-      /** when selected items change */
-      onValueChange: (details) =>
-        multi
-          ? onChange?.(
-              details.items,
-              details.items.length === 0
-                ? "none"
-                : details.items.length === options.length
-                  ? "all"
-                  : details.items.length,
-            )
-          : details.items[0] && onChange?.(details.items[0]),
+      collection,
     }),
+    /** https://zagjs.com/overview/programmatic-control#controlled-usage-in-reacts */
+    {
+      context: {
+        collection,
+        /** selected values (array of ids) */
+        value: value
+          ? [value].flat()
+          : multi
+            ? []
+            : options[0]
+              ? [options[0].id]
+              : [],
+        /** when selected items change */
+        onValueChange: (details) =>
+          multi
+            ? onChange?.(
+                details.items.map((item) => item.id),
+                details.items.length === 0
+                  ? "none"
+                  : details.items.length === options.length
+                    ? "all"
+                    : details.items.length,
+              )
+            : details.items[0] && onChange?.(details.items[0].id),
+      },
+    },
   );
 
   /** interact with zag */
@@ -122,6 +130,12 @@ const Select = <O extends Option>({
   let cols = 2;
   if (options.some((option) => option.info)) cols++;
   if (options.some((option) => option.icon)) cols++;
+
+  /** if single, auto-select first option if value not in options anymore */
+  useEffect(() => {
+    if (!multi && !options.find((option) => option.id === value))
+      api.setValue([options[0]!.id]);
+  });
 
   return (
     <>

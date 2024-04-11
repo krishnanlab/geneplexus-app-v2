@@ -7,6 +7,7 @@ import {
   FaEye,
   FaFish,
   FaLightbulb,
+  FaPaperPlane,
   FaPerson,
   FaPlus,
   FaTable,
@@ -14,29 +15,33 @@ import {
   FaXmark,
 } from "react-icons/fa6";
 import { GiFly, GiRat } from "react-icons/gi";
-import { MdConveyorBelt } from "react-icons/md";
+import { useNavigate } from "react-router";
 import { useDebounce } from "use-debounce";
 import { convertGeneIds } from "@/api/input";
+import type { GenesetContext, Input, Network, Species } from "@/api/types";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Heading from "@/components/Heading";
 import Meta from "@/components/Meta";
+import Radios, { type Option as RadioOption } from "@/components/Radios";
 import Section from "@/components/Section";
-import type { Option } from "@/components/Select";
+import type { Option as SelectOption } from "@/components/Select";
 import Select from "@/components/Select";
 import Table from "@/components/Table";
 import Tabs, { Tab } from "@/components/Tabs";
 import TextBox from "@/components/TextBox";
+import { toast } from "@/components/Toasts";
 import UploadButton from "@/components/UploadButton";
 import { scrollTo } from "@/util/dom";
 import { useQuery } from "@/util/hooks";
 import { formatNumber } from "@/util/string";
+import meta from "./meta.json";
 import classes from "./NewAnalysis.module.css";
 
 const example =
   "CASP3,CYP1A2,CYP1A1,NFE2L2,CYP2C19,CYP2D6,CYP7A1,NR1H4,TP53,CYP19A1";
 
-const speciesOptions: Option[] = [
+const speciesOptions: SelectOption<Species>[] = [
   { id: "Human", text: "Human", icon: <FaPerson /> },
   { id: "Mouse", text: "Mouse", icon: <GiRat /> },
   { id: "Fly", text: "Fly", icon: <GiFly /> },
@@ -44,6 +49,47 @@ const speciesOptions: Option[] = [
   { id: "Worm", text: "Worm", icon: <FaWorm /> },
   { id: "Yeast", text: "Yeast", icon: <FaBacteria /> },
 ] as const;
+
+const networkOptions: RadioOption<Network>[] = [
+  {
+    id: "BioGRID",
+    primary: "BioGRID",
+    secondary: "Physical interactions",
+  },
+  {
+    id: "STRING",
+    primary: "STRING",
+    secondary: "Derived from a variety of sources",
+  },
+  {
+    id: "IMP",
+    primary: "IMP",
+    secondary: "Expression-derived interactions",
+  },
+] as const;
+
+const genesetContextOptions: RadioOption<GenesetContext>[] = [
+  {
+    id: "GO",
+    primary: "GO",
+    secondary: "Biological Processes",
+  },
+  {
+    id: "Monarch",
+    primary: "Monarch",
+    secondary: "Phenotypes",
+  },
+  {
+    id: "DisGeNet",
+    primary: "DisGeNet",
+    secondary: "Diseases",
+  },
+  {
+    id: "Combined",
+    primary: "Combined",
+    secondary: "All sets",
+  },
+];
 
 const NewAnalysis = () => {
   /** raw text list of gene ids */
@@ -56,32 +102,82 @@ const NewAnalysis = () => {
     .map((id) => id.trim())
     .filter(Boolean);
 
-  /** selected species */
-  const [species, setSpecies] = useState<(typeof speciesOptions)[number]>(
-    speciesOptions[0]!,
-  );
-
   /** filename when file uploaded */
   const [filename, setFilename] = useState("");
 
-  /** gene id conversion */
+  /** selected species */
+  const [species, setSpecies] = useState<(typeof speciesOptions)[number]["id"]>(
+    speciesOptions[0]!.id,
+  );
+
+  /** selected network type */
+  const [network, setNetwork] = useState<(typeof networkOptions)[number]["id"]>(
+    networkOptions[0]!.id,
+  );
+
+  /** selected geneset context */
+  const [genesetContext, setGenesetContext] = useState<
+    (typeof genesetContextOptions)[number]["id"]
+  >(genesetContextOptions[0]!.id);
+
+  /** update meta counts */
+  networkOptions.forEach((option) => {
+    const { nodes, edges } = meta[species][option.id];
+    option.tertiary = `${formatNumber(nodes, true)} nodes – ${formatNumber(edges, true)} edges`;
+  });
+
+  /** gene id conversion data */
   const {
-    data: genes,
+    data: geneData,
     status: genesStatus,
     query: runConvertGeneIds,
   } = useQuery(
     async () =>
       splitGeneIds.length
-        ? await convertGeneIds(splitGeneIds, species.id)
+        ? await convertGeneIds(splitGeneIds, species)
         : undefined,
-    [splitGeneIds, species.id],
-    false,
+    [splitGeneIds, species],
   );
 
-  /** scroll down to section */
+  /** converted list of gene ids */
+  const genes =
+    geneData?.table.map((entry) => entry.entrez).filter(Boolean) || [];
+
+  /** scroll down to review section after entering genes */
   useEffect(() => {
     if (genesStatus !== "idle") scrollTo("#review-genes");
   }, [genesStatus]);
+
+  /** submit analysis */
+  const navigate = useNavigate();
+  const submitAnalysis = () => {
+    /** check for sufficient inputs */
+    if (!genes.length) {
+      window.alert("Please enter some genes first!");
+      scrollTo("#enter-genes");
+      return;
+    }
+
+    /** send inputs to load analysis page */
+    navigate("/load-analysis", {
+      state: {
+        input: { genes, species, network, genesetContext } satisfies Input,
+      },
+    });
+  };
+
+  /** restrict species options based on other params */
+  const filteredSpeciesOptions = speciesOptions.filter((option) => {
+    if (genesetContext === "DisGeNet" && option.id !== "Human") return false;
+    if (network === "BioGRID" && option.id === "Zebrafish") return false;
+    return true;
+  });
+
+  /** warn about param restrictions */
+  if (network === "BioGRID" && species === "Zebrafish")
+    toast("BioGRID does not support Zebrafish.", "warning", "warn1");
+  if (genesetContext === "DisGeNet" && species !== "Human")
+    toast("DisGeNet only supports Human genes.", "warning", "warn2");
 
   return (
     <>
@@ -109,11 +205,20 @@ const NewAnalysis = () => {
         />
 
         <div className="flex-row gap-sm">
+          <Select
+            label="Species"
+            layout="horizontal"
+            options={filteredSpeciesOptions}
+            value={species}
+            onChange={setSpecies}
+          />
+
           <Button
             text="Example"
             icon={<FaLightbulb />}
             onClick={() => setGeneIds(example)}
           />
+
           <div className="flex-row gap-sm">
             <UploadButton
               accept="text/plain, text/csv, text/tsv, text/tab-separated-values"
@@ -129,21 +234,13 @@ const NewAnalysis = () => {
           </div>
         </div>
 
-        <div className="flex-row gap-sm">
-          <Select
-            label="Species"
-            layout="horizontal"
-            options={speciesOptions}
-            value={species}
-            onChange={setSpecies}
-          />
-          <Button
-            text="Convert IDs"
-            icon={<MdConveyorBelt />}
-            design="accent"
-            onClick={() => splitGeneIds.length && runConvertGeneIds()}
-          />
-        </div>
+        <Button
+          text="Enter Genes"
+          icon={<FaPaperPlane />}
+          design="accent"
+          tooltip="Converts and checks your genes in preparation for analysis."
+          onClick={() => splitGeneIds.length && runConvertGeneIds()}
+        />
       </Section>
 
       <Section>
@@ -151,23 +248,23 @@ const NewAnalysis = () => {
           Review Genes
         </Heading>
 
-        {genes && (
+        {geneData && (
           <Tabs>
             <Tab text="Summary" icon={<FaEye />} className={classes.summary}>
               <FaCheck className={classes.success} />
               <span>
                 <strong className={classes.success}>
-                  {formatNumber(genes.success)} genes
+                  {formatNumber(geneData.success)} genes
                 </strong>{" "}
                 converted to Entrez
               </span>
 
-              {!!genes.error && (
+              {!!geneData.error && (
                 <>
                   <FaXmark className={classes.error} />
                   <span>
                     <strong className={classes.error}>
-                      {formatNumber(genes.error)} genes
+                      {formatNumber(geneData.error)} genes
                     </strong>{" "}
                     couldn't be converted
                   </span>
@@ -176,7 +273,7 @@ const NewAnalysis = () => {
 
               <span className={classes.divider} />
 
-              {genes.summary.map((row, index) => (
+              {geneData.summary.map((row, index) => (
                 <Fragment key={index}>
                   <FaDna />
                   <span>
@@ -225,7 +322,7 @@ const NewAnalysis = () => {
                     filterType: "boolean",
                   },
                 ]}
-                rows={genes.table}
+                rows={geneData.table}
               />
             </Tab>
           </Tabs>
@@ -239,24 +336,52 @@ const NewAnalysis = () => {
         {genesStatus === "error" && (
           <Alert type="error">Error converting genes to Entrez</Alert>
         )}
+        {genesStatus === "idle" && "No genes entered"}
       </Section>
 
       <Section>
         <Heading level={2} icon="3">
-          Analysis Questions
+          Choose Parameters
         </Heading>
+
+        <div className={classes.parameters}>
+          <Radios
+            value={network}
+            onChange={setNetwork}
+            label="Network"
+            options={networkOptions}
+            tooltip="The network the machine learning features are from and which edge list is used to make the final graph."
+          />
+          <Radios
+            value={genesetContext}
+            onChange={setGenesetContext}
+            label="Geneset Context"
+            options={genesetContextOptions}
+            tooltip="Source used to select negative genes and which sets to compare the trained model to."
+          />
+        </div>
+
+        <Select
+          label="Species"
+          layout="vertical"
+          options={filteredSpeciesOptions}
+          value={species}
+          onChange={setSpecies}
+          tooltip="The species for which model predictions will be made."
+        />
       </Section>
 
       <Section>
         <Heading level={2} icon="4">
-          Review Parameters
-        </Heading>
-      </Section>
-
-      <Section>
-        <Heading level={2} icon="5">
           Submit Analysis
         </Heading>
+
+        <Button
+          text="Submit Analysis"
+          icon={<FaPaperPlane />}
+          design="accent"
+          onClick={submitAnalysis}
+        />
       </Section>
     </>
   );
@@ -264,6 +389,7 @@ const NewAnalysis = () => {
 
 export default NewAnalysis;
 
+/** yes/no check/x */
 const Mark = (yes: boolean, text?: string) => {
   const Icon = yes ? FaCheck : FaXmark;
 

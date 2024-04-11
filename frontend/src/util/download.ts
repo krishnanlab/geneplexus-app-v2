@@ -16,7 +16,8 @@ export const download = (
       .flat()
       .join("_")
       .replace(/[^ A-Za-z0-9_-]/g, " ")
-      .replace(/\s+/g, "-") +
+      .replace(/\s+/g, "-")
+      .replace(new RegExp("." + ext), "") +
     "." +
     ext;
   link.click();
@@ -26,3 +27,7 @@ export const download = (
 /** download table data as csv */
 export const downloadCsv = (data: unknown[], filename: string | string[]) =>
   download(stringify(data), filename, "text/csv;charset=utf-8", "csv");
+
+/** download data as json */
+export const downloadJson = (data: unknown, filename: string | string[]) =>
+  download(JSON.stringify(data), filename, "application/json", "json");

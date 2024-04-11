@@ -8,7 +8,7 @@ const FloatButtons = () => {
 
   return (
     <div className={classes.list}>
-      {y > 1000 && (
+      {y > 100 && (
         <button
           className={classes.button}
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}

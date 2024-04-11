@@ -369,10 +369,10 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
         <Heading level={2} icon={<FaRegCircleDot />}>
           Radios
         </Heading>
-        <div className="flex-row">
-          <Radios
-            label="Choice"
-            options={[
+        <Radios
+          label="Choice"
+          options={
+            [
               { id: "first", primary: "Primary lorem ipsum" },
               {
                 id: "second",
@@ -384,10 +384,10 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
                 primary: "Primar lorem ipsumy",
                 icon: <FaCat />,
               },
-            ]}
-            onChange={logChange}
-          />
-        </div>
+            ] as const
+          }
+          onChange={logChange}
+        />
       </Section>
 
       {/* ago */}
@@ -473,13 +473,18 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
           <Button
             text="Overwriting Toast"
             design="accent"
-            onClick={() =>
+            onClick={() => {
               toast(
                 `ABC`,
                 sample(["info", "loading", "success", "warning", "error"]),
                 "abc",
-              )
-            }
+              );
+              toast(
+                `ABC`,
+                sample(["info", "loading", "success", "warning", "error"]),
+                "abc",
+              );
+            }}
           />
         </div>
       </Section>

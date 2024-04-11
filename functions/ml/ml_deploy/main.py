@@ -26,7 +26,7 @@ def run_pipeline(request):
              Note: should just be original input genes as they will be converted
                    again
     gsc: str; option are ["GO","Monarch","DisGeNet","Combined"]
-         this will be used to selected negastive genes and which sets
+         this will be used to select negative genes and which sets
             to compare trained model to
          Note: DisGeNet is only available for Human
          Note: Combined is including GO, Monarch together (plus 

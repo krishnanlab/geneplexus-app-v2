@@ -1,0 +1,104 @@
+{
+  "convert_ids": [
+    "836",
+    "1544",
+    "1543",
+    "4780",
+    "1557",
+    "1565",
+    "1581",
+    "9971",
+    "7157",
+    "1588"
+  ],
+  "df_convert_out": [
+    {
+      "Entrez ID": "836",
+      "In BioGRID?": "Y",
+      "In IMP?": "Y",
+      "In STRING?": "Y",
+      "Original ID": "CASP3"
+    },
+    {
+      "Entrez ID": "1544",
+      "In BioGRID?": "Y",
+      "In IMP?": "Y",
+      "In STRING?": "Y",
+      "Original ID": "CYP1A2"
+    },
+    {
+      "Entrez ID": "1543",
+      "In BioGRID?": "Y",
+      "In IMP?": "Y",
+      "In STRING?": "Y",
+      "Original ID": "CYP1A1"
+    },
+    {
+      "Entrez ID": "4780",
+      "In BioGRID?": "Y",
+      "In IMP?": "Y",
+      "In STRING?": "Y",
+      "Original ID": "NFE2L2"
+    },
+    {
+      "Entrez ID": "1557",
+      "In BioGRID?": "Y",
+      "In IMP?": "Y",
+      "In STRING?": "Y",
+      "Original ID": "CYP2C19"
+    },
+    {
+      "Entrez ID": "1565",
+      "In BioGRID?": "Y",
+      "In IMP?": "Y",
+      "In STRING?": "Y",
+      "Original ID": "CYP2D6"
+    },
+    {
+      "Entrez ID": "1581",
+      "In BioGRID?": "N",
+      "In IMP?": "Y",
+      "In STRING?": "Y",
+      "Original ID": "CYP7A1"
+    },
+    {
+      "Entrez ID": "9971",
+      "In BioGRID?": "Y",
+      "In IMP?": "Y",
+      "In STRING?": "Y",
+      "Original ID": "NR1H4"
+    },
+    {
+      "Entrez ID": "7157",
+      "In BioGRID?": "Y",
+      "In IMP?": "Y",
+      "In STRING?": "Y",
+      "Original ID": "TP53"
+    },
+    {
+      "Entrez ID": "1588",
+      "In BioGRID?": "Y",
+      "In IMP?": "Y",
+      "In STRING?": "Y",
+      "Original ID": "CYP19A1"
+    }
+  ],
+  "input_count": 10,
+  "table_summary": [
+    {
+      "Network": "BioGRID",
+      "NetworkGenes": 19937,
+      "PositiveGenes": 9
+    },
+    {
+      "Network": "IMP",
+      "NetworkGenes": 28265,
+      "PositiveGenes": 10
+    },
+    {
+      "Network": "STRING",
+      "NetworkGenes": 19156,
+      "PositiveGenes": 10
+    }
+  ]
+}
