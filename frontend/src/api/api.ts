@@ -1,13 +1,21 @@
 import { api, request } from "@/api";
-import type { ConvertIds, Species } from "@/api/types";
+import type { AnalysisResults, ConvertIds, Input, Species } from "@/api/types";
 
 /** convert input list of genes into entrez */
 export const convertGeneIds = async (
-  ids: string[],
+  genes: string[],
   species: Species = "Human",
 ) => {
-  const params = { geneids: ids, species };
-  const response = await request<ConvertIds>(`${api}/gpz-convert-ids`, params);
+  const headers = new Headers();
+  headers.append("Content-Type", "application/json");
+
+  const params = { genes, species };
+
+  const response = await request<ConvertIds>(
+    `${api}/gpz-convert-ids`,
+    undefined,
+    { method: "POST", headers, body: JSON.stringify(params) },
+  );
 
   /** map "couldn't convert" status to easier-to-work-with value */
   for (const row of response.df_convert_out)
@@ -30,4 +38,26 @@ export const convertGeneIds = async (
   };
 
   return transformed;
+};
+
+/** submit analysis */
+export const submitAnalysis = async (input: Input) => {
+  const headers = new Headers();
+  headers.append("Content-Type", "application/json");
+
+  const params = {
+    genes: input.genes,
+    net_type: input.network,
+    gsc: input.genesetContext,
+    sp_trn: input.species,
+    sp_tst: input.species,
+  };
+
+  const response = await request<AnalysisResults>(`${api}/gpz-ml`, undefined, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(params),
+  });
+
+  return response;
 };

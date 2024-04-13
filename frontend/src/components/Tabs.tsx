@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
-import { cloneElement, Fragment, useId } from "react";
+import { Fragment, useId } from "react";
 import classNames from "classnames";
 import { kebabCase } from "lodash";
 import { StringParam, useQueryParam } from "use-query-params";
@@ -61,7 +61,7 @@ const Tabs = ({ syncWithUrl = "", children }: Props) => {
               type="button"
             >
               {tab.text}
-              {tab.icon && cloneElement(tab.icon, { className: "icon" })}
+              {tab.icon}
             </button>
           </Tooltip>
         ))}

@@ -1,5 +1,11 @@
 export type ConvertIds = {
+  input_count: number;
   convert_ids: string[];
+  table_summary: {
+    Network: string;
+    NetworkGenes: number;
+    PositiveGenes: number;
+  }[];
   df_convert_out: {
     "Entrez ID": string;
     "In BioGRID?": string;
@@ -7,16 +13,9 @@ export type ConvertIds = {
     "In STRING?": string;
     "Original ID": string;
   }[];
-  input_count: number;
-  table_summary: {
-    Network: string;
-    NetworkGenes: number;
-    PositiveGenes: number;
-  }[];
 };
 
 export type AnalysisResults = {
-  avgps: number[];
   df_convert_out_subset: {
     "Entrez ID": string;
     "In BioGRID?"?: string;
@@ -24,12 +23,16 @@ export type AnalysisResults = {
     "In STRING?"?: string;
     "Original ID": string;
   }[];
+  avgps: number[];
+  positive_genes: number;
+  isolated_genes: string[];
+  isolated_genes_sym: string[];
   df_edge: { Node1: string; Node2: string }[];
   df_edge_sym: { Node1: string; Node2: string }[];
   df_probs: {
-    "Class-Label": string;
+    "Class-Label": "P" | "N" | "U";
     Entrez: string;
-    "Known/Novel": string;
+    "Known/Novel": "Known" | "Novel";
     Name: string;
     Probability: number;
     Rank: number;
@@ -41,9 +44,6 @@ export type AnalysisResults = {
     Rank: number;
     Similarity: number;
   }[];
-  isolated_genes: string[];
-  isolated_genes_sym: string[];
-  positive_genes: number;
 };
 
 export type Species =
