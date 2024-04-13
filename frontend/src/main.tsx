@@ -6,7 +6,11 @@ console.debug(import.meta);
 
 (async () => {
   /** mock api */
-  if (new URL(window.location.href).searchParams.get("mock") === "true") {
+  if (
+    new URL(
+      window.sessionStorage.redirect || window.location.href,
+    ).searchParams.get("mock") === "true"
+  ) {
     const { setupWorker } = await import("msw/browser");
     const { handlers } = await import("../fixtures");
     await setupWorker(...handlers).start({
