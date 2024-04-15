@@ -70,7 +70,7 @@ const Radios = <O extends Option>({
 
   /** auto-select first option if value not in options anymore */
   useEffect(() => {
-    if (!options.find((option) => option.id === value))
+    if (!options.find((option) => option.id === api.value))
       api.setValue(options[0]!.id);
   });
 

@@ -1,8 +1,7 @@
-import { Fragment, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { FaBeer } from "react-icons/fa";
 import {
   FaArrowUp,
-  FaCheck,
   FaDna,
   FaEye,
   FaFish,
@@ -12,14 +11,13 @@ import {
   FaPlus,
   FaTable,
   FaWorm,
-  FaXmark,
 } from "react-icons/fa6";
 import { GiFly, GiRat } from "react-icons/gi";
 import { useNavigate } from "react-router";
 import { useDebounce } from "use-debounce";
 import { convertGeneIds } from "@/api/api";
 import type {
-  AnalysisInput,
+  AnalysisInputs,
   GenesetContext,
   Network,
   Species,
@@ -27,6 +25,7 @@ import type {
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Heading from "@/components/Heading";
+import Mark from "@/components/Mark";
 import Meta from "@/components/Meta";
 import Radios, { type Option as RadioOption } from "@/components/Radios";
 import Section from "@/components/Section";
@@ -103,12 +102,12 @@ const genesetContextOptions: RadioOption<GenesetContext>[] = [
 ];
 
 const NewAnalysis = () => {
-  /** raw text list of gene ids */
-  const [geneIds, setGeneIds] = useState("");
-  const [debouncedGeneIds] = useDebounce(geneIds, 500);
+  /** raw text list of input gene ids */
+  const [inputGenes, setInputGenes] = useState("");
+  const [debouncedInputGenes] = useDebounce(inputGenes, 500);
 
-  /** array of gene ids */
-  const splitGeneIds = debouncedGeneIds
+  /** array of input gene ids */
+  const splitInputGenes = debouncedInputGenes
     .split(/,|\t|\n/)
     .map((id) => id.trim())
     .filter(Boolean);
@@ -142,25 +141,21 @@ const NewAnalysis = () => {
 
   /** gene id conversion data */
   const {
-    data: geneData,
-    status: genesStatus,
+    data: geneConversionData,
+    status: geneConversionStatus,
     query: runConvertGeneIds,
   } = useQuery(
     async () =>
-      splitGeneIds.length
-        ? await convertGeneIds(splitGeneIds, speciesTrain)
+      splitInputGenes.length
+        ? await convertGeneIds(splitInputGenes, speciesTrain)
         : undefined,
-    [splitGeneIds, speciesTrain],
+    [splitInputGenes, speciesTrain],
   );
-
-  /** converted list of gene ids */
-  const genes =
-    geneData?.table.map((entry) => entry.entrez).filter(Boolean) || [];
 
   /** scroll down to review section after entering genes */
   useEffect(() => {
-    if (genesStatus !== "idle") scrollTo("#review-genes");
-  }, [genesStatus]);
+    if (geneConversionStatus !== "idle") scrollTo("#review-genes");
+  }, [geneConversionStatus]);
 
   /** analysis name */
   const [name, setName] = useState("");
@@ -169,7 +164,7 @@ const NewAnalysis = () => {
   const navigate = useNavigate();
   const submitAnalysis = () => {
     /** check for sufficient inputs */
-    if (!genes.length) {
+    if (!splitInputGenes.length) {
       window.alert("Please enter some genes first!");
       scrollTo("#enter-genes");
       return;
@@ -178,14 +173,14 @@ const NewAnalysis = () => {
     /** send inputs to load analysis page */
     navigate("/analysis", {
       state: {
-        input: {
+        inputs: {
           name,
-          genes,
+          genes: splitInputGenes,
           speciesTrain,
           speciesTest,
           network,
           genesetContext,
-        } satisfies AnalysisInput,
+        } satisfies AnalysisInputs,
       },
     });
   };
@@ -225,9 +220,9 @@ const NewAnalysis = () => {
         </Heading>
 
         <TextBox
-          value={geneIds}
+          value={inputGenes}
           onChange={(value) => {
-            setGeneIds(value);
+            setInputGenes(value);
             setFilename("");
           }}
           multi={true}
@@ -247,7 +242,7 @@ const NewAnalysis = () => {
           <Button
             text="Example"
             icon={<FaLightbulb />}
-            onClick={() => setGeneIds(example[speciesTrain])}
+            onClick={() => setInputGenes(example[speciesTrain])}
             tooltip="Try some example genes for this species"
           />
 
@@ -258,7 +253,7 @@ const NewAnalysis = () => {
               icon={<FaArrowUp />}
               onUpload={async (file, filename) => {
                 const text = await file.text();
-                setGeneIds(text);
+                setInputGenes(text);
                 setFilename(filename);
               }}
             />
@@ -271,7 +266,7 @@ const NewAnalysis = () => {
           icon={<FaPaperPlane />}
           design="accent"
           tooltip="Converts and checks your genes in preparation for analysis"
-          onClick={() => splitGeneIds.length && runConvertGeneIds()}
+          onClick={() => splitInputGenes.length && runConvertGeneIds()}
         />
       </Section>
 
@@ -280,39 +275,32 @@ const NewAnalysis = () => {
           Review Genes
         </Heading>
 
-        {geneData && (
+        {geneConversionData && (
           <Tabs>
             <Tab text="Summary" icon={<FaEye />} className={classes.summary}>
-              <FaCheck className={classes.success} />
-              <span>
+              <Mark type="success">
                 <strong className={classes.success}>
-                  {formatNumber(geneData.success)} genes
+                  {formatNumber(geneConversionData.success)} genes
                 </strong>{" "}
                 converted to Entrez
-              </span>
+              </Mark>
 
-              {!!geneData.error && (
-                <>
-                  <FaXmark className={classes.error} />
-                  <span>
-                    <strong className={classes.error}>
-                      {formatNumber(geneData.error)} genes
-                    </strong>{" "}
-                    couldn't be converted
-                  </span>
-                </>
+              {!!geneConversionData.error && (
+                <Mark type="error">
+                  <strong className={classes.error}>
+                    {formatNumber(geneConversionData.error)} genes
+                  </strong>{" "}
+                  couldn't be converted
+                </Mark>
               )}
 
               <span className={classes.divider} />
 
-              {geneData.summary.map((row, index) => (
-                <Fragment key={index}>
-                  <FaDna />
-                  <span>
-                    <strong>{formatNumber(row.positiveGenes)} genes</strong> in{" "}
-                    {row.network} ({formatNumber(row.totalGenes, true)})
-                  </span>
-                </Fragment>
+              {geneConversionData.summary.map((row, index) => (
+                <Mark key={index} icon={<FaDna />}>
+                  <strong>{formatNumber(row.positiveGenes)} genes</strong> in{" "}
+                  {row.network} ({formatNumber(row.totalGenes, true)})
+                </Mark>
               ))}
             </Tab>
 
@@ -329,46 +317,46 @@ const NewAnalysis = () => {
                     key: "entrez",
                     name: "Entrez ID",
                     filterable: true,
-                    filterType: "enum",
-                    render: (cell) => cell || Mark(false, "Fail"),
+                    filterType: "string",
+                    render: (cell) => cell || <Mark type="error">Failed</Mark>,
                   },
                   {
                     key: "biogrid",
                     name: "In BioGRID",
-                    render: Mark,
+                    render: YesNo,
                     filterable: true,
                     filterType: "boolean",
                   },
                   {
                     key: "imp",
                     name: "In IMP",
-                    render: Mark,
+                    render: YesNo,
                     filterable: true,
                     filterType: "boolean",
                   },
                   {
                     key: "string",
                     name: "In STRING",
-                    render: Mark,
+                    render: YesNo,
                     filterable: true,
                     filterType: "boolean",
                   },
                 ]}
-                rows={geneData.table}
+                rows={geneConversionData.table}
               />
             </Tab>
           </Tabs>
         )}
 
-        {genesStatus === "loading" && (
+        {geneConversionStatus === "loading" && (
           <Alert type="loading">
-            Converting {formatNumber(splitGeneIds.length)} genes to Entrez
+            Converting {formatNumber(splitInputGenes.length)} genes to Entrez
           </Alert>
         )}
-        {genesStatus === "error" && (
+        {geneConversionStatus === "error" && (
           <Alert type="error">Error converting genes to Entrez</Alert>
         )}
-        {genesStatus === "idle" && "No genes entered"}
+        {geneConversionStatus === "idle" && "No genes entered"}
       </Section>
 
       <Section>
@@ -430,14 +418,7 @@ const NewAnalysis = () => {
 
 export default NewAnalysis;
 
-/** yes/no check/x */
-const Mark = (yes: boolean, text?: string) => {
-  const Icon = yes ? FaCheck : FaXmark;
-
-  return (
-    <span className={classes.mark}>
-      <Icon className={yes ? classes.success : classes.error} />
-      {text || (yes ? "Yes" : "No")}
-    </span>
-  );
-};
+/** mark, but only yes/no */
+export const YesNo = (yes: boolean) => (
+  <Mark type={yes ? "success" : "error"}>{yes ? "Yes" : "No"}</Mark>
+);

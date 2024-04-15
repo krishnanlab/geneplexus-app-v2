@@ -92,5 +92,11 @@ export const useQuery = <Data>(
     if (auto) query();
   }, [auto, query, key]);
 
-  return { query, data, status };
+  /** reset data and status */
+  const reset = () => {
+    setData(undefined);
+    setStatus("idle");
+  };
+
+  return { query, data, status, reset };
 };

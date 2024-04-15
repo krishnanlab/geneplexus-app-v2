@@ -93,17 +93,18 @@ const Select = <O extends Option>({
               ? [options[0].id]
               : [],
         /** when selected items change */
-        onValueChange: (details) =>
-          multi
-            ? onChange?.(
-                details.items.map((item) => item.id),
-                details.items.length === 0
-                  ? "none"
-                  : details.items.length === options.length
-                    ? "all"
-                    : details.items.length,
-              )
-            : details.items[0] && onChange?.(details.items[0].id),
+        onValueChange: (details) => {
+          if (multi)
+            onChange?.(
+              details.items.map((item) => item.id),
+              details.items.length === 0
+                ? "none"
+                : details.items.length === options.length
+                  ? "all"
+                  : details.items.length,
+            );
+          else details.items[0] && onChange?.(details.items[0].id);
+        },
       },
     },
   );
@@ -133,7 +134,7 @@ const Select = <O extends Option>({
 
   /** if single, auto-select first option if value not in options anymore */
   useEffect(() => {
-    if (!multi && !options.find((option) => option.id === value))
+    if (!multi && !options.find((option) => option.id === api.value[0]))
       api.setValue([options[0]!.id]);
   });
 

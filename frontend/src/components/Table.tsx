@@ -104,7 +104,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
   /** column visibility options for multi-select */
   const visibleOptions = cols.map(colToOption);
   /** visible columns */
-  const [visible, setVisible] = useState<Option["id"][]>(
+  const [visibleCols, setVisibleCols] = useState<Option["id"][]>(
     cols
       .filter((col) => col.show === true || col.show === undefined)
       .map(colToOption)
@@ -237,7 +237,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
       columnVisibility: Object.fromEntries(
         cols.map((col, index) => [
           String(index),
-          !!visible.includes(String(index)),
+          !!visibleCols.includes(String(index)),
         ]),
       ),
     },
@@ -245,54 +245,6 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
 
   return (
     <div className="flex-col gap-md">
-      {/* top controls */}
-      <div className="flex-row gap-md">
-        {/* visible columns */}
-        <Select
-          label="Cols"
-          layout="horizontal"
-          multi={true}
-          options={visibleOptions}
-          value={visible}
-          onChange={setVisible}
-        />
-
-        {/* table-wide search */}
-        <TextBox
-          placeholder="Search"
-          width={150}
-          icon={<FaMagnifyingGlass />}
-          value={search}
-          onChange={setSearch}
-          tooltip="Search entire table for plain text or regex"
-        />
-
-        {/* download */}
-        <Button
-          icon={<FaDownload />}
-          text="CSV"
-          onClick={() => {
-            /** get col defs that are visible */
-            const defs = visible.map((visible) => cols[Number(visible)]!);
-
-            /** visible keys */
-            const keys = defs.map((def) => def.key);
-
-            /** visible names */
-            const names = defs.map((def) => def.name);
-
-            /** filtered row data */
-            const data = table
-              .getFilteredRowModel()
-              .rows.map((row) => Object.values(pick(row.original, keys)));
-
-            /** download */
-            downloadCsv([names, ...data], ["geneplexus", "table"]);
-          }}
-          design="accent"
-        />
-      </div>
-
       <div className={classes.scroll}>
         {/* table */}
         <table
@@ -400,7 +352,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
         </table>
       </div>
 
-      {/* bottom controls */}
+      {/* controls */}
       <div className="flex-row gap-md">
         {/* pagination */}
         <div className={classes.pagination}>
@@ -453,11 +405,58 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
 
         {/* per page */}
         <Select
-          label="Per page"
+          label="Rows"
           layout="horizontal"
           options={perPageOptions}
           onChange={(option) => table.setPageSize(Number(option))}
           width={70}
+        />
+
+        {/* visible columns */}
+        <Select
+          label="Cols"
+          layout="horizontal"
+          multi={true}
+          options={visibleOptions}
+          value={visibleCols}
+          onChange={setVisibleCols}
+          width={100}
+        />
+
+        {/* table-wide search */}
+        <TextBox
+          placeholder="Search"
+          width={120}
+          icon={<FaMagnifyingGlass />}
+          value={search}
+          onChange={setSearch}
+          tooltip="Search entire table for plain text or regex"
+        />
+
+        {/* download */}
+        <Button
+          icon={<FaDownload />}
+          text="CSV"
+          tooltip="Download table data as .csv"
+          onClick={() => {
+            /** get col defs that are visible */
+            const defs = visibleCols.map((visible) => cols[Number(visible)]!);
+
+            /** visible keys */
+            const keys = defs.map((def) => def.key);
+
+            /** visible names */
+            const names = defs.map((def) => def.name);
+
+            /** filtered row data */
+            const data = table
+              .getFilteredRowModel()
+              .rows.map((row) => Object.values(pick(row.original, keys)));
+
+            /** download */
+            downloadCsv([names, ...data], ["geneplexus", "table"]);
+          }}
+          design="accent"
         />
       </div>
     </div>

@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   FaArrowDown,
-  FaArrowRightToBracket,
   FaArrowUp,
   FaChartBar,
   FaMagnifyingGlassChart,
@@ -9,9 +8,10 @@ import {
 import { useLocation } from "react-router";
 import { submitAnalysis } from "@/api/api";
 import {
-  convertInput,
+  convertAnalysisInputs,
+  convertAnalysisResults,
   type _AnalysisResults,
-  type AnalysisInput,
+  type AnalysisInputs,
 } from "@/api/types";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
@@ -20,49 +20,53 @@ import Meta from "@/components/Meta";
 import Section from "@/components/Section";
 import { toast } from "@/components/Toasts";
 import UploadButton from "@/components/UploadButton";
+import Inputs from "@/pages/analysis/Inputs";
 import { downloadJson } from "@/util/download";
 import { useQuery } from "@/util/hooks";
-import { formatNumber } from "@/util/string";
-import classes from "./Analysis.module.css";
 
 const Analysis = () => {
   /** get info and state from route */
   const location = useLocation();
   const state = location.state ?? {};
-  const stateInput = state.input as AnalysisInput | undefined;
+  const stateInput = state.inputs as AnalysisInputs | undefined;
 
   /** query results */
   const {
     data: queryData,
     status: queryStatus,
-    query: runSubmitAnalysis,
+    query: runQuery,
+    reset: resetQuery,
   } = useQuery(async () => await submitAnalysis(stateInput!), stateInput);
-
-  useEffect(() => {
-    /** submit query once on mounted, if appropriate */
-    if (stateInput && queryStatus === "idle") runSubmitAnalysis();
-  }, [stateInput, queryStatus, runSubmitAnalysis]);
 
   /** upload results */
   const [upload, setUpload] = useState<_AnalysisResults>();
-  const uploadInput = upload ? convertInput(upload.input) : undefined;
+  const uploadInput = upload ? convertAnalysisInputs(upload.inputs) : undefined;
+  const uploadResults = upload ? convertAnalysisResults(upload) : undefined;
 
-  const input = uploadInput ?? stateInput;
-  const results = upload ?? queryData;
+  /** submit query once on mounted, if appropriate */
+  if (!uploadInput && stateInput && queryStatus === "idle") runQuery();
 
-  /** show all genes */
-  const [showAllGenes, setShowAllGenes] = useState(false);
-
-  console.log(input);
+  /** "final" input and results */
+  const inputs = uploadInput ?? stateInput;
+  const results = uploadResults ?? queryData;
 
   return (
     <>
-      <Meta title={input?.name || "Analysis"} />
+      <Meta title="Analysis" />
 
       <Section>
         <Heading level={1} icon={<FaMagnifyingGlassChart />}>
-          {input?.name || "Analysis"}
+          Analysis
         </Heading>
+
+        {queryStatus === "loading" && (
+          <Alert type="loading">
+            Processing analysis. This may take a minute or so.
+          </Alert>
+        )}
+        {queryStatus === "error" && (
+          <Alert type="error">Error processing analysis.</Alert>
+        )}
 
         <div className="flex-row gap-sm">
           {results && (
@@ -74,7 +78,7 @@ const Analysis = () => {
               onClick={() =>
                 downloadJson(
                   results,
-                  input?.name ||
+                  inputs?.name ||
                     window.prompt("Choose a filename:") ||
                     "analysis",
                 )
@@ -91,8 +95,9 @@ const Analysis = () => {
               const text = await file.text();
               try {
                 const json = JSON.parse(text) as _AnalysisResults;
-                json.input.name ??= filename;
+                json.inputs.name ??= filename;
                 setUpload(json);
+                resetQuery();
               } catch (error) {
                 toast("Error parsing file", "error");
               }
@@ -101,57 +106,13 @@ const Analysis = () => {
         </div>
       </Section>
 
-      {input && (
-        <Section>
-          <Heading level={2} icon={<FaArrowRightToBracket />}>
-            Inputs
-          </Heading>
-
-          <div className={classes.inputs}>
-            <div className="mini-table">
-              <span>Species Train</span>
-              <span>{input.speciesTrain}</span>
-              <span>Species Test</span>
-              <span>{input.speciesTest}</span>
-              <span>Network</span>
-              <span>{input.network}</span>
-              <span>Geneset Context</span>
-              <span>{input.genesetContext}</span>
-            </div>
-
-            <div className="mini-table">
-              <span>Genes ({formatNumber(input.genes.length)})</span>
-              <span className={classes["genes-list"]}>
-                {input.genes
-                  .slice(0, showAllGenes ? Infinity : 10)
-                  .map((gene, index) => (
-                    <span key={index}>{gene}</span>
-                  ))}
-                {input.genes.length > 10 && (
-                  <button onClick={() => setShowAllGenes(!showAllGenes)}>
-                    {showAllGenes ? "Show Less" : "Show All"}
-                  </button>
-                )}
-              </span>
-            </div>
-          </div>
-        </Section>
-      )}
+      <Inputs inputs={inputs} results={results} />
 
       {results && (
         <Section>
           <Heading level={2} icon={<FaChartBar />}>
             Results
           </Heading>
-
-          {queryStatus === "loading" && (
-            <Alert type="loading">
-              Processing analysis. This may take a minute or so.
-            </Alert>
-          )}
-          {queryStatus === "error" && (
-            <Alert type="error">Error processing analysis.</Alert>
-          )}
         </Section>
       )}
     </>

@@ -15,7 +15,7 @@ type Props = {
    */
   syncWithUrl?: string;
   /** series of Tab components */
-  children: ReactElement<TabProps>[];
+  children: (ReactElement<TabProps> | undefined)[];
 };
 
 const Tabs = ({ syncWithUrl = "", children }: Props) => {
@@ -23,11 +23,13 @@ const Tabs = ({ syncWithUrl = "", children }: Props) => {
   const [value, setValue] = useQueryParam(syncWithUrl, StringParam);
 
   /** tab props */
-  const tabProps = children.map((child) => ({
-    ...child.props,
-    /** make unique tab id from text */
-    id: kebabCase(child.props.text),
-  }));
+  const tabProps = children
+    .filter((child): child is ReactElement => !!child)
+    .map((child) => ({
+      ...child.props,
+      /** make unique tab id from text */
+      id: kebabCase(child.props.text),
+    }));
 
   /** set up zag */
   const [state, send] = useMachine(

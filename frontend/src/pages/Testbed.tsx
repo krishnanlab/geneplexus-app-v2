@@ -732,11 +732,6 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
           </tbody>
         </table>
       </Section>
-
-      {/* section */}
-      <Section fill={true} full={true}>
-        <div className="placeholder pulse" />
-      </Section>
     </>
   );
 };

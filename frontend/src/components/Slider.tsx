@@ -90,10 +90,10 @@ const Slider = ({
             ? [_min]
             : [value],
         /** when value changes */
-        onValueChange: (details) =>
-          multi
-            ? onChange?.(details.value)
-            : details.value[0] && onChange?.(details.value[0]),
+        onValueChange: (details) => {
+          if (multi) onChange?.(details.value);
+          else details.value[0] && onChange?.(details.value[0]);
+        },
       },
     },
   );
