@@ -56,6 +56,7 @@ def ml(request):
 
         # format response
         response = {}
+        response["input"] = request_json
         response["avgps"] = gp.avgps
         response["df_probs"] = gp.df_probs.to_dict(orient="records")
         response["df_sim"] = gp.df_sim.to_dict(orient="records")

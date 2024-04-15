@@ -11,7 +11,7 @@ Unless noted otherwise, each API method expects:
 #### Inputs
 
 ```ts
-type request = {
+type Request = {
   // list of gene symbols/names/ids
   genes: string[];
   // species to lookup genes against
@@ -22,7 +22,7 @@ type request = {
 #### Outputs
 
 ```ts
-type response = {
+type Response = {
   // number of genes inputted
   input_count: int;
   // list of successfully converted Entrez IDs
@@ -57,7 +57,7 @@ Note: if input species is Zebrafish, BioGRID is not included in results
 #### Inputs
 
 ```ts
-type request = {
+type Request = {
   // list of gene symbols/names/ids
   genes: string[];
   // species to lookup genes against
@@ -75,6 +75,9 @@ type request = {
 
 ```ts
 type Response = {
+  // copy of inputs for re-uploading convenience
+  input: Request;
+
   // see `convert-ids` `df_convert_out` schema
   df_convert_out_subset: {
     "Original ID": string;
