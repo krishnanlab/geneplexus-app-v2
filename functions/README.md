@@ -52,7 +52,7 @@ type response = {
 
 Note: if input species is Zebrafish, BioGRID is not included in results
 
-## `/gpz-convert-ids`
+## `/gpz-ml`
 
 #### Inputs
 
@@ -100,6 +100,7 @@ type Response = {
   // edge list corresponding to subgraph induced by top predicted genes (as gene symbols)
   df_edge_sym: { Node1: string; Node2: string }[];
 
+  // table showing how associated each gene in prediction species network is to the users gene list
   df_probs: {
     // Entrez ID
     "Entrez": string;
@@ -117,6 +118,7 @@ type Response = {
     "Rank": int;
   }[];
 
+  // table showing how similar user's trained model is to models trained on known gene sets
   df_sim: {
     // term ID
     ID: string;
