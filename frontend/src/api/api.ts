@@ -1,5 +1,11 @@
 import { api, request } from "@/api";
-import type { AnalysisResults, ConvertIds, Input, Species } from "@/api/types";
+import {
+  revertInput,
+  type _AnalysisResults,
+  type _ConvertIds,
+  type AnalysisInput,
+  type Species,
+} from "@/api/types";
 
 /** convert input list of genes into entrez */
 export const convertGeneIds = async (
@@ -11,7 +17,7 @@ export const convertGeneIds = async (
 
   const params = { genes, species };
 
-  const response = await request<ConvertIds>(
+  const response = await request<_ConvertIds>(
     `${api}/gpz-convert-ids`,
     undefined,
     { method: "POST", headers, body: JSON.stringify(params) },
@@ -27,7 +33,11 @@ export const convertGeneIds = async (
     count: response.input_count,
     success: response.df_convert_out.filter((row) => row["Entrez ID"]).length,
     error: response.df_convert_out.filter((row) => !row["Entrez ID"]).length,
-    summary: response.table_summary,
+    summary: response.table_summary.map((row) => ({
+      network: row.Network,
+      positiveGenes: row.PositiveGenes,
+      totalGenes: row.NetworkGenes,
+    })),
     table: response.df_convert_out.map((row) => ({
       input: row["Original ID"],
       entrez: row["Entrez ID"],
@@ -41,19 +51,12 @@ export const convertGeneIds = async (
 };
 
 /** submit analysis */
-export const submitAnalysis = async (input: Input) => {
+export const submitAnalysis = async (input: AnalysisInput) => {
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
 
-  const params = {
-    genes: input.genes,
-    net_type: input.network,
-    gsc: input.genesetContext,
-    sp_trn: input.species,
-    sp_tst: input.species,
-  };
-
-  const response = await request<AnalysisResults>(`${api}/gpz-ml`, undefined, {
+  const params = revertInput(input);
+  const response = await request<_AnalysisResults>(`${api}/gpz-ml`, undefined, {
     method: "POST",
     headers,
     body: JSON.stringify(params),

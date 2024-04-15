@@ -24,7 +24,7 @@ const Home = () => {
             design="accent"
           />
           <Button
-            to="/load-analysis"
+            to="/analysis"
             text="Load Analysis"
             icon={<FaArrowRight />}
             design="accent"

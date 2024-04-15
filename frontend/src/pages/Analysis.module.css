@@ -1,0 +1,27 @@
+.inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+}
+
+.inputs > * {
+  max-width: max-content;
+}
+
+.genes {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.genes-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 15px;
+}
+
+@media (max-width: 600px) {
+  .inputs {
+    grid-template-columns: 1fr;
+  }
+}

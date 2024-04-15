@@ -70,23 +70,18 @@
   gap: 40px 60px;
 }
 
-/** let flex/grid gap handle spacing of children */
-
-:is(.flex-row, .flex-col, .grid) > * {
-  margin: 0;
-}
-
 /** simple two-col auto-sized table of key/value pairs */
 
 .mini-table {
   display: grid;
-  grid-template-columns: auto auto;
-  align-items: center;
+  grid-template-columns: max-content auto;
+  grid-auto-rows: minmax(min-content, max-content);
   gap: 5px 20px;
   text-align: left;
 }
 
 .mini-table > :nth-child(odd) {
+  max-width: 200px;
   color: var(--gray);
 }
 

@@ -63,11 +63,11 @@ type Request = {
   // species to lookup genes against
   sp_trn: "Human" | "Mouse" | "Fly" | "Zebrafish" | "Worm" | "Yeast";
   // species for which model predictions will be made
-  sp_test: "Human" | "Mouse" | "Fly" | "Zebrafish" | "Worm" | "Yeast";
-  // source used to select negative genes and which sets to compare trained model to
-  gsc: "GO" | "Monarch" | "DisGeNet" | "Combined";
+  sp_tst: "Human" | "Mouse" | "Fly" | "Zebrafish" | "Worm" | "Yeast";
   // network that ML features are from and which edge list is used to make final graph
   net_type: "BioGRID" | "STRING" | "IMP";
+  // source used to select negative genes and which sets to compare trained model to
+  gsc: "GO" | "Monarch" | "DisGeNet" | "Combined";
 };
 ```
 

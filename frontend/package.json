@@ -9,7 +9,7 @@
     "test:lint": "./lint.sh",
     "test:types": "tsc",
     "test:spelling": "bunx cspell src/**/*.{tsx,ts}",
-    "clean": "rm -rf node_modules bun.lockb && bun pm cache rm"
+    "clean": "rm -rf node_modules dist bun.lockb && bun pm cache rm"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.29.0",

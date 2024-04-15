@@ -18,7 +18,12 @@ import { GiFly, GiRat } from "react-icons/gi";
 import { useNavigate } from "react-router";
 import { useDebounce } from "use-debounce";
 import { convertGeneIds } from "@/api/api";
-import type { GenesetContext, Input, Network, Species } from "@/api/types";
+import type {
+  AnalysisInput,
+  GenesetContext,
+  Network,
+  Species,
+} from "@/api/types";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Heading from "@/components/Heading";
@@ -112,9 +117,12 @@ const NewAnalysis = () => {
   const [filename, setFilename] = useState("");
 
   /** selected species */
-  const [species, setSpecies] = useState<(typeof speciesOptions)[number]["id"]>(
-    speciesOptions[0]!.id,
-  );
+  const [speciesTrain, setSpeciesTrain] = useState<
+    (typeof speciesOptions)[number]["id"]
+  >(speciesOptions[0]!.id);
+  const [speciesTest, setSpeciesTest] = useState<
+    (typeof speciesOptions)[number]["id"]
+  >(speciesOptions[0]!.id);
 
   /** selected network type */
   const [network, setNetwork] = useState<(typeof networkOptions)[number]["id"]>(
@@ -128,7 +136,7 @@ const NewAnalysis = () => {
 
   /** update meta counts */
   networkOptions.forEach((option) => {
-    const { nodes, edges } = meta[species][option.id];
+    const { nodes, edges } = meta[speciesTest][option.id];
     option.tertiary = `${formatNumber(nodes, true)} nodes – ${formatNumber(edges, true)} edges`;
   });
 
@@ -140,9 +148,9 @@ const NewAnalysis = () => {
   } = useQuery(
     async () =>
       splitGeneIds.length
-        ? await convertGeneIds(splitGeneIds, species)
+        ? await convertGeneIds(splitGeneIds, speciesTrain)
         : undefined,
-    [splitGeneIds, species],
+    [splitGeneIds, speciesTrain],
   );
 
   /** converted list of gene ids */
@@ -153,6 +161,9 @@ const NewAnalysis = () => {
   useEffect(() => {
     if (genesStatus !== "idle") scrollTo("#review-genes");
   }, [genesStatus]);
+
+  /** analysis name */
+  const [name, setName] = useState("");
 
   /** submit analysis */
   const navigate = useNavigate();
@@ -165,9 +176,16 @@ const NewAnalysis = () => {
     }
 
     /** send inputs to load analysis page */
-    navigate("/load-analysis", {
+    navigate("/analysis", {
       state: {
-        input: { genes, species, network, genesetContext } satisfies Input,
+        input: {
+          name,
+          genes,
+          speciesTrain,
+          speciesTest,
+          network,
+          genesetContext,
+        } satisfies AnalysisInput,
       },
     });
   };
@@ -180,9 +198,15 @@ const NewAnalysis = () => {
   });
 
   /** warn about param restrictions */
-  if (network === "BioGRID" && species === "Zebrafish")
+  if (
+    network === "BioGRID" &&
+    (speciesTrain === "Zebrafish" || speciesTest === "Zebrafish")
+  )
     toast("BioGRID does not support Zebrafish.", "warning", "warn1");
-  if (genesetContext === "DisGeNet" && species !== "Human")
+  if (
+    genesetContext === "DisGeNet" &&
+    (speciesTrain !== "Human" || speciesTest !== "Human")
+  )
     toast("DisGeNet only supports Human genes.", "warning", "warn2");
 
   return (
@@ -213,16 +237,17 @@ const NewAnalysis = () => {
         <div className="flex-row gap-sm">
           <Select
             label="Species"
+            tooltip="Species to lookup genes against and train model with. May be limited by parameter choices below."
             layout="horizontal"
             options={filteredSpeciesOptions}
-            value={species}
-            onChange={setSpecies}
+            value={speciesTrain}
+            onChange={setSpeciesTrain}
           />
 
           <Button
             text="Example"
             icon={<FaLightbulb />}
-            onClick={() => setGeneIds(example[species])}
+            onClick={() => setGeneIds(example[speciesTrain])}
             tooltip="Try some example genes for this species"
           />
 
@@ -284,8 +309,8 @@ const NewAnalysis = () => {
                 <Fragment key={index}>
                   <FaDna />
                   <span>
-                    <strong>{formatNumber(row.PositiveGenes)} genes</strong> in{" "}
-                    {row.Network} ({formatNumber(row.NetworkGenes, true)})
+                    <strong>{formatNumber(row.positiveGenes)} genes</strong> in{" "}
+                    {row.network} ({formatNumber(row.totalGenes, true)})
                   </span>
                 </Fragment>
               ))}
@@ -351,13 +376,22 @@ const NewAnalysis = () => {
           Choose Parameters
         </Heading>
 
+        <Select
+          label="Species"
+          layout="vertical"
+          options={filteredSpeciesOptions}
+          value={speciesTest}
+          onChange={setSpeciesTest}
+          tooltip="The species for which model predictions will be made. May be limited by parameter choices below."
+        />
+
         <div className={classes.parameters}>
           <Radios
             value={network}
             onChange={setNetwork}
             label="Network"
             options={networkOptions}
-            tooltip="The network the machine learning features are from and which edge list is used to make the final graph."
+            tooltip="The network that the machine learning features are from and which edge list is used to make the final graph."
           />
           <Radios
             value={genesetContext}
@@ -367,21 +401,21 @@ const NewAnalysis = () => {
             tooltip="Source used to select negative genes and which sets to compare the trained model to"
           />
         </div>
-
-        <Select
-          label="Species"
-          layout="vertical"
-          options={filteredSpeciesOptions}
-          value={species}
-          onChange={setSpecies}
-          tooltip="The species for which model predictions will be made"
-        />
       </Section>
 
       <Section>
         <Heading level={2} icon="4">
           Submit Analysis
         </Heading>
+
+        <TextBox
+          label="Name"
+          tooltip="(Optional) Give your analysis a name to remember it by"
+          placeholder="analysis"
+          value={name}
+          onChange={(value) => setName(value.replaceAll(/[^\w\d-_ ]*/g, ""))}
+          width={300}
+        />
 
         <Button
           text="Submit Analysis"

@@ -24,7 +24,7 @@ import TableOfContents from "@/components/TableOfContents";
 import Toasts from "@/components/Toasts";
 import About from "@/pages/About";
 import Home from "@/pages/Home";
-import LoadAnalysis from "@/pages/LoadAnalysis";
+import Analysis from "@/pages/Analysis";
 import NewAnalysis from "@/pages/NewAnalysis";
 import NotFound from "@/pages/NotFound";
 import Testbed from "@/pages/Testbed";
@@ -107,8 +107,8 @@ const routes = [
         loader: () => ({ toc: true }) satisfies Meta,
       },
       {
-        path: "load-analysis",
-        element: <LoadAnalysis />,
+        path: "analysis",
+        element: <Analysis />,
         loader: () => ({ toc: true }) satisfies Meta,
       },
       {
