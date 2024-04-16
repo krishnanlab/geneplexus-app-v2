@@ -3,6 +3,17 @@
   overflow-x: auto;
 }
 
+.expanded {
+  width: calc(100vw - 80px);
+}
+
+@media (max-width: 800px) {
+  .expanded th,
+  .expanded td {
+    white-space: nowrap;
+  }
+}
+
 .table {
   width: 100%;
   min-width: min(max-content, var(--content));

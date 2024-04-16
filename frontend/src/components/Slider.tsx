@@ -59,7 +59,7 @@ const Slider = ({
   /** defaults */
   const _min = min ?? 0;
   const _max = max ?? 100;
-  const _step = step ?? 1;
+  const _step = Math.min(step ?? (_max - _min) / 10, _max - _min);
 
   /** set up zag */
   const [state, send] = useMachine(

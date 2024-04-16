@@ -310,35 +310,28 @@ const NewAnalysis = () => {
                   {
                     key: "input",
                     name: "Input ID",
-                    filterable: true,
-                    filterType: "string",
                   },
                   {
                     key: "entrez",
                     name: "Entrez ID",
-                    filterable: true,
-                    filterType: "string",
                     render: (cell) => cell || <Mark type="error">Failed</Mark>,
                   },
                   {
                     key: "biogrid",
                     name: "In BioGRID",
                     render: YesNo,
-                    filterable: true,
                     filterType: "boolean",
                   },
                   {
                     key: "imp",
                     name: "In IMP",
                     render: YesNo,
-                    filterable: true,
                     filterType: "boolean",
                   },
                   {
                     key: "string",
                     name: "In STRING",
                     render: YesNo,
-                    filterable: true,
                     filterType: "boolean",
                   },
                 ]}

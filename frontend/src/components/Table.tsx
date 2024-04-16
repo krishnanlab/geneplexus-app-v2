@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { useMemo, useState } from "react";
+import { FaCompressArrowsAlt, FaExpandArrowsAlt } from "react-icons/fa";
 import {
   FaAngleLeft,
   FaAngleRight,
@@ -12,6 +13,7 @@ import {
   FaSortDown,
   FaSortUp,
 } from "react-icons/fa6";
+import classNames from "classnames";
 import { clamp, isEqual, pick, sortBy, sum } from "lodash";
 import type { Column, FilterFn, NoInfer, RowData } from "@tanstack/react-table";
 import {
@@ -47,15 +49,17 @@ type Col<
   name: string;
   /** is sortable (default true) */
   sortable?: boolean;
-  /** whether col is individually filterable */
+  /** whether col is individually filterable (default true) */
   filterable?: boolean;
   /**
    * how to treat cell value when filtering individually or searching globally
    * (default string)
    */
   filterType?: "string" | "number" | "enum" | "boolean";
-  /** horizontal alignment */
+  /** horizontal alignment (default left) */
   align?: "left" | "center" | "right";
+  /** cell style */
+  style?: CSSProperties;
   /** visibility (default true) */
   show?: boolean;
   /** custom render function for cell */
@@ -82,6 +86,7 @@ declare module "@tanstack/table-core" {
     filterable: NonNullable<Col["filterable"]>;
     filterType: NonNullable<Col["filterType"]>;
     align: NonNullable<Col["align"]>;
+    style: Col["style"];
   }
 }
 
@@ -101,6 +106,8 @@ const colToOption = <Datum extends object>(
  * https://codesandbox.io/p/devbox/tanstack-table-example-kitchen-sink-vv4871
  */
 const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
+  const [expanded, setExpanded] = useState(true);
+
   /** column visibility options for multi-select */
   const visibleOptions = cols.map(colToOption);
   /** visible columns */
@@ -189,14 +196,15 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
       /** sortable */
       enableSorting: col.sortable ?? true,
       /** individually filterable */
-      enableColumnFilter: col.filterable ?? false,
+      enableColumnFilter: col.filterable ?? true,
       /** only include in table-wide search if column is visible */
       // enableGlobalFilter: visible.includes(String(index)),
       /** type of column */
       meta: {
-        filterable: col.filterable ?? false,
+        filterable: col.filterable ?? true,
         filterType: col.filterType ?? "string",
         align: col.align ?? "left",
+        style: col.style,
       },
       /** func to use for filtering individual column */
       filterFn: filterFunc,
@@ -245,7 +253,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
 
   return (
     <div className="flex-col gap-md">
-      <div className={classes.scroll}>
+      <div className={classNames(classes.scroll, expanded && classes.expanded)}>
         {/* table */}
         <table
           className={classes.table}
@@ -262,6 +270,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                     key={header.id}
                     align={header.column.columnDef.meta?.align}
                     aria-colindex={Number(header.id) + 1}
+                    style={header.column.columnDef.meta?.style}
                   >
                     {header.isPlaceholder ? null : (
                       <div className={classes.th}>
@@ -332,7 +341,11 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                   }
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} align={cell.column.columnDef.meta?.align}>
+                    <td
+                      key={cell.id}
+                      align={cell.column.columnDef.meta?.align}
+                      style={cell.column.columnDef.meta?.style}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -403,61 +416,70 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
           </button>
         </div>
 
-        {/* per page */}
-        <Select
-          label="Rows"
-          layout="horizontal"
-          options={perPageOptions}
-          onChange={(option) => table.setPageSize(Number(option))}
-          width={70}
-        />
-
-        {/* visible columns */}
-        <Select
-          label="Cols"
-          layout="horizontal"
-          multi={true}
-          options={visibleOptions}
-          value={visibleCols}
-          onChange={setVisibleCols}
-          width={100}
-        />
+        <div className="flex-row gap-sm">
+          {/* per page */}
+          <Select
+            label="Rows"
+            layout="horizontal"
+            options={perPageOptions}
+            onChange={(option) => table.setPageSize(Number(option))}
+            width={70}
+          />
+          {/* visible columns */}
+          <Select
+            label="Cols"
+            layout="horizontal"
+            multi={true}
+            options={visibleOptions}
+            value={visibleCols}
+            onChange={setVisibleCols}
+            width={100}
+          />
+        </div>
 
         {/* table-wide search */}
         <TextBox
           placeholder="Search"
-          width={120}
+          width={140}
           icon={<FaMagnifyingGlass />}
           value={search}
           onChange={setSearch}
           tooltip="Search entire table for plain text or regex"
         />
 
-        {/* download */}
-        <Button
-          icon={<FaDownload />}
-          text="CSV"
-          tooltip="Download table data as .csv"
-          onClick={() => {
-            /** get col defs that are visible */
-            const defs = visibleCols.map((visible) => cols[Number(visible)]!);
+        <div className="flex-row gap-sm">
+          {/* download */}
+          <Button
+            icon={<FaDownload />}
+            text="CSV"
+            tooltip="Download table data as .csv"
+            onClick={() => {
+              /** get col defs that are visible */
+              const defs = visibleCols.map((visible) => cols[Number(visible)]!);
 
-            /** visible keys */
-            const keys = defs.map((def) => def.key);
+              /** visible keys */
+              const keys = defs.map((def) => def.key);
 
-            /** visible names */
-            const names = defs.map((def) => def.name);
+              /** visible names */
+              const names = defs.map((def) => def.name);
 
-            /** filtered row data */
-            const data = table
-              .getFilteredRowModel()
-              .rows.map((row) => Object.values(pick(row.original, keys)));
+              /** filtered row data */
+              const data = table
+                .getFilteredRowModel()
+                .rows.map((row) => Object.values(pick(row.original, keys)));
 
-            /** download */
-            downloadCsv([names, ...data], ["geneplexus", "table"]);
-          }}
-          design="accent"
-        />
+              /** download */
+              downloadCsv([names, ...data], ["geneplexus", "table"]);
+            }}
+            design="accent"
+          />
+          {/* expand/collapse */}
+          <Button
+            icon={expanded ? <FaCompressArrowsAlt /> : <FaExpandArrowsAlt />}
+            tooltip={expanded ? "Collapse table" : "Expand table"}
+            onClick={() => setExpanded(!expanded)}
+          />
+        </div>
       </div>
     </div>
   );
@@ -477,6 +499,7 @@ const Filter = <Datum extends object>({ column }: FilterProps<Datum>) => {
   /** filter as number range */
   if (type === "number") {
     const [min = 0, max = 100] = column.getFacetedMinMaxValues() || [];
+
     return (
       <Slider
         min={min}

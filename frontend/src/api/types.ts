@@ -114,18 +114,18 @@ export type _AnalysisResults = {
   df_edge: { Node1: string; Node2: string }[];
   df_edge_sym: { Node1: string; Node2: string }[];
   df_probs: {
-    "Class-Label": "P" | "N" | "U";
+    Rank: number;
     Entrez: string;
-    "Known/Novel": "Known" | "Novel";
+    Symbol: string;
     Name: string;
     Probability: number;
-    Rank: number;
-    Symbol: string;
+    "Known/Novel": "Known" | "Novel";
+    "Class-Label": "P" | "N" | "U";
   }[];
   df_sim: {
+    Rank: number;
     ID: string;
     Name: string;
-    Rank: number;
     Similarity: number;
   }[];
 };
@@ -139,6 +139,15 @@ export const convertAnalysisResults = (backend: _AnalysisResults) => ({
       : row["Entrez ID"],
     inNetwork:
       (row["In BioGRID?"] ?? row["In IMP?"] ?? row["In STRING?"]) === "Y",
+  })),
+  predictions: backend.df_probs.map((row) => ({
+    rank: row.Rank,
+    entrez: row.Entrez,
+    symbol: row.Symbol,
+    name: row.Name,
+    probability: row.Probability,
+    knownNovel: row["Known/Novel"],
+    classLabel: row["Class-Label"],
   })),
 });
 

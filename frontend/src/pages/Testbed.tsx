@@ -548,23 +548,21 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
         <Table
           cols={[
             { key: "name", name: "Name" },
-            { key: "age", name: "Age", filterable: true, filterType: "number" },
+            { key: "age", name: "Age", filterType: "number" },
             {
               key: "status",
               name: "Status",
-              filterable: true,
               filterType: "enum",
             },
             {
               key: "text",
               name: "Long text",
-              filterable: true,
               filterType: "string",
               show: false,
               render: (cell) => <div className="truncate-5">{cell}</div>,
             },
           ]}
-          rows={tableData}
+          rows={tableData.map((row) => ({ ...row, age: row.age / 100 }))}
         />
       </Section>
 

@@ -15,7 +15,7 @@ type Props = {
    */
   syncWithUrl?: string;
   /** series of Tab components */
-  children: (ReactElement<TabProps> | undefined)[];
+  children: ReactElement<TabProps> | ReactElement<TabProps>[];
 };
 
 const Tabs = ({ syncWithUrl = "", children }: Props) => {
@@ -23,7 +23,8 @@ const Tabs = ({ syncWithUrl = "", children }: Props) => {
   const [value, setValue] = useQueryParam(syncWithUrl, StringParam);
 
   /** tab props */
-  const tabProps = children
+  const tabProps = [children]
+    .flat()
     .filter((child): child is ReactElement => !!child)
     .map((child) => ({
       ...child.props,

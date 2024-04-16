@@ -105,32 +105,32 @@ type Response = {
 
   // table showing how associated each gene in prediction species network is to the users gene list
   df_probs: {
+    // rank of relevance of gene to input gene list
+    "Rank": int;
     // Entrez ID
     "Entrez": string;
-    // full gene name
-    "Name": string;
     // gene symbol
     "Symbol": string;
+    // full gene name
+    "Name": string;
+    // probability of gene being part of input gene list
+    "Probability": number;
     // whether gene is in input gene list
     "Known/Novel": "Known" | "Novel";
     // gene class, positive | negative | neutraul
     "Class-Label": "P" | "N" | "U";
-    // probability of gene being part of input gene list
-    "Probability": number;
-    // rank of relevance of gene to input gene list
-    "Rank": int;
   }[];
 
   // table showing how similar user's trained model is to models trained on known gene sets
   df_sim: {
+    // rank of similarity between input model and a model trained on term gene set
+    Rank: int;
     // term ID
     ID: string;
     // term name
     Name: string;
     // similarity between input model and a model trained on term gene set
     Similarity: number;
-    // rank of similarity between input model and a model trained on term gene set
-    Rank: int;
   }[];
 };
 ```

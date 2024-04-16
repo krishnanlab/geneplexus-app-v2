@@ -3,8 +3,10 @@ import {
   FaArrowDown,
   FaArrowUp,
   FaChartBar,
+  FaDna,
   FaMagnifyingGlassChart,
 } from "react-icons/fa6";
+import { LuLightbulb } from "react-icons/lu";
 import { useLocation } from "react-router";
 import { submitAnalysis } from "@/api/api";
 import {
@@ -18,9 +20,12 @@ import Button from "@/components/Button";
 import Heading from "@/components/Heading";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
+import Tabs, { Tab } from "@/components/Tabs";
 import { toast } from "@/components/Toasts";
 import UploadButton from "@/components/UploadButton";
+import ConvertedIds from "@/pages/analysis/ConvertedIds";
 import Inputs from "@/pages/analysis/Inputs";
+import Predictions from "@/pages/analysis/Predictions";
 import { downloadJson } from "@/util/download";
 import { useQuery } from "@/util/hooks";
 
@@ -58,15 +63,6 @@ const Analysis = () => {
         <Heading level={1} icon={<FaMagnifyingGlassChart />}>
           Analysis
         </Heading>
-
-        {queryStatus === "loading" && (
-          <Alert type="loading">
-            Processing analysis. This may take a minute or so.
-          </Alert>
-        )}
-        {queryStatus === "error" && (
-          <Alert type="error">Error processing analysis.</Alert>
-        )}
 
         <div className="flex-row gap-sm">
           {results && (
@@ -106,13 +102,34 @@ const Analysis = () => {
         </div>
       </Section>
 
-      <Inputs inputs={inputs} results={results} />
+      {inputs && <Inputs inputs={inputs} />}
 
-      {results && (
+      {(!!results || queryStatus !== "idle") && (
         <Section>
           <Heading level={2} icon={<FaChartBar />}>
             Results
           </Heading>
+
+          {queryStatus === "loading" && (
+            <Alert type="loading">
+              Processing analysis. This may take a minute or so.
+            </Alert>
+          )}
+          {queryStatus === "error" && (
+            <Alert type="error">Error processing analysis.</Alert>
+          )}
+
+          {results && (
+            <Tabs>
+              <Tab text="Converted IDs" icon={<FaDna />}>
+                <ConvertedIds results={results} />
+              </Tab>
+
+              <Tab text="Predictions" icon={<LuLightbulb />}>
+                <Predictions results={results} />
+              </Tab>
+            </Tabs>
+          )}
         </Section>
       )}
     </>
