@@ -19,7 +19,14 @@ const Similarities = ({ results }: Props) => {
         {
           key: "id",
           name: "ID",
-          render: (cell) => <Link to={cell}>{cell}</Link>,
+          render: (cell) => {
+            let link = "";
+            if (cell.startsWith("GO:"))
+              link = `https://amigo.geneontology.org/amigo/term/GO%3A${cell}`;
+            if (cell.startsWith("DOID:"))
+              link = `https://disease-ontology.org/?id=DOID%3A${cell}`;
+            return <Link to={link}>{cell}</Link>;
+          },
         },
         {
           key: "name",
