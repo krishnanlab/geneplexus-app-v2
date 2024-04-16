@@ -39,7 +39,8 @@
   font-size: 0.9rem;
 }
 
-.top-marker {
+.min-marker,
+.max-marker {
   transform: translateY(-200%);
   color: var(--gray);
 }

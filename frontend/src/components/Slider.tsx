@@ -132,7 +132,7 @@ const Slider = ({
           {active && (
             <span
               {...api.getMarkerProps({ value: _min })}
-              className={classes["top-marker"]}
+              className={classes["min-marker"]}
             >
               {formatNumber(_min, true)}
             </span>
@@ -160,7 +160,7 @@ const Slider = ({
           {active && (
             <span
               {...api.getMarkerProps({ value: _max })}
-              className={classes["top-marker"]}
+              className={classes["max-marker"]}
             >
               {formatNumber(_max, true)}
             </span>

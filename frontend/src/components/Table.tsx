@@ -61,7 +61,7 @@ type Col<
   attrs?: HTMLAttributes<HTMLTableCellElement>;
   /** cell style */
   style?: CSSProperties;
-  /** visibility (default true) */
+  /** whether to start column visible (default true) */
   show?: boolean;
   /** custom render function for cell */
   render?: (cell: NoInfer<Datum[Key]>) => ReactNode;
@@ -107,6 +107,7 @@ const colToOption = <Datum extends object>(
  * https://codesandbox.io/p/devbox/tanstack-table-example-kitchen-sink-vv4871
  */
 const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
+  /** expanded state */
   const [expanded, setExpanded] = useState(true);
 
   /** column visibility options for multi-select */
@@ -134,7 +135,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
   /** individual column filter func */
   const filterFunc = useMemo<FilterFn<Datum>>(
     () => (row, columnId, filterValue: unknown) => {
-      const type = cols[Number(columnId)]?.filterType;
+      const type = cols[Number(columnId)]?.filterType ?? "string";
       if (!type) return true;
 
       /** string column */
