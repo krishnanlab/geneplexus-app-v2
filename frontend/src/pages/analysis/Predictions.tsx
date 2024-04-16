@@ -26,13 +26,14 @@ const Predictions = ({ results }: Props) => {
         {
           key: "name",
           name: "Name",
-          style: { minWidth: "400px" },
+          style: { minWidth: "400px", maxWidth: "400px" },
         },
         {
           key: "probability",
           name: "Probability",
           filterType: "number",
-          render: (cell) => formatNumber(cell * 100) + "%",
+          render: (cell) =>
+            cell < 0.01 ? Exponential(cell) : formatNumber(cell),
         },
         {
           key: "knownNovel",
@@ -54,3 +55,15 @@ const Predictions = ({ results }: Props) => {
 };
 
 export default Predictions;
+
+/** number as exponential */
+export const Exponential = (value: number) => {
+  const number = value.toExponential();
+  const mantissa = Number(number.split("e")[0]);
+  const exponent = Number(number.split("e")[1]);
+  return (
+    <span style={{ whiteSpace: "nowrap" }}>
+      {mantissa.toFixed(2)} &times; 10<sup>{exponent}</sup>
+    </span>
+  );
+};

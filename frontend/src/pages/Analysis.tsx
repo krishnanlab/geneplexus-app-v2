@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { BiSolidCopy } from "react-icons/bi";
 import {
   FaArrowDown,
   FaArrowUp,
   FaChartBar,
   FaDna,
+  FaEye,
   FaMagnifyingGlassChart,
 } from "react-icons/fa6";
 import { LuLightbulb } from "react-icons/lu";
@@ -26,6 +28,8 @@ import UploadButton from "@/components/UploadButton";
 import ConvertedIds from "@/pages/analysis/ConvertedIds";
 import Inputs from "@/pages/analysis/Inputs";
 import Predictions from "@/pages/analysis/Predictions";
+import Similarities from "@/pages/analysis/Similarities";
+import Summary from "@/pages/analysis/Summary";
 import { downloadJson } from "@/util/download";
 import { useQuery } from "@/util/hooks";
 
@@ -120,13 +124,21 @@ const Analysis = () => {
           )}
 
           {results && (
-            <Tabs>
+            <Tabs defaultValue="summary">
               <Tab text="Converted IDs" icon={<FaDna />}>
                 <ConvertedIds results={results} />
               </Tab>
 
+              <Tab text="Summary" icon={<FaEye />}>
+                <Summary results={results} />
+              </Tab>
+
               <Tab text="Predictions" icon={<LuLightbulb />}>
                 <Predictions results={results} />
+              </Tab>
+
+              <Tab text="Similarities" icon={<BiSolidCopy />}>
+                <Similarities results={results} />
               </Tab>
             </Tabs>
           )}

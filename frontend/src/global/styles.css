@@ -99,6 +99,7 @@ p a:visited:hover {
 }
 
 p {
+  width: 100%;
   line-height: var(--spacing);
   text-align: justify;
 }
@@ -140,14 +141,15 @@ pre {
   padding: 10px 20px;
   overflow: auto;
   border-radius: var(--rounded);
-  background: var(--dark-gray);
+  background: var(--off-black);
   color: var(--white);
 }
 
 :not(pre) > code {
-  padding: 2px 5px;
+  margin: -3px 0;
+  padding: 1px 3px;
   border-radius: var(--rounded);
-  background: var(--light-gray);
+  background: color-mix(in srgb, currentColor 10%, transparent);
 }
 
 blockquote {
@@ -173,7 +175,7 @@ td {
 }
 
 thead tr {
-  border-bottom: solid 1px var(--gray);
+  border-bottom: solid 1px var(--dark-gray);
 }
 
 tbody tr {
@@ -217,7 +219,7 @@ textarea {
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background-color: var(--light-gray);
+  background-color: var(--off-white);
 }
 
 :not(html) ::-webkit-scrollbar-thumb {

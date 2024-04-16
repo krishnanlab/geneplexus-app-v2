@@ -1,8 +1,8 @@
 import type { ReactElement, ReactNode } from "react";
 import { Fragment, useId } from "react";
+import { useSearchParams } from "react-router-dom";
 import classNames from "classnames";
 import { kebabCase } from "lodash";
-import { StringParam, useQueryParam } from "use-query-params";
 import { normalizeProps, useMachine } from "@zag-js/react";
 import * as tabs from "@zag-js/tabs";
 import Tooltip from "@/components/Tooltip";
@@ -16,12 +16,11 @@ type Props = {
   syncWithUrl?: string;
   /** series of Tab components */
   children: ReactElement<TabProps> | ReactElement<TabProps>[];
+  /** starting selected tab id (defaults to first tab) */
+  defaultValue?: string;
 };
 
-const Tabs = ({ syncWithUrl = "", children }: Props) => {
-  /** sync selected tab with url */
-  const [value, setValue] = useQueryParam(syncWithUrl, StringParam);
-
+const Tabs = ({ syncWithUrl = "", children, defaultValue }: Props) => {
   /** tab props */
   const tabProps = [children]
     .flat()
@@ -32,20 +31,36 @@ const Tabs = ({ syncWithUrl = "", children }: Props) => {
       id: kebabCase(child.props.text),
     }));
 
+  defaultValue ??= tabProps[0]?.id;
+
+  /** sync selected tab with url */
+  const [searchParams, setSearchParams] = useSearchParams();
+
   /** set up zag */
   const [state, send] = useMachine(
     tabs.machine({
       /** unique id for component instance */
       id: useId(),
+      value: defaultValue,
     }),
     /** https://zagjs.com/overview/programmatic-control#controlled-usage-in-reacts */
     {
-      context: {
-        /** initialize selected tab state */
-        value: syncWithUrl ? value || tabProps[0]?.id : tabProps[0]?.id,
-        /** when selected tab changes */
-        onValueChange: (details) => syncWithUrl && setValue(details.value),
-      },
+      context: syncWithUrl
+        ? {
+            /** initialize selected tab state */
+            value: searchParams.get(syncWithUrl) ?? defaultValue,
+            /** when selected tab changes */
+            onValueChange: (details) =>
+              /** note: https://github.com/remix-run/react-router/issues/8393 */
+              setSearchParams(
+                (prev) => {
+                  prev.set(syncWithUrl, details.value);
+                  return prev;
+                },
+                { replace: true },
+              ),
+          }
+        : undefined,
     },
   );
 

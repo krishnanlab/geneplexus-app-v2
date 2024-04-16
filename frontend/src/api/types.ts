@@ -140,6 +140,8 @@ export const convertAnalysisResults = (backend: _AnalysisResults) => ({
     inNetwork:
       (row["In BioGRID?"] ?? row["In IMP?"] ?? row["In STRING?"]) === "Y",
   })),
+  crossValidation: backend.avgps,
+  positiveGenes: backend.positive_genes,
   predictions: backend.df_probs.map((row) => ({
     rank: row.Rank,
     entrez: row.Entrez,
@@ -148,6 +150,12 @@ export const convertAnalysisResults = (backend: _AnalysisResults) => ({
     probability: row.Probability,
     knownNovel: row["Known/Novel"],
     classLabel: row["Class-Label"],
+  })),
+  similarities: backend.df_sim.map((row) => ({
+    rank: row.Rank,
+    id: row.ID,
+    name: row.Name,
+    similarity: row.Similarity,
   })),
 });
 

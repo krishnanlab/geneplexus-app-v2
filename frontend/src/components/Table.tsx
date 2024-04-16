@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { FaCompressArrowsAlt, FaExpandArrowsAlt } from "react-icons/fa";
 import {
@@ -37,6 +37,7 @@ import Slider from "@/components/Slider";
 import TextBox from "@/components/TextBox";
 import Tooltip from "@/components/Tooltip";
 import { downloadCsv } from "@/util/download";
+import { formatNumber } from "@/util/string";
 import classes from "./Table.module.css";
 
 type Col<
@@ -56,8 +57,8 @@ type Col<
    * (default string)
    */
   filterType?: "string" | "number" | "enum" | "boolean";
-  /** horizontal alignment (default left) */
-  align?: "left" | "center" | "right";
+  /** cell attributes */
+  attrs?: HTMLAttributes<HTMLTableCellElement>;
   /** cell style */
   style?: CSSProperties;
   /** visibility (default true) */
@@ -85,7 +86,7 @@ declare module "@tanstack/table-core" {
   interface ColumnMeta<TData extends RowData, TValue> {
     filterable: NonNullable<Col["filterable"]>;
     filterType: NonNullable<Col["filterType"]>;
-    align: NonNullable<Col["align"]>;
+    attrs: Col["attrs"];
     style: Col["style"];
   }
 }
@@ -123,12 +124,12 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
 
   /** per page options */
   const perPageOptions = [
-    { id: "5", text: "5" },
-    { id: "10", text: "10" },
-    { id: "50", text: "50" },
-    { id: "100", text: "100" },
-    { id: "500", text: "500" },
-  ];
+    { id: "5", text: 5 },
+    { id: "10", text: 10 },
+    { id: "50", text: 50 },
+    { id: "100", text: 100 },
+    { id: "500", text: 500 },
+  ].map((option) => ({ ...option, text: formatNumber(option.text) }));
 
   /** individual column filter func */
   const filterFunc = useMemo<FilterFn<Datum>>(
@@ -203,7 +204,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
       meta: {
         filterable: col.filterable ?? true,
         filterType: col.filterType ?? "string",
-        align: col.align ?? "left",
+        attrs: col.attrs,
         style: col.style,
       },
       /** func to use for filtering individual column */
@@ -268,9 +269,10 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    align={header.column.columnDef.meta?.align}
                     aria-colindex={Number(header.id) + 1}
                     style={header.column.columnDef.meta?.style}
+                    align="left"
+                    {...(header.column.columnDef.meta?.attrs || {})}
                   >
                     {header.isPlaceholder ? null : (
                       <div className={classes.th}>
@@ -343,8 +345,9 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
-                      align={cell.column.columnDef.meta?.align}
                       style={cell.column.columnDef.meta?.style}
+                      align="left"
+                      {...(cell.column.columnDef.meta?.attrs || {})}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -394,8 +397,8 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                 table.setPageIndex(clamp(page, 1, table.getPageCount()) - 1);
               }}
             >
-              Page {table.getState().pagination.pageIndex + 1} of{" "}
-              {table.getPageCount() || 1}
+              Page {formatNumber(table.getState().pagination.pageIndex + 1)} of{" "}
+              {formatNumber(table.getPageCount())}
             </button>
           </Tooltip>
           <button

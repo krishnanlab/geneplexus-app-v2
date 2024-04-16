@@ -10,7 +10,7 @@ export const shortenUrl = (value: string) => {
 
 /** format number to string */
 export const formatNumber = (value: number | undefined, compact = false) => {
-  if (value === undefined) return null;
+  if (value === undefined) return "-";
   const options: Intl.NumberFormatOptions = {};
   if (compact) options.notation = "compact";
   if (Math.abs(value) > 1) options.maximumFractionDigits = 2;

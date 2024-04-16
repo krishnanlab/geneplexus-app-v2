@@ -84,10 +84,11 @@ const Testbed = () => {
             "deep-mid",
             "deep-light",
             "black",
+            "off-black",
             "dark-gray",
             "gray",
             "light-gray",
-            "pale",
+            "off-white",
             "white",
             "success",
             "warning",
@@ -424,7 +425,7 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
         <Heading level={2} icon={<FaRegFolder />}>
           Tabs
         </Heading>
-        <Tabs syncWithUrl="tab">
+        <Tabs syncWithUrl="tab" defaultValue="drinks">
           <Tab text="Animals" icon={<FaCat />} tooltip="Tooltip">
             <ul>
               <li>Cat</li>
@@ -562,7 +563,7 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
               render: (cell) => <div className="truncate-5">{cell}</div>,
             },
           ]}
-          rows={tableData.map((row) => ({ ...row, age: row.age / 100 }))}
+          rows={tableData}
         />
       </Section>
 
@@ -638,10 +639,15 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
           <Label htmlFor="123" label="Label" required={true} tooltip="Tooltip">
             <input id="123" name="suppress lighthouse" />
           </Label>
-          <Label htmlFor="456" label="Label" layout="horizontal">
+          <Label
+            htmlFor="456"
+            label="Label"
+            layout="horizontal"
+            tooltip="Tooltip"
+          >
             <input id="456" name="suppress lighthouse" />
           </Label>
-          <Label htmlFor="789" label="Label" layout="none">
+          <Label htmlFor="789" layout="none" tooltip="Tooltip">
             <input id="789" name="suppress lighthouse" />
           </Label>
         </div>

@@ -5,23 +5,26 @@
 .button {
   padding: 5px 10px;
   gap: 10px;
-  border-bottom: solid 1px currentColor;
-  border-radius: var(--rounded) var(--rounded) 0 0;
-  color: var(--gray);
-  transition: color var(--fast);
+  border-bottom: solid 2px var(--light-gray);
+  color: var(--dark-gray);
+  transition:
+    color var(--fast),
+    border-color var(--fast);
 }
 
 .button:hover {
-  border-width: 1px;
+  border-color: var(--deep);
   color: var(--deep);
 }
 
 .button[data-selected] {
-  border-width: 3px;
+  border-color: var(--accent);
   color: var(--accent);
 }
 
 .content {
+  display: flex;
+  justify-content: center;
   width: 100%;
 }
 

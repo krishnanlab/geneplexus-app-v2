@@ -41,7 +41,7 @@ const Tooltip = forwardRef<Handle, Props>(({ content, children, id }, ref) => {
     tooltip.machine({
       /** unique id for component instance */
       id: useId(),
-      ids: { trigger: id },
+      ids: id ? { trigger: id } : undefined,
       /** settings */
       openDelay: 200,
       closeDelay: 0,
@@ -76,10 +76,10 @@ const Tooltip = forwardRef<Handle, Props>(({ content, children, id }, ref) => {
         {cloneElement(
           children,
           mergeProps(
-            /** pass props necessary to trigger */
-            api.triggerProps,
             /** make sure original props preserved */
             children.props,
+            /** pass props necessary to trigger */
+            api.triggerProps,
             {
               /** set aria label if trigger has no visible text */
               "aria-label": !renderText(children)

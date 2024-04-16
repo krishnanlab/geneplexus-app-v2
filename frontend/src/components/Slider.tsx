@@ -103,8 +103,6 @@ const Slider = ({
 
   /** whether to show min/max marks */
   const active = api.isFocused || api.isDragging;
-  const showMin = (api.value[0] ?? _min) > (_max - _min) * 0.2;
-  const showMax = (api.value.at(-1) ?? _max) < (_max - _min) * 0.8;
 
   return (
     <Label {...forwardLabelProps(props, api.rootProps.id)}>
@@ -131,13 +129,14 @@ const Slider = ({
         {/* marks */}
         <div {...api.markerGroupProps} className={classes.markers}>
           {/* min value */}
-          <span
-            {...api.getMarkerProps({ value: _min })}
-            className={classes.marker}
-            data-faded={active && showMin ? "half" : "full"}
-          >
-            {formatNumber(_min, true)}
-          </span>
+          {active && (
+            <span
+              {...api.getMarkerProps({ value: _min })}
+              className={classes["top-marker"]}
+            >
+              {formatNumber(_min, true)}
+            </span>
+          )}
 
           {/* thumb values */}
           {api.value.map((value, index) => (
@@ -158,13 +157,14 @@ const Slider = ({
           ))}
 
           {/* max value */}
-          <span
-            {...api.getMarkerProps({ value: _max })}
-            className={classes.marker}
-            data-faded={active && showMax ? "half" : "full"}
-          >
-            {formatNumber(_max, true)}
-          </span>
+          {active && (
+            <span
+              {...api.getMarkerProps({ value: _max })}
+              className={classes["top-marker"]}
+            >
+              {formatNumber(_max, true)}
+            </span>
+          )}
         </div>
       </div>
     </Label>
