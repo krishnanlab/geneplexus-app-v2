@@ -100,6 +100,7 @@ p a:visited:hover {
 
 p {
   width: 100%;
+  margin: 0;
   line-height: var(--spacing);
   text-align: justify;
 }
@@ -114,6 +115,7 @@ strong {
 ul,
 ol {
   width: 100%;
+  margin: 0;
   padding: 0 0 0 20px;
   line-height: var(--spacing);
 }
@@ -138,6 +140,7 @@ img {
 
 pre {
   max-width: 100%;
+  margin: 0;
   padding: 10px 20px;
   overflow: auto;
   border-radius: var(--rounded);
@@ -171,14 +174,18 @@ th {
 
 th,
 td {
-  padding: 5px 10px;
+  padding: 5px 12.5px;
+}
+
+:is(th, td):not(:last-child) {
+  border-right: solid 1px var(--light-gray);
+}
+
+tr:nth-child(even) {
+  background: #fafafa;
 }
 
 thead tr {
-  border-bottom: solid 1px var(--dark-gray);
-}
-
-tbody tr {
   border-bottom: solid 1px var(--light-gray);
 }
 
@@ -195,6 +202,7 @@ button {
   appearance: none;
   align-items: center;
   justify-content: center;
+  margin: 0;
   padding: 0;
   border: none;
   background: none;

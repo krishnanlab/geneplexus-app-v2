@@ -16,6 +16,14 @@ const Predictions = ({ results }: Props) => {
           filterType: "number",
         },
         {
+          key: "probability",
+          name: "Probability",
+          tooltip: "Indicates gene's network-based similarity to input genes",
+          filterType: "number",
+          render: (cell) =>
+            cell < 0.01 ? Exponential(cell) : formatNumber(cell),
+        },
+        {
           key: "entrez",
           name: "Entrez",
         },
@@ -28,21 +36,19 @@ const Predictions = ({ results }: Props) => {
           name: "Name",
           style: { minWidth: "400px", maxWidth: "400px" },
         },
-        {
-          key: "probability",
-          name: "Probability",
-          filterType: "number",
-          render: (cell) =>
-            cell < 0.01 ? Exponential(cell) : formatNumber(cell),
-        },
+
         {
           key: "knownNovel",
           name: "Known/Novel",
+          tooltip:
+            "Indicates whether gene was part of input gene list (therefore Known) or not (therefore Novel)",
           filterType: "enum",
         },
         {
           key: "classLabel",
           name: "Class Label",
+          tooltip:
+            "Whether gene was considered in positive/negative class or not considered at all during training",
           filterType: "enum",
           render: (cell) =>
             ({ P: "Positive", N: "Negative", U: "Neutral" })[cell],

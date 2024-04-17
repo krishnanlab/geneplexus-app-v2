@@ -90,7 +90,12 @@ const Tabs = ({ syncWithUrl = "", children, defaultValue }: Props) => {
         <div
           key={index}
           {...api.getContentProps({ value: tab.id })}
-          className={classNames(classes.content, tab.className)}
+          className={classNames(
+            "flex-col",
+            "gap-md",
+            classes.content,
+            tab.className,
+          )}
         >
           {tab.children}
         </div>

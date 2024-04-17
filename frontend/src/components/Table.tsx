@@ -1,5 +1,5 @@
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FaCompressArrowsAlt, FaExpandArrowsAlt } from "react-icons/fa";
 import {
   FaAngleLeft,
@@ -15,7 +15,7 @@ import {
 } from "react-icons/fa6";
 import classNames from "classnames";
 import { clamp, isEqual, pick, sortBy, sum } from "lodash";
-import type { Column, FilterFn, NoInfer, RowData } from "@tanstack/react-table";
+import type { Column, FilterFn, NoInfer } from "@tanstack/react-table";
 import {
   createColumnHelper,
   flexRender,
@@ -30,6 +30,7 @@ import {
   type Table,
 } from "@tanstack/react-table";
 import Button from "@/components/Button";
+import Help from "@/components/Help";
 import Popover from "@/components/Popover";
 import Select from "@/components/Select";
 import type { Option } from "@/components/Select";
@@ -63,6 +64,8 @@ type Col<
   style?: CSSProperties;
   /** whether to start column visible (default true) */
   show?: boolean;
+  /** tooltip to show in header cell */
+  tooltip?: ReactNode;
   /** custom render function for cell */
   render?: (cell: NoInfer<Datum[Key]>) => ReactNode;
 };
@@ -79,17 +82,6 @@ type Props<Datum extends object> = {
   cols: _Col<Datum>[];
   rows: Datum[];
 };
-
-/** https://tanstack.com/table/v8/docs/api/core/column-def#meta */
-declare module "@tanstack/table-core" {
-  // eslint-disable-next-line
-  interface ColumnMeta<TData extends RowData, TValue> {
-    filterable: NonNullable<Col["filterable"]>;
-    filterType: NonNullable<Col["filterType"]>;
-    attrs: Col["attrs"];
-    style: Col["style"];
-  }
-}
 
 /** map column definition to multi-select option */
 const colToOption = <Datum extends object>(
@@ -132,10 +124,13 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
     { id: "500", text: 500 },
   ].map((option) => ({ ...option, text: formatNumber(option.text) }));
 
+  /** get column definition (from props) by id */
+  const getCol = useCallback((id: string) => cols[Number(id)], [cols]);
+
   /** individual column filter func */
   const filterFunc = useMemo<FilterFn<Datum>>(
     () => (row, columnId, filterValue: unknown) => {
-      const type = cols[Number(columnId)]?.filterType ?? "string";
+      const type = getCol(columnId)?.filterType ?? "string";
       if (!type) return true;
 
       /** string column */
@@ -172,7 +167,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
 
       return true;
     },
-    [cols],
+    [getCol],
   );
 
   /** global search func */
@@ -200,13 +195,13 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
       /** individually filterable */
       enableColumnFilter: col.filterable ?? true,
       /** only include in table-wide search if column is visible */
-      // enableGlobalFilter: visible.includes(String(index)),
+      enableGlobalFilter: visibleCols.includes(String(index)),
       /** type of column */
       meta: {
-        filterable: col.filterable ?? true,
-        filterType: col.filterType ?? "string",
+        filterType: col.filterType,
         attrs: col.attrs,
         style: col.style,
+        tooltip: col.tooltip,
       },
       /** func to use for filtering individual column */
       filterFn: filterFunc,
@@ -271,9 +266,9 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                   <th
                     key={header.id}
                     aria-colindex={Number(header.id) + 1}
-                    style={header.column.columnDef.meta?.style}
+                    style={getCol(header.column.id)?.style}
                     align="left"
-                    {...(header.column.columnDef.meta?.attrs || {})}
+                    {...getCol(header.column.id)?.attrs}
                   >
                     {header.isPlaceholder ? null : (
                       <div className={classes.th}>
@@ -285,32 +280,44 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                           )}
                         </span>
 
+                        {/* header tooltip */}
+                        {getCol(header.column.id)?.tooltip && (
+                          <Help tooltip={getCol(header.column.id)?.tooltip} />
+                        )}
+
                         {/* header sort */}
-                        <Tooltip content="Sort this column">
-                          <button
-                            className={classes["header-button"]}
-                            data-active={
-                              header.column.getIsSorted() ? "" : undefined
-                            }
-                            onClick={header.column.getToggleSortingHandler()}
-                          >
-                            {header.column.getIsSorted() ? (
-                              header.column.getIsSorted() === "asc" ? (
-                                <FaSortUp />
+                        {header.column.getCanSort() && (
+                          <Tooltip content="Sort this column">
+                            <button
+                              className={classes["header-button"]}
+                              data-active={
+                                header.column.getIsSorted() ? "" : undefined
+                              }
+                              onClick={header.column.getToggleSortingHandler()}
+                            >
+                              {header.column.getIsSorted() ? (
+                                header.column.getIsSorted() === "asc" ? (
+                                  <FaSortUp />
+                                ) : (
+                                  <FaSortDown />
+                                )
                               ) : (
-                                <FaSortDown />
-                              )
-                            ) : (
-                              <FaSort />
-                            )}
-                          </button>
-                        </Tooltip>
+                                <FaSort />
+                              )}
+                            </button>
+                          </Tooltip>
+                        )}
 
                         {/* header filter */}
                         {header.column.getCanFilter() ? (
                           <Popover
                             label="Filter this column"
-                            content={<Filter column={header.column} />}
+                            content={
+                              <Filter
+                                column={header.column}
+                                def={getCol(header.column.id)}
+                              />
+                            }
                           >
                             <button
                               className={classes["header-button"]}
@@ -346,9 +353,9 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
-                      style={cell.column.columnDef.meta?.style}
+                      style={getCol(cell.column.id)?.style}
                       align="left"
-                      {...(cell.column.columnDef.meta?.attrs || {})}
+                      {...getCol(cell.column.id)?.attrs}
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
@@ -493,12 +500,13 @@ export default Table;
 
 type FilterProps<Datum extends object> = {
   column: Column<Datum>;
+  def?: Col<Datum>;
 };
 
 /** content of filter popup for column */
-const Filter = <Datum extends object>({ column }: FilterProps<Datum>) => {
+const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
   /** type of filter */
-  const type = column.columnDef.meta?.filterType;
+  const type = def?.filterType ?? "string";
 
   /** filter as number range */
   if (type === "number") {

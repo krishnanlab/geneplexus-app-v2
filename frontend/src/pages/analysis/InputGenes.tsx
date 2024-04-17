@@ -7,7 +7,7 @@ type Props = {
   results: AnalysisResults;
 };
 
-const ConvertedIds = ({ results }: Props) => {
+const InputGenes = ({ results }: Props) => {
   return (
     <Table
       cols={[
@@ -32,4 +32,4 @@ const ConvertedIds = ({ results }: Props) => {
   );
 };
 
-export default ConvertedIds;
+export default InputGenes;

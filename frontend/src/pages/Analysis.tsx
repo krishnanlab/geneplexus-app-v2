@@ -5,10 +5,10 @@ import {
   FaArrowUp,
   FaChartBar,
   FaDna,
-  FaEye,
   FaMagnifyingGlassChart,
 } from "react-icons/fa6";
 import { LuLightbulb } from "react-icons/lu";
+import { PiGraphBold } from "react-icons/pi";
 import { useLocation } from "react-router";
 import { submitAnalysis } from "@/api/api";
 import {
@@ -25,7 +25,7 @@ import Section from "@/components/Section";
 import Tabs, { Tab } from "@/components/Tabs";
 import { toast } from "@/components/Toasts";
 import UploadButton from "@/components/UploadButton";
-import ConvertedIds from "@/pages/analysis/ConvertedIds";
+import InputGenes from "@/pages/analysis/InputGenes";
 import Inputs from "@/pages/analysis/Inputs";
 import Predictions from "@/pages/analysis/Predictions";
 import Similarities from "@/pages/analysis/Similarities";
@@ -124,23 +124,42 @@ const Analysis = () => {
           )}
 
           {results && (
-            <Tabs defaultValue="summary">
-              <Tab text="Converted IDs" icon={<FaDna />}>
-                <ConvertedIds results={results} />
-              </Tab>
+            <>
+              <Summary results={results} />
+              <Tabs defaultValue="predictions">
+                <Tab
+                  text="Input Genes"
+                  icon={<FaDna />}
+                  tooltip="More details about input genes"
+                >
+                  <InputGenes results={results} />
+                </Tab>
 
-              <Tab text="Summary" icon={<FaEye />}>
-                <Summary results={results} />
-              </Tab>
+                <Tab
+                  text="Predictions"
+                  icon={<LuLightbulb />}
+                  tooltip="Predication probability of genes"
+                >
+                  <Predictions results={results} />
+                </Tab>
 
-              <Tab text="Predictions" icon={<LuLightbulb />}>
-                <Predictions results={results} />
-              </Tab>
+                <Tab
+                  text="Similarities"
+                  icon={<BiSolidCopy />}
+                  tooltip="Similarity of input genes with biological processes and diseases"
+                >
+                  <Similarities results={results} />
+                </Tab>
 
-              <Tab text="Similarities" icon={<BiSolidCopy />}>
-                <Similarities results={results} />
-              </Tab>
-            </Tabs>
+                <Tab
+                  text="Network"
+                  icon={<PiGraphBold />}
+                  tooltip="Network visualization of top predicted genes"
+                >
+                  Lorem ipsum
+                </Tab>
+              </Tabs>
+            </>
           )}
         </Section>
       )}
