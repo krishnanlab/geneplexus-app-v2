@@ -1,0 +1,24 @@
+.panels {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 40px;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.svg {
+  width: 100%;
+  height: min(800px, 80vh);
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+@media (max-width: 600px) {
+  .panels {
+    grid-template-columns: 1fr;
+  }
+}

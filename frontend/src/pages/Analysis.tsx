@@ -27,11 +27,13 @@ import { toast } from "@/components/Toasts";
 import UploadButton from "@/components/UploadButton";
 import InputGenes from "@/pages/analysis/InputGenes";
 import Inputs from "@/pages/analysis/Inputs";
+import Network from "@/pages/analysis/Network";
 import Predictions from "@/pages/analysis/Predictions";
 import Similarities from "@/pages/analysis/Similarities";
 import Summary from "@/pages/analysis/Summary";
 import { downloadJson } from "@/util/download";
 import { useQuery } from "@/util/hooks";
+import tempData from "./analysis/test.json";
 
 const Analysis = () => {
   /** get info and state from route */
@@ -48,7 +50,7 @@ const Analysis = () => {
   } = useQuery(async () => await submitAnalysis(stateInput!), stateInput);
 
   /** upload results */
-  const [upload, setUpload] = useState<_AnalysisResults>();
+  const [upload, setUpload] = useState<_AnalysisResults>(tempData);
   const uploadInput = upload ? convertAnalysisInputs(upload.inputs) : undefined;
   const uploadResults = upload ? convertAnalysisResults(upload) : undefined;
 
@@ -67,6 +69,8 @@ const Analysis = () => {
         <Heading level={1} icon={<FaMagnifyingGlassChart />}>
           Analysis
         </Heading>
+
+        {results && <Network results={results} />}
 
         <div className="flex-row gap-sm">
           {results && (

@@ -2,7 +2,7 @@
   display: flex;
   position: relative;
   align-items: center;
-  padding: 15px 10px;
+  padding: 10px 10px;
   border-radius: var(--rounded);
   color: var(--accent);
   cursor: pointer;
@@ -34,13 +34,15 @@
 }
 
 .markers {
-  padding-bottom: 5px;
+  padding-bottom: 20px;
   transform: translateY(-5px);
   font-size: 0.9rem;
+  white-space: nowrap;
 }
 
-.min-marker,
-.max-marker {
-  transform: translateY(-200%);
-  color: var(--gray);
+.marker {
+}
+
+.back-marker {
+  color: var(--light-gray);
 }

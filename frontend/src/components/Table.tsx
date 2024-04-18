@@ -250,7 +250,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
 
   return (
     <div className="flex-col gap-md">
-      <div className={classNames(classes.scroll, expanded && classes.expanded)}>
+      <div className={classNames(classes.scroll, expanded && "expanded")}>
         {/* table */}
         <table
           className={classes.table}

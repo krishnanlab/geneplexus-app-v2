@@ -157,6 +157,21 @@ export const convertAnalysisResults = (backend: _AnalysisResults) => ({
     name: row.Name,
     similarity: row.Similarity,
   })),
+  network: {
+    nodes: backend.df_probs.map((row) => ({
+      rank: row.Rank,
+      entrez: row.Entrez,
+      symbol: row.Symbol,
+      name: row.Name,
+      probability: row.Probability,
+      knownNovel: row["Known/Novel"],
+      classLabel: row["Class-Label"],
+    })),
+    links: backend.df_edge.map((row) => ({
+      source: row.Node1,
+      target: row.Node2,
+    })),
+  },
 });
 
 /** ml endpoint params frontend format */

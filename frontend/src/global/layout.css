@@ -11,6 +11,12 @@
   width: 100%;
 }
 
+/** expanded width */
+
+.expanded {
+  width: calc(100vw - 80px);
+}
+
 /** basic, commonly-needed, centered horizontal or vertical flex */
 /** if any customization needed, use local class from scratch */
 

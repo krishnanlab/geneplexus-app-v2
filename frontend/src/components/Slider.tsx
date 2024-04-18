@@ -59,7 +59,7 @@ const Slider = ({
   /** defaults */
   const _min = min ?? 0;
   const _max = max ?? 100;
-  const _step = Math.min(step ?? (_max - _min) / 10, _max - _min);
+  const _step = Math.min(step ?? 1, _max - _min);
 
   /** set up zag */
   const [state, send] = useMachine(
@@ -132,9 +132,18 @@ const Slider = ({
           {active && (
             <span
               {...api.getMarkerProps({ value: _min })}
-              className={classes["min-marker"]}
+              className={classes["back-marker"]}
             >
               {formatNumber(_min, true)}
+            </span>
+          )}
+          {/* max value */}
+          {active && (
+            <span
+              {...api.getMarkerProps({ value: _max })}
+              className={classes["back-marker"]}
+            >
+              {formatNumber(_max, true)}
             </span>
           )}
 
@@ -155,16 +164,6 @@ const Slider = ({
               {formatNumber(value, true)}
             </span>
           ))}
-
-          {/* max value */}
-          {active && (
-            <span
-              {...api.getMarkerProps({ value: _max })}
-              className={classes["max-marker"]}
-            >
-              {formatNumber(_max, true)}
-            </span>
-          )}
         </div>
       </div>
     </Label>
