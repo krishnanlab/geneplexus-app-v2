@@ -1,0 +1,22 @@
+name: Deploy Cloud Functions
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'functions/convert_ids/convert_ids_deploy/**'
+
+jobs:
+  deploy-convert-ids-func:
+    uses: ./.github/workflows/helper-deploy-func.yaml
+    with:
+      func-name: "gpz-convert-ids"
+      func-src-dir: "functions/convert_ids/convert_ids_deploy"
+      func-entrypoint: "convert_ids"
+      func-memory-mb: 1024
+      func-data-gcs-url: "gs://geneplexus-func-data/convert-ids/convert-ids_data.tar.gz"
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+    secrets: inherit
