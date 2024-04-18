@@ -1,11 +1,14 @@
 import { Fragment, useEffect, useState } from "react";
 import {
   FaArrowDown,
+  FaArrowRightToBracket,
   FaArrowUp,
+  FaChartBar,
   FaMagnifyingGlassChart,
 } from "react-icons/fa6";
 import { useLocation } from "react-router";
-import { submitAnalysis } from "@/api/submit";
+import { startCase } from "lodash";
+import { submitAnalysis } from "@/api/api";
 import type { AnalysisResults, Input } from "@/api/types";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
@@ -50,6 +53,29 @@ const LoadAnalysis = () => {
       <Section>
         <Heading level={1} icon={<FaMagnifyingGlassChart />}>
           Load Analysis
+        </Heading>
+      </Section>
+
+      {input && (
+        <Section>
+          <Heading level={2} icon={<FaArrowRightToBracket />}>
+            Inputs
+          </Heading>
+
+          <div className="mini-table">
+            {Object.entries(input).map(([key, value]) => (
+              <Fragment key={key}>
+                <span>{startCase(key)}</span>
+                <span>{Array.isArray(value) ? value.join(", ") : value}</span>
+              </Fragment>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      <Section>
+        <Heading level={2} icon={<FaChartBar />}>
+          Results
         </Heading>
 
         <div className="flex-row gap-sm">

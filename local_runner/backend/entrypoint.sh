@@ -15,7 +15,7 @@ function launch_and_watch() {
 
 # launch each function in a separate process and background it
 ( launch_and_watch /app/functions/convert_ids/convert_ids_deploy convert_ids 8080)  &
-( launch_and_watch /app/functions/ml/ml_deploy run_pipeline 8081 ) &
+( launch_and_watch /app/functions/ml/ml_deploy ml 8081 ) &
 
 # run caddy to serve the functions we're watching from a single origin
 /usr/bin/caddy run --environ --config /etc/caddy/Caddyfile
