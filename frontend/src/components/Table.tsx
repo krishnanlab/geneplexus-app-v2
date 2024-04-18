@@ -482,11 +482,11 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
               /** download */
               downloadCsv([names, ...data], ["geneplexus", "table"]);
             }}
-            design="accent"
           />
           {/* expand/collapse */}
           <Button
             icon={expanded ? <FaCompressArrowsAlt /> : <FaExpandArrowsAlt />}
+            design="hollow"
             tooltip={expanded ? "Collapse table" : "Expand table"}
             onClick={() => setExpanded(!expanded)}
           />

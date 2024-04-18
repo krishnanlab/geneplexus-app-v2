@@ -1,4 +1,5 @@
 import type { AnalysisResults } from "@/api/types";
+import Exponential from "@/components/Exponential";
 import Table from "@/components/Table";
 import { formatNumber } from "@/util/string";
 
@@ -21,7 +22,7 @@ const Predictions = ({ results }: Props) => {
           tooltip: "Indicates gene's network-based similarity to input genes",
           filterType: "number",
           render: (cell) =>
-            cell < 0.01 ? Exponential(cell) : formatNumber(cell),
+            cell < 0.01 ? <Exponential value={cell} /> : formatNumber(cell),
         },
         {
           key: "entrez",
@@ -50,8 +51,6 @@ const Predictions = ({ results }: Props) => {
           tooltip:
             "Whether gene was considered in positive/negative class or not considered at all during training",
           filterType: "enum",
-          render: (cell) =>
-            ({ P: "Positive", N: "Negative", U: "Neutral" })[cell],
           style: { whiteSpace: "nowrap" },
         },
       ]}
@@ -61,15 +60,3 @@ const Predictions = ({ results }: Props) => {
 };
 
 export default Predictions;
-
-/** number as exponential */
-export const Exponential = (value: number) => {
-  const number = value.toExponential();
-  const mantissa = Number(number.split("e")[0]);
-  const exponent = Number(number.split("e")[1]);
-  return (
-    <span style={{ whiteSpace: "nowrap" }}>
-      {mantissa.toFixed(2)} &times; 10<sup>{exponent}</sup>
-    </span>
-  );
-};

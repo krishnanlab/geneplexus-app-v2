@@ -216,15 +216,11 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
           <Button
             to="/about"
             text="As Link"
+            design="hollow"
             icon={<FaArrowRight />}
             tooltip="Tooltip"
           />
-          <Button
-            to="/about"
-            text="As Link"
-            design="accent"
-            tooltip="Tooltip"
-          />
+          <Button to="/about" text="As Link" tooltip="Tooltip" />
           <Button
             to="/about"
             icon={<CustomIcon />}
@@ -234,13 +230,13 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
           <Button
             onClick={() => window.alert("Hello World")}
             text="As Button"
+            design="hollow"
             tooltip="Tooltip"
           />
           <Button
             onClick={() => window.alert("Hello World")}
             text="As Button"
             icon={<FaArrowRight />}
-            design="accent"
             tooltip="Tooltip"
           />
           <Button
@@ -458,7 +454,6 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
         <div className="flex-row gap-sm">
           <Button
             text="Unique Toast"
-            design="accent"
             onClick={() =>
               toast(
                 sample([
@@ -473,7 +468,6 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
           />
           <Button
             text="Overwriting Toast"
-            design="accent"
             onClick={() => {
               toast(
                 `ABC`,

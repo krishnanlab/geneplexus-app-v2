@@ -17,24 +17,9 @@ const Home = () => {
 
         <p className={classes.hero}>{import.meta.env.VITE_DESCRIPTION}</p>
         <div className="flex-row gap-sm">
-          <Button
-            to="/new-analysis"
-            text="New Analysis"
-            icon={<FaPlus />}
-            design="accent"
-          />
-          <Button
-            to="/analysis"
-            text="Load Analysis"
-            icon={<FaArrowRight />}
-            design="accent"
-          />
-          <Button
-            to="/testbed"
-            text="Testbed"
-            icon={<FaFlaskVial />}
-            design="accent"
-          />
+          <Button to="/new-analysis" text="New Analysis" icon={<FaPlus />} />
+          <Button to="/analysis" text="Load Analysis" icon={<FaArrowRight />} />
+          <Button to="/testbed" text="Testbed" icon={<FaFlaskVial />} />
         </div>
       </Section>
 

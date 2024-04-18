@@ -17,7 +17,7 @@ type Base = {
   /** whether to flip text/icon sides */
   flip?: boolean;
   /** look */
-  design?: "normal" | "accent" | "critical";
+  design?: "hollow" | "normal" | "critical";
   /** class */
   className?: string;
 };

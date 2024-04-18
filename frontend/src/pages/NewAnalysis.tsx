@@ -25,7 +25,7 @@ import type {
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Heading from "@/components/Heading";
-import Mark from "@/components/Mark";
+import Mark, { YesNo } from "@/components/Mark";
 import Meta from "@/components/Meta";
 import Radios, { type Option as RadioOption } from "@/components/Radios";
 import Section from "@/components/Section";
@@ -264,7 +264,6 @@ const NewAnalysis = () => {
         <Button
           text="Enter Genes"
           icon={<FaPaperPlane />}
-          design="accent"
           tooltip="Converts and checks your genes in preparation for analysis"
           onClick={() => splitInputGenes.length && runConvertGeneIds()}
         />
@@ -401,7 +400,6 @@ const NewAnalysis = () => {
         <Button
           text="Submit Analysis"
           icon={<FaPaperPlane />}
-          design="accent"
           onClick={submitAnalysis}
         />
       </Section>
@@ -410,8 +408,3 @@ const NewAnalysis = () => {
 };
 
 export default NewAnalysis;
-
-/** mark, but only yes/no */
-export const YesNo = (yes: boolean) => (
-  <Mark type={yes ? "success" : "error"}>{yes ? "Yes" : "No"}</Mark>
-);

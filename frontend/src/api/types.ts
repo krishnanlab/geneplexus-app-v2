@@ -149,7 +149,7 @@ export const convertAnalysisResults = (backend: _AnalysisResults) => ({
     name: row.Name,
     probability: row.Probability,
     knownNovel: row["Known/Novel"],
-    classLabel: row["Class-Label"],
+    classLabel: expandClass(row["Class-Label"]),
   })),
   similarities: backend.df_sim.map((row) => ({
     rank: row.Rank,
@@ -160,12 +160,12 @@ export const convertAnalysisResults = (backend: _AnalysisResults) => ({
   network: {
     nodes: backend.df_probs.map((row) => ({
       rank: row.Rank,
+      probability: row.Probability,
       entrez: row.Entrez,
       symbol: row.Symbol,
       name: row.Name,
-      probability: row.Probability,
       knownNovel: row["Known/Novel"],
-      classLabel: row["Class-Label"],
+      classLabel: expandClass(row["Class-Label"]),
     })),
     links: backend.df_edge.map((row) => ({
       source: row.Node1,
@@ -176,3 +176,8 @@ export const convertAnalysisResults = (backend: _AnalysisResults) => ({
 
 /** ml endpoint params frontend format */
 export type AnalysisResults = ReturnType<typeof convertAnalysisResults>;
+
+/** convert class label abbreviation to full text */
+const expandClass = (
+  abbrev: _AnalysisResults["df_probs"][number]["Class-Label"],
+) => (({ P: "Positive", N: "Negative", U: "Neutral" }) as const)[abbrev];

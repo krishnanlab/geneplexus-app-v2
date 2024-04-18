@@ -37,3 +37,8 @@ const Mark = ({ type = "info", icon, children }: Props) => {
 };
 
 export default Mark;
+
+/** mark, but only yes/no */
+export const YesNo = (yes: boolean) => (
+  <Mark type={yes ? "success" : "error"}>{yes ? "Yes" : "No"}</Mark>
+);

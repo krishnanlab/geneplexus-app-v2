@@ -37,10 +37,14 @@ const CheckBox = ({ label, tooltip, value, onChange, name }: Props) => {
       /** value of checked for FormData */
       value: checkedValue,
       /** initialize state */
-      checked: value,
-      /** when state changes */
-      onCheckedChange: (details) => onChange?.(!!details.checked),
     }),
+    {
+      context: {
+        checked: value,
+        /** when state changes */
+        onCheckedChange: (details) => onChange?.(!!details.checked),
+      },
+    },
   );
 
   /** interact with zag */

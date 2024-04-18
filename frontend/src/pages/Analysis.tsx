@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { BiSolidCopy } from "react-icons/bi";
 import {
-  FaArrowDown,
-  FaArrowUp,
   FaChartBar,
   FaDna,
+  FaDownload,
   FaMagnifyingGlassChart,
+  FaUpload,
 } from "react-icons/fa6";
 import { LuLightbulb } from "react-icons/lu";
 import { PiGraphBold } from "react-icons/pi";
@@ -33,7 +33,6 @@ import Similarities from "@/pages/analysis/Similarities";
 import Summary from "@/pages/analysis/Summary";
 import { downloadJson } from "@/util/download";
 import { useQuery } from "@/util/hooks";
-import tempData from "./analysis/test.json";
 
 const Analysis = () => {
   /** get info and state from route */
@@ -50,7 +49,7 @@ const Analysis = () => {
   } = useQuery(async () => await submitAnalysis(stateInput!), stateInput);
 
   /** upload results */
-  const [upload, setUpload] = useState<_AnalysisResults>(tempData);
+  const [upload, setUpload] = useState<_AnalysisResults>();
   const uploadInput = upload ? convertAnalysisInputs(upload.inputs) : undefined;
   const uploadResults = upload ? convertAnalysisResults(upload) : undefined;
 
@@ -70,14 +69,11 @@ const Analysis = () => {
           Analysis
         </Heading>
 
-        {results && <Network results={results} />}
-
         <div className="flex-row gap-sm">
           {results && (
             <Button
               text="Download"
-              icon={<FaArrowDown />}
-              design="accent"
+              icon={<FaDownload />}
               tooltip="Save analysis to your device"
               onClick={() =>
                 downloadJson(
@@ -92,8 +88,7 @@ const Analysis = () => {
           <UploadButton
             accept="application/json"
             text="Upload"
-            icon={<FaArrowUp />}
-            design="accent"
+            icon={<FaUpload />}
             tooltip="Upload previously saved analysis"
             onUpload={async (file, filename) => {
               const text = await file.text();
@@ -127,7 +122,7 @@ const Analysis = () => {
             <Alert type="error">Error processing analysis.</Alert>
           )}
 
-          {results && (
+          {inputs && results && (
             <>
               <Summary results={results} />
               <Tabs defaultValue="predictions">
@@ -160,7 +155,7 @@ const Analysis = () => {
                   icon={<PiGraphBold />}
                   tooltip="Network visualization of top predicted genes"
                 >
-                  Lorem ipsum
+                  <Network inputs={inputs} results={results} />
                 </Tab>
               </Tabs>
             </>

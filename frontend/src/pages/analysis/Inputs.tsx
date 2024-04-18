@@ -27,13 +27,13 @@ const Inputs = ({ inputs }: Props) => {
         <div className="mini-table">
           <span>Name</span>
           <span>{inputs.name}</span>
-          <span>Species Train</span>
+          <span>Train Species</span>
           <span>{inputs.speciesTrain}</span>
-          <span>Species Test</span>
+          <span>Test Species</span>
           <span>{inputs.speciesTest}</span>
           <span>Network</span>
           <span>{inputs.network}</span>
-          <span>Geneset Context</span>
+          <span>Geneset Ctx.</span>
           <span>{inputs.genesetContext}</span>
         </div>
 

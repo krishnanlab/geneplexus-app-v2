@@ -1,7 +1,6 @@
 import type { AnalysisResults } from "@/api/types";
-import Mark from "@/components/Mark";
+import Mark, { YesNo } from "@/components/Mark";
 import Table from "@/components/Table";
-import { YesNo } from "@/pages/NewAnalysis";
 
 type Props = {
   results: AnalysisResults;
