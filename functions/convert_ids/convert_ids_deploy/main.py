@@ -1,5 +1,6 @@
 import functions_framework
 import geneplexus
+import traceback
 
 
 @functions_framework.http
@@ -47,5 +48,5 @@ def convert_ids(request):
 
         return (response, 200, headers)
     except Exception as error:
-        message = f"Error running GenePlexus:\n\n{error}"
-        return ({"message": message}, 400, headers)
+        message = f"Error running GenePlexus:\n{error}\n{traceback.format_exc()}"
+        return ({"message": message}, 500, headers)

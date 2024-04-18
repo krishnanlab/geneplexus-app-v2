@@ -99,7 +99,6 @@ export const revertAnalysisInputs = (
 
 /** convert-ids endpoint response format */
 export type _AnalysisResults = {
-  inputs: _AnalysisInputs;
   df_convert_out_subset: {
     "Entrez ID": string;
     "In BioGRID?"?: string;
@@ -181,3 +180,9 @@ export type AnalysisResults = ReturnType<typeof convertAnalysisResults>;
 const expandClass = (
   abbrev: _AnalysisResults["df_probs"][number]["Class-Label"],
 ) => (({ P: "Positive", N: "Negative", U: "Neutral" }) as const)[abbrev];
+
+/** full analysis */
+export type Analysis = {
+  inputs: AnalysisInputs;
+  results: AnalysisResults;
+};

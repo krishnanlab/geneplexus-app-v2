@@ -4,11 +4,10 @@ import { useMeasure } from "react-use";
 import classNames from "classnames";
 import * as d3 from "d3";
 import { atom, getDefaultStore, useAtom } from "jotai";
-import { clamp, cloneDeep } from "lodash";
+import { clamp, cloneDeep, truncate } from "lodash";
 import type { AnalysisInputs, AnalysisResults } from "@/api/types";
 import Button from "@/components/Button";
 import CheckBox from "@/components/CheckBox";
-import Exponential from "@/components/Exponential";
 import Slider from "@/components/Slider";
 import { downloadSvg } from "@/util/download";
 import { cos, lerp, sin } from "@/util/math";
@@ -46,9 +45,9 @@ const nodeColors: Record<Node["classLabel"], string> = {
 /** link line stroke color */
 const linkColor = "#808080";
 /** legend square/text/other size */
-const legendCell = 20;
+const legendCell = 15;
 /** legend line spacing factor */
-const legendSpacing = 1.5;
+const legendSpacing = 2;
 
 type Props = {
   inputs: AnalysisInputs;
@@ -71,7 +70,7 @@ const Network = ({ inputs, results }: Props) => {
   const [getAutoFit, setAutoFit] = useAtom(autoFit);
 
   /** selected node */
-  const [getSelectedNode] = useAtom(selectedNode);
+  const [getSelectedNode, setSelectedNode] = useAtom(selectedNode);
 
   /** node list with filters applied */
   const filteredNodes = results.network.nodes
@@ -105,13 +104,17 @@ const Network = ({ inputs, results }: Props) => {
   /** reset link list */
   links = cloneDeep(filteredLinks);
 
-  /** when filtered data (props, filters, etc) changes */
+  /** update things from data */
   const dataChanged = filteredNodeIds.join(",");
   useEffect(() => {
     updateSimulation();
     updateLinkLines();
     updateNodeCircles();
     updateNodeLabels();
+  }, [dataChanged, getSelectedNode]);
+
+  /** turn on auto-fit */
+  useEffect(() => {
     setAutoFit(true);
   }, [dataChanged, setAutoFit]);
 
@@ -125,6 +128,32 @@ const Network = ({ inputs, results }: Props) => {
     fitZoom();
   }, [svgSizeDeep]);
 
+  /** re-fit panel */
+  useEffect(() => {
+    svg
+      ?.node()
+      ?.querySelectorAll<SVGRectElement>("." + panel)
+      .forEach(fitPanel);
+  }, [svgSizeDeep, getSelectedNode]);
+
+  /** legend info */
+  const legendInfo: [number, string, string][] = [
+    [4.5, "Nodes", formatNumber(filteredNodes.length)],
+    [5.5, "Links", formatNumber(filteredLinks.length)],
+  ];
+
+  if (getSelectedNode)
+    legendInfo.push(
+      [7, "Selected Node", ""],
+      [8, "Rank", formatNumber(getSelectedNode.rank)],
+      [9, "Prob.", formatNumber(getSelectedNode.probability)],
+      [10, "Entrz.", getSelectedNode.entrez],
+      [11, "Sym.", getSelectedNode.symbol],
+      [12, "Name", getSelectedNode.name],
+      [13, "K/N", getSelectedNode.knownNovel],
+      [14, "Class", getSelectedNode.classLabel],
+    );
+
   return (
     <>
       {/* filters/controls */}
@@ -133,7 +162,7 @@ const Network = ({ inputs, results }: Props) => {
           label="Max nodes"
           layout="horizontal"
           min={1}
-          max={Math.min(500, results.network.nodes.length)}
+          max={Math.min(100, results.network.nodes.length)}
           step={1}
           value={maxNodes}
           onChange={setMaxNodes}
@@ -155,138 +184,90 @@ const Network = ({ inputs, results }: Props) => {
         />
       </div>
 
-      <div className={classNames("expanded", classes.panels)}>
-        {/* selected node info panel */}
-        {getSelectedNode ? (
-          <div className={classes.panel}>
-            <div className="primary">Selected Node</div>
-            <div className="mini-table">
-              <span>Rank</span>
-              <span>{formatNumber(getSelectedNode.rank)}</span>
-              <span>Prob.</span>
-              <span>
-                <Exponential value={getSelectedNode.probability} />
-              </span>
-              <span>Entrz.</span>
-              <span>{getSelectedNode.entrez}</span>
-              <span>Sym.</span>
-              <span>{getSelectedNode.symbol}</span>
-              <span>Name</span>
-              <span>{getSelectedNode.name}</span>
-              <span>K/N</span>
-              <span>{getSelectedNode.knownNovel}</span>
-              <span>Class</span>
-              <span>{getSelectedNode.classLabel}</span>
-            </div>
-          </div>
-        ) : (
-          <span className="secondary">Select a node</span>
-        )}
+      {/* svg viz */}
+      <svg
+        ref={(el) => {
+          if (!el) return;
+          /** when svg element changes */
+          svg = d3.select(el);
+          /** update svg measure */
+          svgRef(el);
+          /** attach/re-attach handlers to svg */
+          attachZoom();
+        }}
+        className={classNames("expanded", classes.svg)}
+        onClick={(event) => {
+          /** clear selected if svg was direct click target */
+          if ((event.target as Element).matches("svg")) setSelectedNode(null);
+        }}
+      >
+        {/* camera */}
+        <g className={zoomLayer}>
+          <g
+            className={linkLineLayer}
+            stroke={linkColor}
+            strokeWidth={nodeRadius / 15}
+            pointerEvents="none"
+          />
+          <g className={nodeCircleLayer} cursor="pointer" />
+          <g
+            className={nodeLabelLayer}
+            fontSize={nodeRadius / 1.5}
+            textAnchor="middle"
+            dominantBaseline="central"
+            pointerEvents="none"
+          />
+        </g>
 
-        {/* svg viz */}
-        <svg
-          ref={(el) => {
-            if (!el) return;
-            /** when svg element changes */
-            svg = d3.select(el);
-            /** update svg measure */
-            svgRef(el);
-            /** attach/re-attach handlers to svg */
-            attachZoom();
-          }}
-          className={classNames("expanded", classes.svg)}
-          onClick={(event) => {
-            /** clear selected if svg was direct click target */
-            if ((event.target as Element).matches("svg")) clearSelected();
-          }}
-        >
-          {/* camera */}
-          <g className={zoomLayer}>
-            <g
-              className={linkLineLayer}
-              stroke={linkColor}
-              strokeWidth={nodeRadius / 15}
-              pointerEvents="none"
-            />
-            <g className={nodeCircleLayer} cursor="pointer" />
-            <g
-              className={nodeLabelLayer}
-              fontSize={nodeRadius / 1.5}
-              textAnchor="middle"
-              dominantBaseline="central"
-              pointerEvents="none"
-            />
-          </g>
+        {/* legend */}
+        <g>
+          {/* background */}
+          <rect className={panel} fill="#ffffff" stroke="#e0e0e0" />
 
-          {/* legend */}
-          <g>
-            {/* background */}
-            <rect
-              ref={(el) => {
-                if (!el) return;
+          {/* colors */}
+          {Object.entries(nodeColors).map(([label, color], index) => (
+            <Fragment key={index}>
+              <circle
+                cx={legendCell * legendSpacing}
+                cy={(index + 1) * legendCell * legendSpacing}
+                r={legendCell / 1.2}
+                fill={color}
+              />
+              <text
+                x={legendCell * legendSpacing * 1.75}
+                y={(index + 1) * legendCell * legendSpacing}
+                fontSize={legendCell}
+                dominantBaseline="central"
+              >
+                {label}
+              </text>
+            </Fragment>
+          ))}
 
-                /** don't consider bg in contents */
-                el.removeAttribute("x");
-                el.removeAttribute("y");
-                el.removeAttribute("width");
-                el.removeAttribute("height");
-
-                /** get size of contents */
-                const { x, y, width, height } = (
-                  el.parentElement as unknown as SVGGElement
-                ).getBBox();
-
-                /** auto-fit bg to content */
-                el.setAttribute("x", String(x - legendCell));
-                el.setAttribute("y", String(y - legendCell));
-                el.setAttribute("width", String(width + legendCell * 2));
-                el.setAttribute("height", String(height + legendCell * 2));
-              }}
-              fill="white"
-              opacity={0.9}
-            />
-
-            {/* colors */}
-            {Object.entries(nodeColors).map(([label, color], index) => (
-              <Fragment key={index}>
-                <rect
-                  x={legendCell}
-                  y={(index + 1) * legendCell * legendSpacing - legendCell / 2}
-                  width={legendCell}
-                  height={legendCell}
-                  fill={color}
-                />
-                <text
-                  x={legendCell * 2.5}
-                  y={(index + 1) * legendCell * legendSpacing}
-                  fontSize={legendCell}
-                  dominantBaseline="central"
-                >
-                  {label}
-                </text>
-              </Fragment>
-            ))}
-
-            {/* info */}
-            <text
-              x={legendCell}
-              y={4.5 * legendCell * legendSpacing}
-              fontSize={legendCell}
-              dominantBaseline="central"
-            >
-              {formatNumber(filteredNodes.length)} Nodes
-            </text>
-            <text
-              x={legendCell}
-              y={5.5 * legendCell * legendSpacing}
-              fontSize={legendCell}
-              dominantBaseline="central"
-            >
-              {formatNumber(filteredLinks.length)} Links
-            </text>
-          </g>
-        </svg>
-      </div>
+          {/* info */}
+          {legendInfo?.map(([line, key, value], index) => (
+            <Fragment key={index}>
+              <text
+                x={legendCell}
+                y={line * legendCell * legendSpacing}
+                fontSize={legendCell}
+                dominantBaseline="central"
+                fill="#808080"
+              >
+                {key}
+              </text>
+              <text
+                x={legendCell * 5}
+                y={line * legendCell * legendSpacing}
+                fontSize={legendCell}
+                dominantBaseline="central"
+              >
+                {truncate(value, { length: 20 })}
+              </text>
+            </Fragment>
+          ))}
+        </g>
+      </svg>
 
       {/* actions */}
       <Button
@@ -319,6 +300,7 @@ const nodeCircleLayer = "nodes";
 const nodeCircle = "node";
 const nodeLabelLayer = "labels";
 const nodeLabel = "label";
+const panel = "panel";
 
 /** TYPES */
 
@@ -378,11 +360,17 @@ const simulation = d3
 
 /** update simulation data */
 const updateSimulation = () => {
+  /** if nodes/links added/removed */
+  if (
+    simulation.nodes().length !== nodes.length ||
+    spring.links().length !== links.length
+  )
+    /** restart simulation */
+    simulation.alpha(1).restart();
+
   /** update data */
   simulation.nodes(nodes);
   spring.links(links);
-  /** reheat simulation */
-  simulation.alpha(2).restart();
 };
 
 /** create/remove link lines */
@@ -392,7 +380,25 @@ const updateLinkLines = () =>
     .selectAll<SVGLineElement, Link>("." + linkLine)
     .data(links)
     .join("line")
-    .attr("class", linkLine);
+    .attr("class", linkLine)
+    .attr("opacity", (d) => (isLinkSelected(d) === false ? 0.1 : 1))
+    .attr("stroke", (d) => (isLinkSelected(d) ? "#ba3960" : ""));
+
+/** get if link connected to selected node */
+const isLinkSelected = (link: Link) => {
+  const selected = getDefaultStore().get(selectedNode);
+  return (
+    getLinkSource(link) !== selected?.entrez &&
+    getLinkTarget(link) !== selected?.entrez
+  );
+};
+
+/** get link source id */
+const getLinkSource = (link: Link) =>
+  typeof link.source === "object" ? link.source.entrez : link.source;
+/** get link target id */
+const getLinkTarget = (link: Link) =>
+  typeof link.target === "object" ? link.target.entrez : link.target;
 
 /** create/remove node circles */
 const updateNodeCircles = () =>
@@ -407,12 +413,10 @@ const updateNodeCircles = () =>
       lerp(d.rank, 1, nodes.length + 1, nodeRadius, nodeRadius / 2),
     )
     .attr("fill", (d) => nodeColors[d.classLabel])
-    .on("click", function (event, d) {
-      /** select node */
-      clearSelected();
-      this.setAttribute("data-selected", "");
-      getDefaultStore().set(selectedNode, d);
-    });
+    .attr("stroke", (d) =>
+      d.entrez === getDefaultStore().get(selectedNode)?.entrez ? "#000000" : "",
+    )
+    .on("click", (event, d) => getDefaultStore().set(selectedNode, d));
 
 /** create/remove node labels */
 const updateNodeLabels = () =>
@@ -423,14 +427,6 @@ const updateNodeLabels = () =>
     .join("text")
     .attr("class", nodeLabel)
     .text((d) => d.entrez);
-
-/** unset selected node */
-const clearSelected = () => {
-  getDefaultStore().set(selectedNode, null);
-  document
-    .querySelectorAll("." + nodeCircle + "[data-selected]")
-    .forEach((el) => el.removeAttribute("data-selected"));
-};
 
 /** ON SIMULATION TICK */
 
@@ -547,3 +543,27 @@ const dragHandler = d3
     d.fx = null;
     d.fy = null;
   });
+
+/** MISC */
+
+/** fit background rectangle to fit contents of panel */
+const fitPanel = (el: SVGRectElement) => {
+  if (!el) return;
+
+  /** don't consider bg in contents */
+  el.removeAttribute("x");
+  el.removeAttribute("y");
+  el.removeAttribute("width");
+  el.removeAttribute("height");
+
+  /** get size of contents */
+  const { x, y, width, height } = (
+    el.parentElement as unknown as SVGGElement
+  ).getBBox();
+
+  /** auto-fit bg to content */
+  el.setAttribute("x", String(x - legendCell * 1.2));
+  el.setAttribute("y", String(y - legendCell * 1.2));
+  el.setAttribute("width", String(width + legendCell * 2));
+  el.setAttribute("height", String(height + legendCell * 2));
+};

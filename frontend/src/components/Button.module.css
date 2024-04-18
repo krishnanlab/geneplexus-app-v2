@@ -19,6 +19,7 @@
 }
 
 .hollow {
+  padding: 5px;
   color: var(--accent);
 }
 

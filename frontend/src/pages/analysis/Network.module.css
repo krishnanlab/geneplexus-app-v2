@@ -1,29 +1,5 @@
-.panels {
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  margin: 20px 0;
-  gap: 40px;
-}
-
-.panel {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
 .svg {
-  width: 100%;
-  height: min(800px, 80vh);
+  height: min(800px, 75vh);
+  background: var(--white);
   box-shadow: var(--shadow);
-}
-
-@media (max-width: 800px) {
-  .panels {
-    grid-template-columns: 1fr;
-  }
-}
-
-.node[data-selected] {
-  stroke-width: 1px;
-  stroke: var(--dark-gray);
 }

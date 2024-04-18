@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { FaBeer } from "react-icons/fa";
 import {
-  FaArrowUp,
   FaDna,
   FaEye,
   FaFish,
@@ -10,6 +9,7 @@ import {
   FaPerson,
   FaPlus,
   FaTable,
+  FaUpload,
   FaWorm,
 } from "react-icons/fa6";
 import { GiFly, GiRat } from "react-icons/gi";
@@ -242,6 +242,7 @@ const NewAnalysis = () => {
           <Button
             text="Example"
             icon={<FaLightbulb />}
+            design="hollow"
             onClick={() => setInputGenes(example[speciesTrain])}
             tooltip="Try some example genes for this species"
           />
@@ -250,7 +251,8 @@ const NewAnalysis = () => {
             <UploadButton
               accept="text/plain, text/csv, text/tsv, text/tab-separated-values"
               text="Upload"
-              icon={<FaArrowUp />}
+              icon={<FaUpload />}
+              design="hollow"
               onUpload={async (file, filename) => {
                 const text = await file.text();
                 setInputGenes(text);

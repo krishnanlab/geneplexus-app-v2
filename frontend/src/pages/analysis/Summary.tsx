@@ -24,7 +24,7 @@ const Summary = ({ results }: Props) => {
                 If number of genes in positive class &gt; 15, reports fold
                 change of area under precision-recall curve (auPRC) over prior
                 auPRC expected by random chance. For example, value of 1
-                indicates that model performs twice as good as random ranking of
+                indicates that model performs twice as well as random ranking of
                 genes.
               </div>
             </>

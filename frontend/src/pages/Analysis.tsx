@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { BiSolidCopy } from "react-icons/bi";
+import { BiCopy } from "react-icons/bi";
 import {
   FaChartBar,
   FaDna,
@@ -11,12 +11,7 @@ import { LuLightbulb } from "react-icons/lu";
 import { PiGraphBold } from "react-icons/pi";
 import { useLocation } from "react-router";
 import { submitAnalysis } from "@/api/api";
-import {
-  convertAnalysisInputs,
-  convertAnalysisResults,
-  type _AnalysisResults,
-  type AnalysisInputs,
-} from "@/api/types";
+import { type Analysis, type AnalysisInputs } from "@/api/types";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Heading from "@/components/Heading";
@@ -48,17 +43,15 @@ const Analysis = () => {
     reset: resetQuery,
   } = useQuery(async () => await submitAnalysis(stateInput!), stateInput);
 
-  /** upload results */
-  const [upload, setUpload] = useState<_AnalysisResults>();
-  const uploadInput = upload ? convertAnalysisInputs(upload.inputs) : undefined;
-  const uploadResults = upload ? convertAnalysisResults(upload) : undefined;
+  /** upload analysis */
+  const [upload, setUpload] = useState<Analysis>();
 
   /** submit query once on mounted, if appropriate */
-  if (!uploadInput && stateInput && queryStatus === "idle") runQuery();
+  if (!upload && stateInput && queryStatus === "idle") runQuery();
 
   /** "final" input and results */
-  const inputs = uploadInput ?? stateInput;
-  const results = uploadResults ?? queryData;
+  const inputs = upload?.inputs ?? stateInput;
+  const results = upload?.results ?? queryData;
 
   return (
     <>
@@ -70,14 +63,14 @@ const Analysis = () => {
         </Heading>
 
         <div className="flex-row gap-sm">
-          {results && (
+          {inputs && results && (
             <Button
               text="Download"
               icon={<FaDownload />}
               tooltip="Save analysis to your device"
               onClick={() =>
                 downloadJson(
-                  results,
+                  { inputs, results },
                   inputs?.name ||
                     window.prompt("Choose a filename:") ||
                     "analysis",
@@ -93,7 +86,7 @@ const Analysis = () => {
             onUpload={async (file, filename) => {
               const text = await file.text();
               try {
-                const json = JSON.parse(text) as _AnalysisResults;
+                const json = JSON.parse(text) as Analysis;
                 json.inputs.name ??= filename;
                 setUpload(json);
                 resetQuery();
@@ -144,7 +137,7 @@ const Analysis = () => {
 
                 <Tab
                   text="Similarities"
-                  icon={<BiSolidCopy />}
+                  icon={<BiCopy />}
                   tooltip="Similarity of input genes with biological processes and diseases"
                 >
                   <Similarities results={results} />
