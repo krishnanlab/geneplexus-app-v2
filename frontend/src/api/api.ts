@@ -9,8 +9,8 @@ import {
   type Species,
 } from "@/api/types";
 
-/** convert input list of genes into entrez */
-export const convertGeneIds = async (
+/** check input list of genes. convert to entrez, check if in-network, etc. */
+export const checkGenes = async (
   genes: string[],
   species: Species = "Human",
 ) => {
@@ -25,7 +25,7 @@ export const convertGeneIds = async (
   return convertConvertIds(response);
 };
 
-/** submit analysis */
+/** submit full analysis */
 export const submitAnalysis = async (input: AnalysisInputs) => {
   const headers = new Headers();
   headers.append("Content-Type", "application/json");

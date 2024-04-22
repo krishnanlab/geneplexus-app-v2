@@ -1,6 +1,10 @@
 import functions_framework
 import geneplexus
 import traceback
+from flask import current_app as app
+from flask_compress import Compress
+
+Compress(app)
 
 
 @functions_framework.http

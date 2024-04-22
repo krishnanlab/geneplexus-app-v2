@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BiCopy } from "react-icons/bi";
 import {
   FaChartBar,
@@ -46,8 +46,10 @@ const Analysis = () => {
   /** upload analysis */
   const [upload, setUpload] = useState<Analysis>();
 
-  /** submit query once on mounted, if appropriate */
-  if (!upload && stateInput && queryStatus === "idle") runQuery();
+  useEffect(() => {
+    /** submit query once on mounted, if appropriate */
+    if (!upload && stateInput && queryStatus === "empty") runQuery();
+  }, [upload, stateInput, queryStatus, runQuery]);
 
   /** "final" input and results */
   const inputs = upload?.inputs ?? stateInput;
@@ -100,7 +102,7 @@ const Analysis = () => {
 
       {inputs && <Inputs inputs={inputs} />}
 
-      {(!!results || queryStatus !== "idle") && (
+      {((inputs && results) || queryStatus !== "empty") && (
         <Section>
           <Heading level={2} icon={<FaChartBar />}>
             Results

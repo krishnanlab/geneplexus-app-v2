@@ -31,18 +31,17 @@ export const useMutation = (
 export const useQuery = <Data>(
   func: () => Promise<Data>,
   dependencies: unknown,
-  auto = false,
 ) => {
-  /** status */
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "error" | "success"
-  >("idle");
-
-  /** current data */
-  const [data, setData] = useState<Data>();
-
-  /** cache key */
+  /** unique key based on dependencies */
   const key = JSON.stringify(dependencies);
+  const [state, setState] = useState<{
+    /** current status */
+    status: "empty" | "loading" | "error" | "success";
+    /** current data */
+    data?: Data;
+    /** dependencies corresponding with current data */
+    key?: string;
+  }>({ status: "empty" });
 
   /** cache store for this query */
   const cache = useRef(new Map<typeof dependencies, Data>());
@@ -50,20 +49,20 @@ export const useQuery = <Data>(
   /** keep track of latest query function run */
   const latest = useRef(Symbol());
 
-  /** query function */
   const query = useCallback(async () => {
     try {
       /** unique id for current query function run */
       const current = Symbol();
       latest.current = current;
 
-      /** account for react strict mode double render */
-      await sleep();
-      if (current !== latest.current) return console.debug("Double render");
+      /**
+       * account for rapid successive queries (e.g. react strict mode double
+       * render)
+       */
+      await sleep(10);
+      if (current !== latest.current) return console.debug("Rapid query");
 
-      /** reset state */
-      setStatus("loading");
-      setData(undefined);
+      setState({ status: "loading" });
 
       /** check if data already cached */
       const cached = cache.current.get(key);
@@ -75,28 +74,36 @@ export const useQuery = <Data>(
       if (!cached) cache.current.set(key, result);
 
       /** if this query function run is still the latest */
-      if (current === latest.current) {
-        setData(result);
-        setStatus("success");
-      } else {
-        console.debug("Stale query");
-      }
+      if (current === latest.current)
+        setState({ status: "success", data: result, key });
+      else console.debug("Stale query");
     } catch (error) {
       console.error(error);
-      setStatus("error");
+      setState({ status: "error" });
     }
   }, [func, key]);
 
-  /** re-run query function automatically */
-  useEffect(() => {
-    if (auto) query();
-  }, [auto, query, key]);
+  const reset = useCallback(() => {
+    setState({ status: "empty" });
+  }, []);
 
-  /** reset data and status */
-  const reset = () => {
-    setData(undefined);
-    setStatus("idle");
+  /**
+   * if current dependencies don't match those which determined current data,
+   * reset
+   */
+  if (state.key && key !== state.key) reset();
+
+  return {
+    /**
+     * query function. only run inside useEffect:
+     * https://react.dev/reference/react/useRef#caveats
+     */
+    query,
+    /** reset data and status */
+    reset,
+    /** current status */
+    status: state.status,
+    /** current data */
+    data: state.data,
   };
-
-  return { query, data, status, reset };
 };

@@ -96,14 +96,14 @@ const Select = <O extends Option>({
         onValueChange: (details) => {
           if (multi)
             onChange?.(
-              details.items.map((item) => item.id),
-              details.items.length === 0
+              details.value,
+              details.value.length === 0
                 ? "none"
-                : details.items.length === options.length
+                : details.value.length === options.length
                   ? "all"
-                  : details.items.length,
+                  : details.value.length,
             );
-          else details.items[0] && onChange?.(details.items[0].id);
+          else details.value[0] && onChange?.(details.value[0]);
         },
       },
     },
@@ -114,23 +114,18 @@ const Select = <O extends Option>({
 
   /** label to show in button trigger */
   let selectedLabel = "";
-  const selected = api.selectedItems;
-  const count = [selected].flat().length;
-  if (count === 0) selectedLabel = "None";
-  else if (count === 1) selectedLabel = [selected].flat()[0]?.text || "";
-  else if (count === options.length) selectedLabel = "All";
-  else selectedLabel = count + " selected";
+  if (api.value.length === 0) selectedLabel = "None";
+  else if (api.value.length === 1)
+    selectedLabel =
+      options.find((option) => option.id === api.value[0])?.text || "";
+  else if (api.value.length === options.length) selectedLabel = "All";
+  else selectedLabel = api.value.length + " selected";
 
   /** check icon */
   const Check = multi ? FaCheck : VscCircleFilled;
 
   /** all selected */
   const allSelected = api.selectedItems.length === options.length;
-
-  /** count number of filled columns in options */
-  let cols = 2;
-  if (options.some((option) => option.info)) cols++;
-  if (options.some((option) => option.icon)) cols++;
 
   /** if single, auto-select first option if value not in options anymore */
   useEffect(() => {
@@ -185,23 +180,17 @@ const Select = <O extends Option>({
                     key={index}
                     {...api.getItemProps({ item: option })}
                     className={classes.option}
-                    style={{
-                      ...api.contentProps.style,
-                      gridTemplateColumns: ["30px", "2fr", "1fr", "30px"]
-                        .slice(0, cols)
-                        .join(" "),
-                    }}
                   >
                     <Check
                       {...api.getItemIndicatorProps({ item: option })}
                       className={classes.check}
                     />
                     <span className={classes.text}>{option.text}</span>
-                    {option.info && (
-                      <span className={classNames(classes.info, "secondary")}>
-                        {option.info}
-                      </span>
-                    )}
+
+                    <span className={classNames(classes.info, "secondary")}>
+                      {option.info}
+                    </span>
+
                     {option.icon &&
                       cloneElement(option.icon, {
                         className: classNames(classes.icon, "secondary"),

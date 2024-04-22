@@ -15,7 +15,7 @@ import {
 import { GiFly, GiRat } from "react-icons/gi";
 import { useNavigate } from "react-router";
 import { useDebounce } from "use-debounce";
-import { convertGeneIds } from "@/api/api";
+import { checkGenes } from "@/api/api";
 import type {
   AnalysisInputs,
   GenesetContext,
@@ -141,21 +141,21 @@ const NewAnalysis = () => {
 
   /** gene id conversion data */
   const {
-    data: geneConversionData,
-    status: geneConversionStatus,
-    query: runConvertGeneIds,
+    data: checkGenesData,
+    status: checkGenesStatus,
+    query: runCheckGenes,
   } = useQuery(
     async () =>
       splitInputGenes.length
-        ? await convertGeneIds(splitInputGenes, speciesTrain)
+        ? await checkGenes(splitInputGenes, speciesTrain)
         : undefined,
     [splitInputGenes, speciesTrain],
   );
 
-  /** scroll down to review section after entering genes */
+  /** scroll down to check section after entering genes */
   useEffect(() => {
-    if (geneConversionStatus !== "idle") scrollTo("#review-genes");
-  }, [geneConversionStatus]);
+    if (checkGenesStatus !== "empty") scrollTo("#check-genes");
+  }, [checkGenesStatus]);
 
   /** analysis name */
   const [name, setName] = useState("");
@@ -204,6 +204,11 @@ const NewAnalysis = () => {
   )
     toast("DisGeNet only supports Human genes.", "warning", "warn2");
 
+  /** auto-select species */
+  useEffect(() => {
+    setSpeciesTest(speciesTrain);
+  }, [speciesTrain]);
+
   return (
     <>
       <Meta title="New Analysis" />
@@ -232,9 +237,10 @@ const NewAnalysis = () => {
         <div className="flex-row gap-sm">
           <Select
             label="Species"
-            tooltip="Species to lookup genes against and train model with. May be limited by parameter choices below."
+            tooltip="Species to lookup genes against and train model with."
             layout="horizontal"
             options={filteredSpeciesOptions}
+            width={120}
             value={speciesTrain}
             onChange={setSpeciesTrain}
           />
@@ -262,34 +268,55 @@ const NewAnalysis = () => {
             {filename}
           </div>
         </div>
-
-        <Button
-          text="Enter Genes"
-          icon={<FaPaperPlane />}
-          tooltip="Converts and checks your genes in preparation for analysis"
-          onClick={() => splitInputGenes.length && runConvertGeneIds()}
-        />
       </Section>
 
       <Section>
         <Heading level={2} icon="2">
-          Review Genes
+          Check Genes
         </Heading>
 
-        {geneConversionData && (
+        {checkGenesStatus === "empty" && (
+          <>
+            <p className="narrow">
+              Check that your genes are valid and in our networks before
+              submitting a full analysis. Optional but recommended, since
+              analyses can take some time.
+            </p>
+            <Button
+              text="Check Genes"
+              icon={<FaPaperPlane />}
+              onClick={() =>
+                splitInputGenes.length
+                  ? runCheckGenes()
+                  : toast("Enter some genes")
+              }
+            />
+          </>
+        )}
+
+        {checkGenesStatus === "loading" && (
+          <Alert type="loading">
+            Checking {formatNumber(splitInputGenes.length)} genes
+          </Alert>
+        )}
+        {checkGenesStatus === "error" && (
+          <Alert type="error">Error checking genes</Alert>
+        )}
+
+        {checkGenesData && (
           <Tabs>
             <Tab text="Summary" icon={<FaEye />} className={classes.summary}>
               <Mark type="success">
                 <strong className={classes.success}>
-                  {formatNumber(geneConversionData.success)} genes
+                  {formatNumber(checkGenesData.success)} genes
                 </strong>{" "}
                 converted to Entrez
               </Mark>
 
-              {!!geneConversionData.error && (
+              {!!checkGenesData.error && (
                 <Mark type="error">
                   <strong className={classes.error}>
-                    {formatNumber(geneConversionData.error)} genes
+                    {formatNumber(checkGenesData.error)} genes
                   </strong>{" "}
                   couldn't be converted
                 </Mark>
@@ -297,7 +324,7 @@ const NewAnalysis = () => {
 
               <span className={classes.divider} />
 
-              {geneConversionData.summary.map((row, index) => (
+              {checkGenesData.summary.map((row, index) => (
                 <Mark key={index} icon={<FaDna />}>
                   <strong>{formatNumber(row.positiveGenes)} genes</strong> in{" "}
                   {row.network} ({formatNumber(row.totalGenes, true)})
@@ -336,21 +363,11 @@ const NewAnalysis = () => {
                     filterType: "boolean",
                   },
                 ]}
-                rows={geneConversionData.table}
+                rows={checkGenesData.table}
               />
             </Tab>
           </Tabs>
         )}
-
-        {geneConversionStatus === "loading" && (
-          <Alert type="loading">
-            Converting {formatNumber(splitInputGenes.length)} genes to Entrez
-          </Alert>
-        )}
-        {geneConversionStatus === "error" && (
-          <Alert type="error">Error converting genes to Entrez</Alert>
-        )}
-        {geneConversionStatus === "idle" && "No genes entered"}
       </Section>
 
       <Section>
@@ -361,10 +378,17 @@ const NewAnalysis = () => {
         <Select
           label="Species"
           layout="vertical"
-          options={filteredSpeciesOptions}
+          options={filteredSpeciesOptions.map((option) => ({
+            ...option,
+            ...(option.id === speciesTrain && {
+              text: `Same as above`,
+              info: option.text,
+            }),
+          }))}
           value={speciesTest}
           onChange={setSpeciesTest}
-          tooltip="The species for which model predictions will be made. May be limited by parameter choices below."
+          width={180}
+          tooltip="Species for which model predictions will be made. If different from species selected above, model results will be translated into this species."
         />
 
         <div className={classes.parameters}>
@@ -373,14 +397,14 @@ const NewAnalysis = () => {
             onChange={setNetwork}
             label="Network"
             options={networkOptions}
-            tooltip="The network that the machine learning features are from and which edge list is used to make the final graph."
+            tooltip="Network that machine learning features are from and which edge list is used to make final graph."
           />
           <Radios
             value={genesetContext}
             onChange={setGenesetContext}
             label="Geneset Context"
             options={genesetContextOptions}
-            tooltip="Source used to select negative genes and which sets to compare the trained model to"
+            tooltip="Source used to select negative genes and which sets to compare  trained model to"
           />
         </div>
       </Section>
