@@ -61,13 +61,13 @@ const Button = forwardRef(
     /** contents of main element */
     const children = flip ? (
       <>
-        {text}
         {icon}
+        {text}
       </>
     ) : (
       <>
-        {text}
         {icon}
+        {text}
       </>
     );
 
