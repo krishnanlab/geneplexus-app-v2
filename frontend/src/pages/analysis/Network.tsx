@@ -38,12 +38,14 @@ const springStrength = 1;
 const springDistance = 40;
 /** node circle fill colors (keep light to allow dark text) */
 const nodeColors: Record<Node["classLabel"], string> = {
-  Positive: "#bbf7d0",
-  Negative: "#ffedd5",
-  Neutral: "#e2e8f0",
+  Positive: "#b3e2ff",
+  Negative: "#ffcada",
+  Neutral: "#e8e8e8",
 };
 /** link line stroke color */
 const linkColor = "#808080";
+/** selected link line stroke color */
+const selectedLinkColor = "#ba3960";
 /** legend square/text/other size */
 const legendCell = 15;
 /** legend line spacing factor */
@@ -95,7 +97,11 @@ const Network = ({ inputs, results }: Props) => {
       /** init new node position in spiral based on rank */
       const angle = (360 / 20) * node.rank;
       const dist = (nodeRadius / 4) * node.rank ** 0.75;
-      nodes.push({ ...node, x: sin(angle) * dist, y: cos(angle) * dist });
+      nodes.push({
+        ...node,
+        x: sin(angle) * dist,
+        y: cos(angle) * dist,
+      });
     }
 
   /** remove nodes from mutable list */
@@ -305,7 +311,7 @@ const panel = "panel";
 /** TYPES */
 
 type Node = d3.SimulationNodeDatum &
-  AnalysisResults["network"]["nodes"][number];
+  AnalysisResults["network"]["nodes"][number] & { links?: number };
 type Link = d3.SimulationLinkDatum<Node>;
 
 /** MUTABLE GLOBAL LISTS/OBJECTS FOR D3 */
@@ -328,10 +334,18 @@ const collide = d3.forceCollide().radius(collideDistance / 2);
 
 /** pushes/pulls nodes together based on links */
 const spring = d3
-  .forceLink()
-  .strength(springStrength)
+  .forceLink<Node, Link>()
+  /** https://d3js.org/d3-force/link#link_strength */
+  .strength((d) => {
+    if (typeof d.source !== "object" || typeof d.target !== "object")
+      return springStrength;
+    else
+      return (
+        springStrength / Math.min(d.source.links || 1, d.target.links || 1)
+      );
+  })
   .distance(springDistance)
-  .id((d) => (d as Node).entrez);
+  .id((d) => d.entrez);
 
 /** pull nodes toward a center like gravity */
 const attraction = d3
@@ -370,6 +384,14 @@ const updateSimulation = () => {
 
   /** update data */
   simulation.nodes(nodes);
+  /** count number of links on each node */
+  nodes.forEach((node) => {
+    node.links = links.filter(
+      (link) =>
+        getLinkSource(link) === node.entrez ||
+        getLinkTarget(link) === node.entrez,
+    ).length;
+  });
   spring.links(links);
 };
 
@@ -382,14 +404,15 @@ const updateLinkLines = () =>
     .join("line")
     .attr("class", linkLine)
     .attr("opacity", (d) => (isLinkSelected(d) === false ? 0.1 : 1))
-    .attr("stroke", (d) => (isLinkSelected(d) ? "#ba3960" : ""));
+    .attr("stroke", (d) => (isLinkSelected(d) ? selectedLinkColor : ""));
 
 /** get if link connected to selected node */
 const isLinkSelected = (link: Link) => {
   const selected = getDefaultStore().get(selectedNode);
+  if (!selected) return null;
   return (
-    getLinkSource(link) !== selected?.entrez &&
-    getLinkTarget(link) !== selected?.entrez
+    getLinkSource(link) === selected.entrez ||
+    getLinkTarget(link) === selected.entrez
   );
 };
 
@@ -435,10 +458,10 @@ const positionLinkLines = () =>
   svg
     ?.select("." + linkLineLayer)
     .selectAll<SVGLineElement, Link>("." + linkLine)
-    .attr("x1", (d) => (d.source as Node).x || 0)
-    .attr("y1", (d) => (d.source as Node).y || 0)
-    .attr("x2", (d) => (d.target as Node).x || 0)
-    .attr("y2", (d) => (d.target as Node).y || 0);
+    .attr("x1", (d) => (typeof d.source === "object" ? d.source.x || 0 : 0))
+    .attr("y1", (d) => (typeof d.source === "object" ? d.source.y || 0 : 0))
+    .attr("x2", (d) => (typeof d.target === "object" ? d.target.x || 0 : 0))
+    .attr("y2", (d) => (typeof d.target === "object" ? d.target.y || 0 : 0));
 
 /** update node circle positions */
 const positionNodeCircles = () =>
