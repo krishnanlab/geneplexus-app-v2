@@ -96,6 +96,9 @@ jobs:
         run: |
           find ${{ inputs.func-src-dir }}
 
+      - if: runner.debug == '1'
+        uses: mxschmitt/action-tmate@v3
+        
       - name: Deploy function '${{ inputs.func-name }}' to GCP
         id: deploy
         run: |
