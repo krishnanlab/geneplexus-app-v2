@@ -669,7 +669,7 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
               />
               <NumberBox label="Age" name="age" />
               <Slider label="Cutoff" name="cutoff" />
-              <Slider label="Range" multi={true} name="range" width="100%" />
+              <Slider label="Range" multi={true} name="range" />
               <Radios
                 label="Order"
                 options={[
