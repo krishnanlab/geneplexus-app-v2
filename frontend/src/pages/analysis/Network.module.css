@@ -3,3 +3,8 @@
   background: var(--white);
   box-shadow: var(--shadow);
 }
+
+.node:focus {
+  stroke: var(--accent);
+  outline: none;
+}

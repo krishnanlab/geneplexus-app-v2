@@ -382,7 +382,7 @@ const Network = ({ inputs, results }: Props) => {
             zoom(d3.select(el));
             svg
               /** always prevent scroll on wheel, not just when at scale limit */
-              .on("wheel", (event) => event.preventDefault())
+              // .on("wheel", (event) => event.preventDefault())
               /** auto-fit on dbl click */
               .on("dblclick.zoom", () => {
                 fitZoom();
@@ -449,6 +449,7 @@ const Network = ({ inputs, results }: Props) => {
                     drag(d3.select(el).data([index]));
                   } else circleRefs.current.delete(index);
                 }}
+                className={classes.node}
                 r={lerp(
                   node.rank,
                   1,
@@ -458,7 +459,12 @@ const Network = ({ inputs, results }: Props) => {
                 )}
                 fill={nodeColors[node.classLabel]}
                 stroke={node.entrez === selectedNode?.entrez ? "#000000" : ""}
+                tabIndex={0}
                 onClick={() => setSelectedNode(node)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") setSelectedNode(node);
+                }}
+                aria-label={`Node rank ${node.rank}, ${node.symbol} ${node.name}, probability ${formatNumber(node.probability)}`}
               />
             ))}
           </g>
