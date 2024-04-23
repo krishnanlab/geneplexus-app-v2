@@ -94,7 +94,7 @@ const Network = ({ inputs, results }: Props) => {
 
   /** max # of nodes to display, in order of rank */
   const [maxNodes, setMaxNodes] = useState(
-    Math.min(hardMaxNodes, results.network.nodes.length),
+    Math.min(Math.floor(hardMaxNodes / 10), results.network.nodes.length),
   );
 
   /** min/max of probabilities */
@@ -401,7 +401,13 @@ const Network = ({ inputs, results }: Props) => {
           {/* links */}
           <g
             stroke={linkColor}
-            strokeWidth={lerp(links.length, 500, 1, 0.2, 1)}
+            strokeWidth={lerp(
+              links.length,
+              500,
+              0,
+              nodeRadius / 50,
+              nodeRadius / 10,
+            )}
             pointerEvents="none"
           >
             {links.map((link, index) => {
@@ -424,7 +430,7 @@ const Network = ({ inputs, results }: Props) => {
                         ? "transparent"
                         : ""
                   }
-                  strokeWidth={selected === true ? 1 : ""}
+                  strokeWidth={selected === true ? nodeRadius / 10 : ""}
                 />
               );
             })}
@@ -458,6 +464,10 @@ const Network = ({ inputs, results }: Props) => {
 
           {/* node labels */}
           <g
+            strokeWidth={nodeRadius / 5}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+            paintOrder="stroke"
             fontSize={nodeRadius / 1.5}
             textAnchor="middle"
             dominantBaseline="central"
@@ -470,6 +480,7 @@ const Network = ({ inputs, results }: Props) => {
                   if (el) labelRefs.current.set(index, el);
                   else labelRefs.current.delete(index);
                 }}
+                stroke={nodeColors[node.classLabel]}
               >
                 {(() => {
                   const label = node[labelKey];
@@ -535,7 +546,7 @@ const Network = ({ inputs, results }: Props) => {
       {/* controls */}
       <div className="flex-row gap-md">
         <Select
-          label="Node label"
+          label="Node labels"
           layout="horizontal"
           options={labelKeyOptions}
           value={labelKey}
