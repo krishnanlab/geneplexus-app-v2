@@ -16,7 +16,4 @@ jobs:
       func-entrypoint: "convert_ids"
       func-memory-mb: 1024
       func-data-gcs-url: "gs://geneplexus-func-data/convert-ids/convert-ids_data.tar.gz"
-    permissions:
-      contents: 'read'
-      id-token: 'write'
     secrets: inherit

@@ -44,10 +44,6 @@ on:
 jobs:
   deploy-cloud-func-helper:
     runs-on: 'ubuntu-latest'
-    permissions:
-      contents: 'read'
-      id-token: 'write'
-
     env:
       DATA_ARCHIVE_HASH: 'none'
 
