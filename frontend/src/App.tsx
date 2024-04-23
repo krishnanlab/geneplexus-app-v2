@@ -14,7 +14,6 @@ import {
   useMatches,
   useRouteLoaderData,
 } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import FloatButtons from "@/components/FloatButtons";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
@@ -57,9 +56,7 @@ const Layout = () => {
       <Header />
       <main>
         {toc && <TableOfContents />}
-        <QueryClientProvider client={queryClient}>
-          <Outlet />
-        </QueryClientProvider>
+        <Outlet />
       </main>
       <Footer />
       <Toasts />
@@ -121,9 +118,6 @@ const routes = [
 const router = createBrowserRouter(routes, {
   basename: import.meta.env.BASE_URL,
 });
-
-/** query client */
-const queryClient = new QueryClient();
 
 /** prefix for localStorage keys */
 export const storageKey = "geneplexus-";

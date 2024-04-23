@@ -12,7 +12,6 @@
     "clean": "rm -rf node_modules dist bun.lockb && bun pm cache rm"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.29.0",
     "@tanstack/react-table": "^8.15.3",
     "@zag-js/checkbox": "^0.45.0",
     "@zag-js/number-input": "^0.45.0",
@@ -28,7 +27,6 @@
     "csv-stringify": "^6.4.6",
     "d3": "^7.9.0",
     "javascript-time-ago": "^2.5.9",
-    "jotai": "^2.8.0",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
