@@ -186,9 +186,6 @@ const Network = ({ inputs, results }: Props) => {
   const fitZoom = useCallback(() => {
     if (!svgRef.current || !zoomRef.current) return;
 
-    /** turn auto-fit on */
-    setAutoFit(true);
-
     /** get svg size */
     const container = svgRef.current.getBoundingClientRect();
     /** get size of svg contents */
@@ -347,6 +344,7 @@ const Network = ({ inputs, results }: Props) => {
   const svgSizeDeep = JSON.stringify(svgSize);
   useEffect(() => {
     fitZoom();
+    setAutoFit(true);
   }, [svgSizeDeep, fitZoom]);
 
   return (
@@ -386,7 +384,10 @@ const Network = ({ inputs, results }: Props) => {
               /** always prevent scroll on wheel, not just when at scale limit */
               .on("wheel", (event) => event.preventDefault())
               /** auto-fit on dbl click */
-              .on("dblclick.zoom", fitZoom);
+              .on("dblclick.zoom", () => {
+                fitZoom();
+                setAutoFit(true);
+              });
           }
         }}
         className={classNames("expanded", classes.svg)}
@@ -555,7 +556,10 @@ const Network = ({ inputs, results }: Props) => {
         <CheckBox
           label="Auto-fit"
           value={autoFit}
-          onChange={setAutoFit}
+          onChange={(value) => {
+            if (value) fitZoom();
+            setAutoFit(value);
+          }}
           tooltip="Or double-click network background"
         />
         <Button
