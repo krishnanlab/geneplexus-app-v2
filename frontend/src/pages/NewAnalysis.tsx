@@ -116,22 +116,16 @@ const NewAnalysis = () => {
   const [filename, setFilename] = useState("");
 
   /** selected species */
-  const [speciesTrain, setSpeciesTrain] = useState<
-    (typeof speciesOptions)[number]["id"]
-  >(speciesOptions[0]!.id);
-  const [speciesTest, setSpeciesTest] = useState<
-    (typeof speciesOptions)[number]["id"]
-  >(speciesOptions[0]!.id);
+  const [speciesTrain, setSpeciesTrain] = useState(speciesOptions[0]!.id);
+  const [speciesTest, setSpeciesTest] = useState(speciesOptions[0]!.id);
 
   /** selected network type */
-  const [network, setNetwork] = useState<(typeof networkOptions)[number]["id"]>(
-    networkOptions[0]!.id,
-  );
+  const [network, setNetwork] = useState(networkOptions[0]!.id);
 
   /** selected geneset context */
-  const [genesetContext, setGenesetContext] = useState<
-    (typeof genesetContextOptions)[number]["id"]
-  >(genesetContextOptions[0]!.id);
+  const [genesetContext, setGenesetContext] = useState(
+    genesetContextOptions[0]!.id,
+  );
 
   /** update meta counts */
   networkOptions.forEach((option) => {

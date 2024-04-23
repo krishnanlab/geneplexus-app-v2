@@ -105,7 +105,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
   /** column visibility options for multi-select */
   const visibleOptions = cols.map(colToOption);
   /** visible columns */
-  const [visibleCols, setVisibleCols] = useState<Option["id"][]>(
+  const [visibleCols, setVisibleCols] = useState(
     cols
       .filter((col) => col.show === true || col.show === undefined)
       .map(colToOption)

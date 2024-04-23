@@ -6,7 +6,13 @@ import {
   useRef,
   useState,
 } from "react";
-import { FaDownload } from "react-icons/fa6";
+import {
+  FaAt,
+  FaBarcode,
+  FaDownload,
+  FaPercent,
+  FaRankingStar,
+} from "react-icons/fa6";
 import { useMeasure } from "react-use";
 import classNames from "classnames";
 import * as d3 from "d3";
@@ -14,6 +20,7 @@ import { clamp, cloneDeep, truncate } from "lodash";
 import type { AnalysisInputs, AnalysisResults } from "@/api/types";
 import Button from "@/components/Button";
 import CheckBox from "@/components/CheckBox";
+import Select, { type Option } from "@/components/Select";
 import Slider from "@/components/Slider";
 import { downloadSvg } from "@/util/download";
 import { lerp } from "@/util/math";
@@ -24,6 +31,8 @@ import classes from "./Network.module.css";
 
 /** PARAMS */
 
+/** hard limit on number of nodes */
+const hardMaxNodes = 500;
 /** min zoom (scale factor) */
 const minZoom = 0.2;
 /** lower zoom (scale factor) */
@@ -67,6 +76,13 @@ type LinkDatum = d3.SimulationLinkDatum<NodeDatum> & {
   targetIndex: number;
 };
 
+const labelKeyOptions: Option<keyof Node>[] = [
+  { id: "entrez", text: "Entrez", icon: <FaBarcode /> },
+  { id: "symbol", text: "Symbol", icon: <FaAt /> },
+  { id: "rank", text: "Rank", icon: <FaRankingStar /> },
+  { id: "probability", text: "Probability", icon: <FaPercent /> },
+] as const;
+
 const Network = ({ inputs, results }: Props) => {
   /** element refs */
   const svgRef = useRef<SVGSVGElement | null>(null);
@@ -78,7 +94,7 @@ const Network = ({ inputs, results }: Props) => {
 
   /** max # of nodes to display, in order of rank */
   const [maxNodes, setMaxNodes] = useState(
-    Math.min(100, results.network.nodes.length),
+    Math.min(hardMaxNodes, results.network.nodes.length),
   );
 
   /** min/max of probabilities */
@@ -94,6 +110,9 @@ const Network = ({ inputs, results }: Props) => {
 
   /** selected node */
   const [selectedNode, setSelectedNode] = useState<Node>();
+
+  /** node label key to display */
+  const [labelKey, setLabelKey] = useState(labelKeyOptions[0]!.id);
 
   /** nodes to display */
   const nodes = useMemo(
@@ -332,13 +351,13 @@ const Network = ({ inputs, results }: Props) => {
 
   return (
     <>
-      {/* filters/controls */}
+      {/* filters */}
       <div className="flex-row gap-md">
         <Slider
           label="Max nodes"
           layout="horizontal"
           min={1}
-          max={Math.min(100, results.network.nodes.length)}
+          max={Math.min(hardMaxNodes, results.network.nodes.length)}
           step={1}
           value={maxNodes}
           onChange={setMaxNodes}
@@ -351,12 +370,6 @@ const Network = ({ inputs, results }: Props) => {
           step={(probabilityExtent[1]! - probabilityExtent[0]!) / 100}
           value={minProbability}
           onChange={setMinProbability}
-        />
-        <CheckBox
-          label="Auto-fit"
-          value={autoFit}
-          onChange={setAutoFit}
-          tooltip="Or double-click network"
         />
       </div>
 
@@ -458,7 +471,12 @@ const Network = ({ inputs, results }: Props) => {
                   else labelRefs.current.delete(index);
                 }}
               >
-                {node.entrez}
+                {(() => {
+                  const label = node[labelKey];
+                  return typeof label === "number"
+                    ? formatNumber(label)
+                    : label;
+                })()}
               </text>
             ))}
           </g>
@@ -514,22 +532,37 @@ const Network = ({ inputs, results }: Props) => {
         </g>
       </svg>
 
-      {/* actions */}
-      <Button
-        icon={<FaDownload />}
-        text="SVG"
-        tooltip="Download visualization as SVG"
-        onClick={() => {
-          const element = svgRef.current;
-          if (!element) return;
-          const { width, height } = element.getBoundingClientRect();
-          downloadSvg(element, inputs.name, {
-            /** fit viewbox to client-dimensions */
-            viewBox: [0, 0, width, height].join(" "),
-            style: "font-family: sans-serif;",
-          });
-        }}
-      />
+      {/* controls */}
+      <div className="flex-row gap-md">
+        <Select
+          label="Node label"
+          layout="horizontal"
+          options={labelKeyOptions}
+          value={labelKey}
+          onChange={setLabelKey}
+        />
+        <CheckBox
+          label="Auto-fit"
+          value={autoFit}
+          onChange={setAutoFit}
+          tooltip="Or double-click network background"
+        />
+        <Button
+          icon={<FaDownload />}
+          text="SVG"
+          tooltip="Download visualization as SVG"
+          onClick={() => {
+            const element = svgRef.current;
+            if (!element) return;
+            const { width, height } = element.getBoundingClientRect();
+            downloadSvg(element, inputs.name, {
+              /** fit viewbox to client-dimensions */
+              viewBox: [0, 0, width, height].join(" "),
+              style: "font-family: sans-serif;",
+            });
+          }}
+        />
+      </div>
     </>
   );
 };
