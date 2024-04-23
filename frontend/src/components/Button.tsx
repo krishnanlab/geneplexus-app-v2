@@ -4,7 +4,7 @@ import type {
   ReactElement,
   ReactNode,
 } from "react";
-import { cloneElement, forwardRef } from "react";
+import { forwardRef } from "react";
 import classNames from "classnames";
 import { useForm } from "@/components/Form";
 import Link from "@/components/Link";
@@ -59,10 +59,17 @@ const Button = forwardRef(
     ref,
   ) => {
     /** contents of main element */
-    const children = [text, icon && cloneElement(icon, { className: "icon" })];
-
-    /** flip icon/text */
-    if (flip) children.reverse();
+    const children = flip ? (
+      <>
+        {icon}
+        {text}
+      </>
+    ) : (
+      <>
+        {icon}
+        {text}
+      </>
+    );
 
     /** class name string */
     const _class = classNames(className, classes.button, classes[design], {

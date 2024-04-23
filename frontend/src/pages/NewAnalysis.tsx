@@ -1,7 +1,7 @@
 import { Fragment, useEffect, useState } from "react";
+import { FaBeer } from "react-icons/fa";
 import {
   FaArrowUp,
-  FaBacteria,
   FaCheck,
   FaDna,
   FaEye,
@@ -17,7 +17,7 @@ import {
 import { GiFly, GiRat } from "react-icons/gi";
 import { useNavigate } from "react-router";
 import { useDebounce } from "use-debounce";
-import { convertGeneIds } from "@/api/input";
+import { convertGeneIds } from "@/api/api";
 import type { GenesetContext, Input, Network, Species } from "@/api/types";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
@@ -38,8 +38,14 @@ import { formatNumber } from "@/util/string";
 import meta from "./meta.json";
 import classes from "./NewAnalysis.module.css";
 
-const example =
-  "CASP3,CYP1A2,CYP1A1,NFE2L2,CYP2C19,CYP2D6,CYP7A1,NR1H4,TP53,CYP19A1";
+const example: Record<Species, string> = {
+  Human: "CASP3,CYP1A2,CYP1A1,NFE2L2,CYP2C19,CYP2D6,CYP7A1,NR1H4,TP53,CYP19A1",
+  Mouse: "Mpo,Inmt,Gnmt,Fos,Calr,Selenbp2,Rgn,Stat6,Etfa,Atp5f1b",
+  Fly: "SC35,Rbp1-like,x16,Rsf1,B52,norpA,SF2,Srp54k,Srp54,Rbp1",
+  Zebrafish: "upf1,dhx34,lsm1,xrn1,xrn2,lsm7,mrto4,pnrc2,lsm4,nbas",
+  Worm: "egl-26,cas-1,exc-5,gex-3,gex-2,sax-2,cas-2,mig-6,cap-2,rhgf-2",
+  Yeast: "KL1,GND1,GND2,ZWF1,TKL2,RKI1,RPE1,SOL4,TAL1,SOL3",
+};
 
 const speciesOptions: SelectOption<Species>[] = [
   { id: "Human", text: "Human", icon: <FaPerson /> },
@@ -47,7 +53,7 @@ const speciesOptions: SelectOption<Species>[] = [
   { id: "Fly", text: "Fly", icon: <GiFly /> },
   { id: "Zebrafish", text: "Zebrafish", icon: <FaFish /> },
   { id: "Worm", text: "Worm", icon: <FaWorm /> },
-  { id: "Yeast", text: "Yeast", icon: <FaBacteria /> },
+  { id: "Yeast", text: "Yeast", icon: <FaBeer /> },
 ] as const;
 
 const networkOptions: RadioOption<Network>[] = [
@@ -216,7 +222,8 @@ const NewAnalysis = () => {
           <Button
             text="Example"
             icon={<FaLightbulb />}
-            onClick={() => setGeneIds(example)}
+            onClick={() => setGeneIds(example[species])}
+            tooltip="Try some example genes for this species"
           />
 
           <div className="flex-row gap-sm">
@@ -238,7 +245,7 @@ const NewAnalysis = () => {
           text="Enter Genes"
           icon={<FaPaperPlane />}
           design="accent"
-          tooltip="Converts and checks your genes in preparation for analysis."
+          tooltip="Converts and checks your genes in preparation for analysis"
           onClick={() => splitGeneIds.length && runConvertGeneIds()}
         />
       </Section>
@@ -357,7 +364,7 @@ const NewAnalysis = () => {
             onChange={setGenesetContext}
             label="Geneset Context"
             options={genesetContextOptions}
-            tooltip="Source used to select negative genes and which sets to compare the trained model to."
+            tooltip="Source used to select negative genes and which sets to compare the trained model to"
           />
         </div>
 
@@ -367,7 +374,7 @@ const NewAnalysis = () => {
           options={filteredSpeciesOptions}
           value={species}
           onChange={setSpecies}
-          tooltip="The species for which model predictions will be made."
+          tooltip="The species for which model predictions will be made"
         />
       </Section>
 

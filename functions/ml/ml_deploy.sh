@@ -7,7 +7,7 @@ gcloud functions deploy gpz-ml \
     --runtime=python311 \
     --region=us-central1 \
     --source=. \
-    --entry-point=run_pipeline \
+    --entry-point=ml \
     --trigger-http \
     --allow-unauthenticated \
     --memory=8192MB \

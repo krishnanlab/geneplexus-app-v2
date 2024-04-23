@@ -10,3 +10,5 @@ __pycache__/
 # ignore sensitive items
 .env
 /.keys/*
+
+data
