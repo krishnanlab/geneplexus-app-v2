@@ -27,10 +27,6 @@ import { lerp } from "@/util/math";
 import { formatNumber } from "@/util/string";
 import classes from "./Network.module.css";
 
-/** only one of these components can be rendered at a time (singleton) */
-
-/** PARAMS */
-
 /** hard limit on number of nodes */
 const hardMaxNodes = 500;
 /** min zoom (scale factor) */
