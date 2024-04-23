@@ -98,14 +98,15 @@ jobs:
 
       - name: Deploy function '${{ inputs.func-name }}' to GCP
         id: deploy
-        uses: 'google-github-actions/deploy-cloud-functions@v2'
-        with:
-          name: ${{ inputs.func-name }}
-          runtime: ${{ inputs.func-runtime }}
-          entry_point: ${{ inputs.func-entrypoint }}
-          memory_mb: ${{ inputs.func-memory-mb }}
-          source_dir: ${{ inputs.func-src-dir }}
-          ingress_settings: "ALLOW_ALL"
-          project_id: ${{ inputs.project-id }}
-          region: ${{ inputs.region }}
-          service_account_email: ${{ inputs.func-svc-acct }}
+        run: |
+          gcloud functions deploy ${{ inputs.func-name }} \
+              --gen2 \
+              --runtime=${{ inputs.func-runtime }} \
+              --project=${{ inputs.project-id }} \
+              --region=${{ inputs.region }} \
+              --source=${{ inputs.func-src-dir }} \
+              --entry-point=${{ inputs.func-entrypoint }} \
+              --trigger-http \
+              --allow-unauthenticated \
+              --memory=${{ inputs.func-memory-mb }}MB \
+              --service-account=${{ inputs.func-svc-acct }}
