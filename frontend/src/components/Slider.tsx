@@ -69,18 +69,17 @@ const Slider = ({
       /** link field to form */
       name,
       form: useForm(),
-      minStepsBetweenThumbs: _step,
-      /** slider props */
-      min: _min,
-      max: _max,
-      step: _step,
-
       /** when focused thumb changes */
       onFocusChange: (details) => setFocused(details.focusedIndex),
     }),
     /** https://zagjs.com/overview/programmatic-control#controlled-usage-in-reacts */
     {
       context: {
+        /** slider props */
+        minStepsBetweenThumbs: _step,
+        min: _min,
+        max: _max,
+        step: _step,
         /** initialize value state */
         value: multi
           ? value === undefined

@@ -1,16 +1,22 @@
-import { Fragment, useEffect, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { FaDownload } from "react-icons/fa6";
 import { useMeasure } from "react-use";
 import classNames from "classnames";
 import * as d3 from "d3";
-import { atom, getDefaultStore, useAtom } from "jotai";
 import { clamp, cloneDeep, truncate } from "lodash";
 import type { AnalysisInputs, AnalysisResults } from "@/api/types";
 import Button from "@/components/Button";
 import CheckBox from "@/components/CheckBox";
 import Slider from "@/components/Slider";
 import { downloadSvg } from "@/util/download";
-import { cos, lerp, sin } from "@/util/math";
+import { lerp } from "@/util/math";
 import { formatNumber } from "@/util/string";
 import classes from "./Network.module.css";
 
@@ -33,8 +39,6 @@ const simulationDecay = 0.2;
 /** how much nodes attract each other */
 const attractionStrength = 1;
 /** equilibrium distance between linked nodes */
-const springStrength = 1;
-/** equilibrium distance between linked nodes */
 const springDistance = 40;
 /** node circle fill colors (keep light to allow dark text) */
 const nodeColors: Record<Node["classLabel"], string> = {
@@ -43,7 +47,7 @@ const nodeColors: Record<Node["classLabel"], string> = {
   Neutral: "#e8e8e8",
 };
 /** link line stroke color */
-const linkColor = "#808080";
+const linkColor = "#a0a0a0";
 /** selected link line stroke color */
 const selectedLinkColor = "#ba3960";
 /** legend square/text/other size */
@@ -56,109 +60,275 @@ type Props = {
   results: AnalysisResults;
 };
 
+type Node = AnalysisResults["network"]["nodes"][number];
+type NodeDatum = d3.SimulationNodeDatum & { id: string };
+type LinkDatum = d3.SimulationLinkDatum<NodeDatum> & {
+  sourceIndex: number;
+  targetIndex: number;
+};
+
 const Network = ({ inputs, results }: Props) => {
+  /** element refs */
+  const svgRef = useRef<SVGSVGElement | null>(null);
+  const zoomRef = useRef<SVGGElement | null>(null);
+  const legendRef = useRef<SVGGElement | null>(null);
+  const linkRefs = useRef<Map<number, SVGLineElement>>(new Map());
+  const circleRefs = useRef<Map<number, SVGCircleElement>>(new Map());
+  const labelRefs = useRef<Map<number, SVGTextElement>>(new Map());
+
+  /** max # of nodes to display, in order of rank */
+  const [maxNodes, setMaxNodes] = useState(
+    Math.min(100, results.network.nodes.length),
+  );
+
   /** min/max of probabilities */
   const probabilityExtent = d3.extent(
     results.network.nodes.map((node) => node.probability),
   );
 
-  /** filters */
-  const [maxNodes, setMaxNodes] = useState(
-    Math.min(100, results.network.nodes.length),
-  );
+  /** don't display nodes below this probability */
   const [minProbability, setMinProbability] = useState(probabilityExtent[0]!);
 
-  /** options */
-  const [getAutoFit, setAutoFit] = useAtom(autoFit);
+  /** whether to auto-fit camera to contents every frame */
+  const [autoFit, setAutoFit] = useState(false);
 
   /** selected node */
-  const [getSelectedNode, setSelectedNode] = useAtom(selectedNode);
+  const [selectedNode, setSelectedNode] = useState<Node>();
 
-  /** node list with filters applied */
-  const filteredNodes = results.network.nodes
-    .slice(0, maxNodes)
-    .filter((node) => node.probability >= minProbability);
-
-  /** mutable node list ids */
-  const nodeIds = nodes.map((node) => node.entrez);
-  /** filtered node list ids */
-  const filteredNodeIds = filteredNodes.map((node) => node.entrez);
-
-  /** link list with filters applied */
-  const filteredLinks = results.network.links.filter(
-    (link) =>
-      filteredNodeIds.includes(link.source) &&
-      filteredNodeIds.includes(link.target),
+  /** nodes to display */
+  const nodes = useMemo(
+    () =>
+      results.network.nodes
+        .filter((node) => node.probability >= minProbability)
+        .slice(0, maxNodes),
+    [results.network.nodes, minProbability, maxNodes],
   );
 
-  /** add new nodes to mutable list */
-  for (const node of filteredNodes)
-    if (!nodeIds.includes(node.entrez)) {
-      /** init new node position in spiral based on rank */
-      const angle = (360 / 20) * node.rank;
-      const dist = (nodeRadius / 4) * node.rank ** 0.75;
-      nodes.push({
-        ...node,
-        x: sin(angle) * dist,
-        y: cos(angle) * dist,
-      });
-    }
+  /** quick node lookup */
+  const nodeLookup = useMemo(
+    () => Object.fromEntries(nodes.map((node, index) => [node.entrez, index])),
+    [nodes],
+  );
 
-  /** remove nodes from mutable list */
-  nodes = nodes.filter((node) => filteredNodeIds.includes(node.entrez));
+  /** links to display */
+  const links = useMemo(
+    () =>
+      results.network.links
+        .filter(
+          (link) => link.source in nodeLookup && link.target in nodeLookup,
+        )
+        .map((link) => ({
+          ...link,
+          sourceIndex: nodeLookup[link.source]!,
+          targetIndex: nodeLookup[link.target]!,
+        })),
+    [nodeLookup, results.network.links],
+  );
 
-  /** reset link list */
-  links = cloneDeep(filteredLinks);
+  /** legend info */
+  const legendInfo: [number, string, string][] = [
+    [4.5, "Nodes", formatNumber(nodes.length)],
+    [5.5, "Links", formatNumber(links.length)],
+  ];
+  if (selectedNode)
+    legendInfo.push(
+      [7, "Selected Node", ""],
+      [8, "Rank", formatNumber(selectedNode.rank)],
+      [9, "Prob.", formatNumber(selectedNode.probability)],
+      [10, "Entrz.", selectedNode.entrez],
+      [11, "Sym.", selectedNode.symbol],
+      [12, "Name", selectedNode.name],
+      [13, "K/N", selectedNode.knownNovel],
+      [14, "Class", selectedNode.classLabel],
+    );
 
-  /** update things from data */
-  const dataChanged = filteredNodeIds.join(",");
+  /** camera zoom handler */
+  const zoom = useMemo(
+    () =>
+      d3
+        .zoom<SVGSVGElement, unknown>()
+        .scaleExtent([minZoom, maxZoom])
+        /** on zoom/pan */
+        .on("zoom", (event) => {
+          /** if due to direct user interaction (wheel, drag, pinch, etc) */
+          if (event.sourceEvent) setAutoFit(false);
+          /** update zoom camera transform */
+          zoomRef.current?.setAttribute(
+            "transform",
+            event.transform.toString(),
+          );
+        })
+        /** prevent zoom over legend */
+        .filter((event) => !legendRef.current?.contains(event.target)),
+    [],
+  );
+
+  /** fit zoom camera to contents of svg */
+  const fitZoom = useCallback(() => {
+    if (!svgRef.current || !zoomRef.current) return;
+
+    /** turn auto-fit on */
+    setAutoFit(true);
+
+    /** get svg size */
+    const container = svgRef.current.getBoundingClientRect();
+    /** get size of svg contents */
+    const contents = zoomRef.current.getBBox();
+
+    /** get center point of contents */
+    const midX = contents.x + contents.width / 2;
+    const midY = contents.y + contents.height / 2;
+
+    /** determine scale up/down to contain */
+    const fromWidth = contents.width / (container.width - fitPadding * 2);
+    const fromHeight = contents.height / (container.height - fitPadding * 2);
+    let scale = 1 / Math.max(fromWidth, fromHeight);
+
+    /** limit scale */
+    scale = clamp(scale, minZoom, maxZoom);
+
+    /** determine center position */
+    const translateX = container.width / 2 - scale * midX;
+    const translateY = container.height / 2 - scale * midY;
+
+    /** set new camera */
+    zoom.transform(
+      d3.select(svgRef.current),
+      d3.zoomIdentity.translate(translateX, translateY).scale(scale),
+    );
+  }, [zoom]);
+
+  /** physics simulation */
+  const latestAutoFit = useRef(true);
+  latestAutoFit.current = autoFit;
+  const simulation = useMemo(
+    () =>
+      d3
+        .forceSimulation<NodeDatum>()
+        .alphaDecay(simulationDecay)
+        .force("collide", collide)
+        .force("attraction", attraction)
+        .force("spring", spring)
+        .on("tick", () => {
+          /** position nodes */
+          simulation.nodes().forEach((node, index) => {
+            const circle = circleRefs.current.get(index);
+            circle?.setAttribute("cx", String(node.x));
+            circle?.setAttribute("cy", String(node.y));
+            const label = labelRefs.current.get(index);
+            label?.setAttribute("x", String(node.x));
+            label?.setAttribute("y", String(node.y));
+          });
+
+          /** position links */
+          (simulation.force("spring") as typeof spring)
+            .links()
+            .forEach((link, index) => {
+              const line = linkRefs.current.get(index);
+              const source = simulation.nodes().at(link.sourceIndex);
+              const target = simulation.nodes().at(link.targetIndex);
+              if (source) {
+                line?.setAttribute("x1", String(source.x));
+                line?.setAttribute("y1", String(source.y));
+              }
+              if (target) {
+                line?.setAttribute("x2", String(target.x));
+                line?.setAttribute("y2", String(target.y));
+              }
+            });
+
+          /** fit every tick */
+          if (latestAutoFit.current) fitZoom();
+        }),
+    [fitZoom],
+  );
+
+  /** node drag handler */
+  const drag = useMemo(
+    () =>
+      d3
+        .drag<SVGCircleElement, number>()
+        .on("drag", (event, d) => {
+          /** get node being dragged from datum index */
+          const node = simulation.nodes().at(d);
+          if (!node) return;
+          /** pin position while dragging */
+          node.fx = event.x;
+          node.fy = event.y;
+          /** reheat */
+          simulation.alpha(1).restart();
+        })
+        .on("end", (event, d) => {
+          /** get node being dragged from datum index */
+          const node = simulation.nodes().at(d);
+          if (!node) return;
+          /** unpin position */
+          node.fx = null;
+          node.fy = null;
+        }),
+    [simulation],
+  );
+
+  /** update simulation to be in-sync with declarative nodes/links */
   useEffect(() => {
-    updateSimulation();
-    updateLinkLines();
-    updateNodeCircles();
-    updateNodeLabels();
-  }, [dataChanged, getSelectedNode]);
+    /** update nodes */
+    const d3nodeLookup = Object.fromEntries(
+      simulation.nodes().map((node) => [node.id, node]),
+    );
+    simulation.nodes(
+      nodes.map((node) => d3nodeLookup[node.entrez] ?? { id: node.entrez }),
+    );
 
-  /** turn on auto-fit */
+    /** update links */
+    (simulation.force("spring") as typeof spring).links(cloneDeep(links));
+
+    /** reheat */
+    simulation.alpha(1).restart();
+  }, [nodes, links, simulation]);
+
+  /** fit background rectangle to fit contents of legend */
+  const fitLegend = useCallback(() => {
+    if (!legendRef.current) return;
+
+    /** bg fill */
+    const bg = legendRef.current.querySelector("rect");
+    if (!bg) return;
+
+    /** don't consider bg in contents */
+    bg.removeAttribute("x");
+    bg.removeAttribute("y");
+    bg.removeAttribute("width");
+    bg.removeAttribute("height");
+
+    /** get size of contents */
+    const { x, y, width, height } = legendRef.current.getBBox();
+
+    /** auto-fit bg to content */
+    bg.setAttribute("x", String(x - legendCell * 1.2));
+    bg.setAttribute("y", String(y - legendCell * 1.2));
+    bg.setAttribute("width", String(width + legendCell * 2));
+    bg.setAttribute("height", String(height + legendCell * 2));
+  }, []);
+
+  /** turn on auto-fit any-time # of nodes grows or shrinks */
   useEffect(() => {
     setAutoFit(true);
-  }, [dataChanged, setAutoFit]);
+  }, [nodes.length, setAutoFit]);
+
+  /** fit-legend after any render */
+  useEffect(() => {
+    fitLegend();
+  });
 
   /**
    * fit zoom any time svg resizes (on window resize, but also when hidden ->
    * visible)
    */
-  const [svgRef, svgSize] = useMeasure();
+  const [svgSizeRef, svgSize] = useMeasure();
   const svgSizeDeep = JSON.stringify(svgSize);
   useEffect(() => {
     fitZoom();
-  }, [svgSizeDeep]);
-
-  /** re-fit panel */
-  useEffect(() => {
-    svg
-      ?.node()
-      ?.querySelectorAll<SVGRectElement>("." + panel)
-      .forEach(fitPanel);
-  }, [svgSizeDeep, getSelectedNode]);
-
-  /** legend info */
-  const legendInfo: [number, string, string][] = [
-    [4.5, "Nodes", formatNumber(filteredNodes.length)],
-    [5.5, "Links", formatNumber(filteredLinks.length)],
-  ];
-
-  if (getSelectedNode)
-    legendInfo.push(
-      [7, "Selected Node", ""],
-      [8, "Rank", formatNumber(getSelectedNode.rank)],
-      [9, "Prob.", formatNumber(getSelectedNode.probability)],
-      [10, "Entrz.", getSelectedNode.entrez],
-      [11, "Sym.", getSelectedNode.symbol],
-      [12, "Name", getSelectedNode.name],
-      [13, "K/N", getSelectedNode.knownNovel],
-      [14, "Class", getSelectedNode.classLabel],
-    );
+  }, [svgSizeDeep, fitZoom]);
 
   return (
     <>
@@ -184,7 +354,7 @@ const Network = ({ inputs, results }: Props) => {
         />
         <CheckBox
           label="Auto-fit"
-          value={getAutoFit}
+          value={autoFit}
           onChange={setAutoFit}
           tooltip="Or double-click network"
         />
@@ -193,42 +363,111 @@ const Network = ({ inputs, results }: Props) => {
       {/* svg viz */}
       <svg
         ref={(el) => {
-          if (!el) return;
-          /** when svg element changes */
-          svg = d3.select(el);
-          /** update svg measure */
-          svgRef(el);
-          /** attach/re-attach handlers to svg */
-          attachZoom();
+          svgRef.current = el;
+          if (el) {
+            svgSizeRef(el);
+            const svg = d3.select(el);
+            /** attach zoom behavior */
+            zoom(d3.select(el));
+            svg
+              /** always prevent scroll on wheel, not just when at scale limit */
+              .on("wheel", (event) => event.preventDefault())
+              /** auto-fit on dbl click */
+              .on("dblclick.zoom", fitZoom);
+          }
         }}
         className={classNames("expanded", classes.svg)}
         onClick={(event) => {
           /** clear selected if svg was direct click target */
-          if ((event.target as Element).matches("svg")) setSelectedNode(null);
+          if ((event.target as Element).matches("svg"))
+            setSelectedNode(undefined);
         }}
       >
-        {/* camera */}
-        <g className={zoomLayer}>
+        {/* zoom camera */}
+        <g ref={zoomRef}>
+          {/* links */}
           <g
-            className={linkLineLayer}
             stroke={linkColor}
-            strokeWidth={nodeRadius / 15}
+            strokeWidth={lerp(links.length, 500, 1, 0.2, 1)}
             pointerEvents="none"
-          />
-          <g className={nodeCircleLayer} cursor="pointer" />
+          >
+            {links.map((link, index) => {
+              /** is link connected to selected node */
+              const selected = selectedNode
+                ? link.source === selectedNode.entrez ||
+                  link.target === selectedNode.entrez
+                : undefined;
+              return (
+                <line
+                  ref={(el) => {
+                    if (el) linkRefs.current.set(index, el);
+                    else linkRefs.current.delete(index);
+                  }}
+                  key={index}
+                  stroke={
+                    selected === true
+                      ? selectedLinkColor
+                      : selected === false
+                        ? "transparent"
+                        : ""
+                  }
+                  strokeWidth={selected === true ? 1 : ""}
+                />
+              );
+            })}
+          </g>
+
+          {/* node circles */}
+          <g cursor="pointer">
+            {nodes.map((node, index) => (
+              <circle
+                key={index}
+                ref={(el) => {
+                  if (el) {
+                    circleRefs.current.set(index, el);
+                    /** attach drag behavior */
+                    drag(d3.select(el).data([index]));
+                  } else circleRefs.current.delete(index);
+                }}
+                r={lerp(
+                  node.rank,
+                  1,
+                  nodes.length + 1,
+                  nodeRadius,
+                  nodeRadius / 2,
+                )}
+                fill={nodeColors[node.classLabel]}
+                stroke={node.entrez === selectedNode?.entrez ? "#000000" : ""}
+                onClick={() => setSelectedNode(node)}
+              />
+            ))}
+          </g>
+
+          {/* node labels */}
           <g
-            className={nodeLabelLayer}
             fontSize={nodeRadius / 1.5}
             textAnchor="middle"
             dominantBaseline="central"
             pointerEvents="none"
-          />
+          >
+            {nodes.map((node, index) => (
+              <text
+                key={index}
+                ref={(el) => {
+                  if (el) labelRefs.current.set(index, el);
+                  else labelRefs.current.delete(index);
+                }}
+              >
+                {node.entrez}
+              </text>
+            ))}
+          </g>
         </g>
 
         {/* legend */}
-        <g>
+        <g ref={legendRef}>
           {/* background */}
-          <rect className={panel} fill="#ffffff" stroke="#e0e0e0" />
+          <rect fill="#ffffff" stroke="#e0e0e0" />
 
           {/* colors */}
           {Object.entries(nodeColors).map(([label, color], index) => (
@@ -281,7 +520,7 @@ const Network = ({ inputs, results }: Props) => {
         text="SVG"
         tooltip="Download visualization as SVG"
         onClick={() => {
-          const element = svg?.node();
+          const element = svgRef.current;
           if (!element) return;
           const { width, height } = element.getBoundingClientRect();
           downloadSvg(element, inputs.name, {
@@ -297,55 +536,8 @@ const Network = ({ inputs, results }: Props) => {
 
 export default Network;
 
-/** CLASS NAMES FOR IDENTIFYING SVG ELEMENTS */
-
-const zoomLayer = "zoom";
-const linkLineLayer = "links";
-const linkLine = "link";
-const nodeCircleLayer = "nodes";
-const nodeCircle = "node";
-const nodeLabelLayer = "labels";
-const nodeLabel = "label";
-const panel = "panel";
-
-/** TYPES */
-
-type Node = d3.SimulationNodeDatum &
-  AnalysisResults["network"]["nodes"][number] & { links?: number };
-type Link = d3.SimulationLinkDatum<Node>;
-
-/** MUTABLE GLOBAL LISTS/OBJECTS FOR D3 */
-
-let svg: d3.Selection<SVGSVGElement, unknown, null, undefined> | undefined;
-let nodes: Node[] = [];
-let links: Link[] = [];
-
-/** GLOBAL STATE SETTABLE FROM REACT OR D3 */
-
-/** whether to auto-fit zoom on every simulation tick */
-const autoFit = atom(true);
-/** currently selected node */
-const selectedNode = atom<Node | null>(null);
-
-/** PHYSICS SIMULATION */
-
-/** forces nodes apart when overlapping */
+/** force nodes apart when overlapping */
 const collide = d3.forceCollide().radius(collideDistance / 2);
-
-/** pushes/pulls nodes together based on links */
-const spring = d3
-  .forceLink<Node, Link>()
-  /** https://d3js.org/d3-force/link#link_strength */
-  .strength((d) => {
-    if (typeof d.source !== "object" || typeof d.target !== "object")
-      return springStrength;
-    else
-      return (
-        springStrength / Math.min(d.source.links || 1, d.target.links || 1)
-      );
-  })
-  .distance(springDistance)
-  .id((d) => d.entrez);
 
 /** pull nodes toward a center like gravity */
 const attraction = d3
@@ -353,240 +545,8 @@ const attraction = d3
   .strength(attractionStrength)
   .distanceMin(nodeRadius);
 
-/** when simulation ticks forward */
-const onTick = () => {
-  positionLinkLines();
-  positionNodeCircles();
-  positionNodeLabels();
-  if (getDefaultStore().get(autoFit)) fitZoom();
-};
-
-/** simulation object */
-const simulation = d3
-  .forceSimulation()
-  .alphaDecay(simulationDecay)
-  .force("collide", collide)
-  .force("attraction", attraction)
-  .force("spring", spring)
-  .on("tick", onTick);
-
-/** ON DATA CHANGE */
-
-/** update simulation data */
-const updateSimulation = () => {
-  /** if nodes/links added/removed */
-  if (
-    simulation.nodes().length !== nodes.length ||
-    spring.links().length !== links.length
-  )
-    /** restart simulation */
-    simulation.alpha(1).restart();
-
-  /** update data */
-  simulation.nodes(nodes);
-  /** count number of links on each node */
-  nodes.forEach((node) => {
-    node.links = links.filter(
-      (link) =>
-        getLinkSource(link) === node.entrez ||
-        getLinkTarget(link) === node.entrez,
-    ).length;
-  });
-  spring.links(links);
-};
-
-/** create/remove link lines */
-const updateLinkLines = () =>
-  svg
-    ?.select("." + linkLineLayer)
-    .selectAll<SVGLineElement, Link>("." + linkLine)
-    .data(links)
-    .join("line")
-    .attr("class", linkLine)
-    .attr("opacity", (d) => (isLinkSelected(d) === false ? 0.1 : 1))
-    .attr("stroke", (d) => (isLinkSelected(d) ? selectedLinkColor : ""));
-
-/** get if link connected to selected node */
-const isLinkSelected = (link: Link) => {
-  const selected = getDefaultStore().get(selectedNode);
-  if (!selected) return null;
-  return (
-    getLinkSource(link) === selected.entrez ||
-    getLinkTarget(link) === selected.entrez
-  );
-};
-
-/** get link source id */
-const getLinkSource = (link: Link) =>
-  typeof link.source === "object" ? link.source.entrez : link.source;
-/** get link target id */
-const getLinkTarget = (link: Link) =>
-  typeof link.target === "object" ? link.target.entrez : link.target;
-
-/** create/remove node circles */
-const updateNodeCircles = () =>
-  svg
-    ?.select("." + nodeCircleLayer)
-    .selectAll<SVGCircleElement, Node>("." + nodeCircle)
-    .data(nodes)
-    .call(dragHandler)
-    .join("circle")
-    .attr("class", classNames(nodeCircle, classes.node))
-    .attr("r", (d) =>
-      lerp(d.rank, 1, nodes.length + 1, nodeRadius, nodeRadius / 2),
-    )
-    .attr("fill", (d) => nodeColors[d.classLabel])
-    .attr("stroke", (d) =>
-      d.entrez === getDefaultStore().get(selectedNode)?.entrez ? "#000000" : "",
-    )
-    .on("click", (event, d) => getDefaultStore().set(selectedNode, d));
-
-/** create/remove node labels */
-const updateNodeLabels = () =>
-  svg
-    ?.select("." + nodeLabelLayer)
-    .selectAll<SVGTextElement, Node>("." + nodeLabel)
-    .data(nodes)
-    .join("text")
-    .attr("class", nodeLabel)
-    .text((d) => d.entrez);
-
-/** ON SIMULATION TICK */
-
-/** update link line positions */
-const positionLinkLines = () =>
-  svg
-    ?.select("." + linkLineLayer)
-    .selectAll<SVGLineElement, Link>("." + linkLine)
-    .attr("x1", (d) => (typeof d.source === "object" ? d.source.x || 0 : 0))
-    .attr("y1", (d) => (typeof d.source === "object" ? d.source.y || 0 : 0))
-    .attr("x2", (d) => (typeof d.target === "object" ? d.target.x || 0 : 0))
-    .attr("y2", (d) => (typeof d.target === "object" ? d.target.y || 0 : 0));
-
-/** update node circle positions */
-const positionNodeCircles = () =>
-  svg
-    ?.select<SVGGElement>("." + nodeCircleLayer)
-    .selectAll<SVGCircleElement, Node>("." + nodeCircle)
-    .attr("cx", (d) => d.x || 0)
-    .attr("cy", (d) => d.y || 0);
-
-/** update node label positions */
-const positionNodeLabels = () =>
-  svg
-    ?.select("." + nodeLabelLayer)
-    .selectAll<SVGTextElement, Node>("." + nodeLabel)
-    .attr("x", (d) => d.x || 0)
-    .attr("y", (d) => d.y || 0);
-
-/** CAMERA ZOOM/PAN */
-
-/** zoom/pan handler */
-const zoom = d3
-  .zoom<SVGSVGElement, unknown>()
-  .scaleExtent([minZoom, maxZoom])
-  /** on zoom/pan */
-  .on("zoom", (event) => {
-    /** if zoom was due to direct user interaction (wheel, drag, pinch, etc) */
-    if (event.sourceEvent) getDefaultStore().set(autoFit, false);
-    /** update zoom camera transform */
-    svg?.select("." + zoomLayer).attr("transform", event.transform.toString());
-  });
-
-/** attach zoom handlers to svg */
-const attachZoom = () => {
-  if (!svg) return;
-  zoom(svg);
-  svg
-    /** always prevent scroll on wheel, not just when at scale limit */
-    .on("wheel", (event) => event.preventDefault())
-    /** on double click */
-    .on("dblclick.zoom", () => {
-      getDefaultStore().set(autoFit, true);
-      fitZoom();
-    });
-};
-
-/** fit zoom camera to contents of svg */
-const fitZoom = () => {
-  if (!svg) return;
-
-  /** get svg size */
-  const container = svg.node()?.getBoundingClientRect();
-  /** get size of svg contents */
-  const contents = svg
-    .select<SVGGElement>("." + zoomLayer)
-    ?.node()
-    ?.getBBox();
-
-  if (
-    !container?.width ||
-    !container?.height ||
-    !contents?.width ||
-    !contents?.height
-  )
-    return;
-
-  /** get center point of contents */
-  const midX = contents.x + contents.width / 2;
-  const midY = contents.y + contents.height / 2;
-
-  /** determine scale up/down to contain */
-  let scale =
-    1 /
-    Math.max(
-      contents.width / (container.width - fitPadding * 2),
-      contents.height / (container.height - fitPadding * 2),
-    );
-
-  /** limit scale */
-  scale = clamp(scale, minZoom, maxZoom);
-
-  /** determine center position */
-  const translateX = container.width / 2 - scale * midX;
-  const translateY = container.height / 2 - scale * midY;
-
-  /** set new camera */
-  zoom.transform(
-    svg,
-    d3.zoomIdentity.translate(translateX, translateY).scale(scale),
-  );
-};
-
-/** NODE DRAG */
-
-const dragHandler = d3
-  .drag<SVGCircleElement, Node>()
-  .on("drag", (event, d) => {
-    simulation.alpha(1).restart();
-    d.fx = event.x;
-    d.fy = event.y;
-  })
-  .on("end", (event, d) => {
-    d.fx = null;
-    d.fy = null;
-  });
-
-/** MISC */
-
-/** fit background rectangle to fit contents of panel */
-const fitPanel = (el: SVGRectElement) => {
-  if (!el) return;
-
-  /** don't consider bg in contents */
-  el.removeAttribute("x");
-  el.removeAttribute("y");
-  el.removeAttribute("width");
-  el.removeAttribute("height");
-
-  /** get size of contents */
-  const { x, y, width, height } = (
-    el.parentElement as unknown as SVGGElement
-  ).getBBox();
-
-  /** auto-fit bg to content */
-  el.setAttribute("x", String(x - legendCell * 1.2));
-  el.setAttribute("y", String(y - legendCell * 1.2));
-  el.setAttribute("width", String(width + legendCell * 2));
-  el.setAttribute("height", String(height + legendCell * 2));
-};
+/** push/pull nodes together based on links */
+const spring = d3
+  .forceLink<NodeDatum, LinkDatum>()
+  .distance(springDistance)
+  .id((d) => d.id);
