@@ -1,4 +1,4 @@
-name: Deploy Cloud Functions
+name: 'Deploy GCP function gpz-convert-ids'
 on:
   workflow_dispatch:
   push:

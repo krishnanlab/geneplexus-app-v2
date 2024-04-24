@@ -1,4 +1,4 @@
-name: Deploy Cloud Function
+name: Cloud Function Deploy Helper
 
 on:
   workflow_call:

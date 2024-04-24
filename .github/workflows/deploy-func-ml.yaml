@@ -1,4 +1,4 @@
-name: Deploy Cloud Functions
+name: 'Deploy GCP function gpz-ml'
 on:
   push:
     branches:
