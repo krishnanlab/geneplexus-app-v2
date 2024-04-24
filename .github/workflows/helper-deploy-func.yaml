@@ -50,20 +50,19 @@ jobs:
     steps:
       - uses: 'actions/checkout@v4'
 
-      - id: 'auth'
+      - name: Authenticate to GCP
         uses: 'google-github-actions/auth@v2'
         with:
           # workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
           # service_account: 'cloud-function-deployer@gap-som-dbmi-geneplx-app-p0n.iam.gserviceaccount.com'
           credentials_json: ${{ secrets.JSON_GCLOUD_SERVICE_ACCOUNT_JSON }}
 
-      - name: 'Set up Cloud SDK'
+      - name: Set up Cloud SDK
         uses: 'google-github-actions/setup-gcloud@v2'
         with:
           version: '>= 363.0.0'
 
       - name: Get hash of the data archive for this function
-        id: get-data-hash
         run: |
           gsutil ls -L ${{ inputs.func-data-gcs-url }} | \
             grep "Hash (crc32c)" | \
@@ -83,7 +82,6 @@ jobs:
           key: ${{ inputs.func-name }}-data-${{ env.DATA_ARCHIVE_HASH }}
 
       - name: Download function data from GCS
-        id: download-data
         if: steps.cache-existing-data.outputs.cache-hit != 'true'
         run: |
           gsutil cp ${{ inputs.func-data-gcs-url }} /tmp/data.tar.gz
@@ -92,15 +90,13 @@ jobs:
           rm /tmp/data.tar.gz
 
       - name: Check filesystem status
-        id: check-fs
         run: |
           find ${{ inputs.func-src-dir }}
 
       - if: runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
-        
+
       - name: Deploy function '${{ inputs.func-name }}' to GCP
-        id: deploy
         run: |
           gcloud functions deploy ${{ inputs.func-name }} \
               --gen2 \
