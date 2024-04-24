@@ -1,0 +1,18 @@
+name: Deploy Cloud Functions
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'functions/ml/ml_deploy/**'
+
+jobs:
+  deploy-ml-func:
+    uses: ./.github/workflows/helper-deploy-func.yaml
+    with:
+      func-name: "gpz-ml"
+      func-src-dir: "functions/ml/ml_deploy"
+      func-entrypoint: "ml"
+      func-memory-mb: 8192
+      func-data-gcs-url: "gs://geneplexus-func-data/ml/ml_data.tar.gz"
+    secrets: inherit

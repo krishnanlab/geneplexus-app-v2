@@ -1,0 +1,111 @@
+name: Deploy Cloud Function
+
+on:
+  workflow_call:
+    inputs:
+      func-name:
+        required: true
+        type: string
+      func-src-dir:
+        required: true
+        type: string
+        description: Path in the repo containing this function's code
+      func-entrypoint:
+        required: true
+        type: string
+        description: Name of the function entrypoint in main.py
+      func-data-gcs-url:
+        required: true
+        type: string
+        description: GCS URL to the archive containing the data for this function
+      func-memory-mb:
+        required: true
+        type: number
+
+      func-runtime:
+        default: python311
+        type: string
+      func-svc-acct:
+        default: logging-monitoring@gap-som-dbmi-geneplx-app-p0n.iam.gserviceaccount.com
+        type: string
+      project-id:
+        default: gap-som-dbmi-geneplx-app-p0n
+        type: string
+      region:
+        default: us-central1
+        type: string
+      func-data-local-path:
+        default: 'data'
+        type: string
+        description: 'Path under func-src-dir where the GCS archive is extracted, default ./data'
+    secrets:
+      JSON_GCLOUD_SERVICE_ACCOUNT_JSON:
+        required: true
+jobs:
+  deploy-cloud-func-helper:
+    runs-on: 'ubuntu-latest'
+    env:
+      DATA_ARCHIVE_HASH: 'none'
+
+    steps:
+      - uses: 'actions/checkout@v4'
+
+      - name: Authenticate to GCP
+        uses: 'google-github-actions/auth@v2'
+        with:
+          # workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
+          # service_account: 'cloud-function-deployer@gap-som-dbmi-geneplx-app-p0n.iam.gserviceaccount.com'
+          credentials_json: ${{ secrets.JSON_GCLOUD_SERVICE_ACCOUNT_JSON }}
+
+      - name: Set up Cloud SDK
+        uses: 'google-github-actions/setup-gcloud@v2'
+        with:
+          version: '>= 363.0.0'
+
+      - name: Get hash of the data archive for this function
+        run: |
+          gsutil ls -L ${{ inputs.func-data-gcs-url }} | \
+            grep "Hash (crc32c)" | \
+            awk '{printf "DATA_ARCHIVE_HASH=%s",$3}' >> "$GITHUB_ENV"
+
+      # if the cached files aren't present, this will defer caching the files
+      # until the end of a successful run of this workflow. the next time the
+      # workflow runs, it'll retrieve the cached files from the previous run
+      # and skip the download step.
+      # the hash of the current datafile is included as part of the key, so
+      # that fresh data will be fetched if the datafile has changed in GCS.
+      - name: Cache existing data folder
+        id: cache-existing-data
+        uses: actions/cache@v4
+        with:
+          path: ${{ inputs.func-src-dir }}/${{ inputs.func-data-local-path }}
+          key: ${{ inputs.func-name }}-data-${{ env.DATA_ARCHIVE_HASH }}
+
+      - name: Download function data from GCS
+        if: steps.cache-existing-data.outputs.cache-hit != 'true'
+        run: |
+          gsutil cp ${{ inputs.func-data-gcs-url }} /tmp/data.tar.gz
+          mkdir -p ${{ inputs.func-src-dir }}/${{ inputs.func-data-local-path }}
+          tar -xvf /tmp/data.tar.gz -C ${{ inputs.func-src-dir }}
+          rm /tmp/data.tar.gz
+
+      - name: Check filesystem status
+        run: |
+          find ${{ inputs.func-src-dir }}
+
+      - if: runner.debug == '1'
+        uses: mxschmitt/action-tmate@v3
+
+      - name: Deploy function '${{ inputs.func-name }}' to GCP
+        run: |
+          gcloud functions deploy ${{ inputs.func-name }} \
+              --gen2 \
+              --runtime=${{ inputs.func-runtime }} \
+              --project=${{ inputs.project-id }} \
+              --region=${{ inputs.region }} \
+              --source=${{ inputs.func-src-dir }} \
+              --entry-point=${{ inputs.func-entrypoint }} \
+              --trigger-http \
+              --allow-unauthenticated \
+              --memory=${{ inputs.func-memory-mb }}MB \
+              --service-account=${{ inputs.func-svc-acct }}
