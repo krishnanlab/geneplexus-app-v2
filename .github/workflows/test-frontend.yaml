@@ -1,6 +1,10 @@
 name: Test Frontend
 
-on: pull_request
+on:
+  pull_request:
+    paths:
+      - 'frontend/**'
+      - 'package.json'
 
 defaults:
   run:
