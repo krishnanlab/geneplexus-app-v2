@@ -44,14 +44,14 @@ const NumberBox = ({
       form: useForm(),
       /** settings */
       allowMouseWheel: true,
-      /** regular number box props */
-      min: min ?? 0,
-      max: max ?? 100,
-      step: step ?? 1,
     }),
     /** https://zagjs.com/overview/programmatic-control#controlled-usage-in-reacts */
     {
       context: {
+        /** regular number box props */
+        min: min ?? 0,
+        max: max ?? 100,
+        step: step ?? 1,
         /** initialize value state */
         value: String(value || 0),
         /** when value changes */

@@ -84,10 +84,11 @@ const Testbed = () => {
             "deep-mid",
             "deep-light",
             "black",
+            "off-black",
             "dark-gray",
             "gray",
             "light-gray",
-            "pale",
+            "off-white",
             "white",
             "success",
             "warning",
@@ -215,15 +216,11 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
           <Button
             to="/about"
             text="As Link"
+            design="hollow"
             icon={<FaArrowRight />}
             tooltip="Tooltip"
           />
-          <Button
-            to="/about"
-            text="As Link"
-            design="accent"
-            tooltip="Tooltip"
-          />
+          <Button to="/about" text="As Link" tooltip="Tooltip" />
           <Button
             to="/about"
             icon={<CustomIcon />}
@@ -233,13 +230,13 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
           <Button
             onClick={() => window.alert("Hello World")}
             text="As Button"
+            design="hollow"
             tooltip="Tooltip"
           />
           <Button
             onClick={() => window.alert("Hello World")}
             text="As Button"
             icon={<FaArrowRight />}
-            design="accent"
             tooltip="Tooltip"
           />
           <Button
@@ -424,7 +421,7 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
         <Heading level={2} icon={<FaRegFolder />}>
           Tabs
         </Heading>
-        <Tabs syncWithUrl="tab">
+        <Tabs syncWithUrl="tab" defaultValue="drinks">
           <Tab text="Animals" icon={<FaCat />} tooltip="Tooltip">
             <ul>
               <li>Cat</li>
@@ -457,7 +454,6 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
         <div className="flex-row gap-sm">
           <Button
             text="Unique Toast"
-            design="accent"
             onClick={() =>
               toast(
                 sample([
@@ -472,7 +468,6 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
           />
           <Button
             text="Overwriting Toast"
-            design="accent"
             onClick={() => {
               toast(
                 `ABC`,
@@ -548,17 +543,15 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
         <Table
           cols={[
             { key: "name", name: "Name" },
-            { key: "age", name: "Age", filterable: true, filterType: "number" },
+            { key: "age", name: "Age", filterType: "number" },
             {
               key: "status",
               name: "Status",
-              filterable: true,
               filterType: "enum",
             },
             {
               key: "text",
               name: "Long text",
-              filterable: true,
               filterType: "string",
               show: false,
               render: (cell) => <div className="truncate-5">{cell}</div>,
@@ -640,10 +633,15 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
           <Label htmlFor="123" label="Label" required={true} tooltip="Tooltip">
             <input id="123" name="suppress lighthouse" />
           </Label>
-          <Label htmlFor="456" label="Label" layout="horizontal">
+          <Label
+            htmlFor="456"
+            label="Label"
+            layout="horizontal"
+            tooltip="Tooltip"
+          >
             <input id="456" name="suppress lighthouse" />
           </Label>
-          <Label htmlFor="789" label="Label" layout="none">
+          <Label htmlFor="789" layout="none" tooltip="Tooltip">
             <input id="789" name="suppress lighthouse" />
           </Label>
         </div>
@@ -671,7 +669,7 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
               />
               <NumberBox label="Age" name="age" />
               <Slider label="Cutoff" name="cutoff" />
-              <Slider label="Range" multi={true} name="range" width="100%" />
+              <Slider label="Range" multi={true} name="range" />
               <Radios
                 label="Order"
                 options={[
@@ -731,11 +729,6 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
             </tr>
           </tbody>
         </table>
-      </Section>
-
-      {/* section */}
-      <Section fill={true} full={true}>
-        <div className="placeholder pulse" />
       </Section>
     </>
   );

@@ -1,0 +1,18 @@
+.summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(100px, max-content));
+  justify-content: center;
+  gap: 60px;
+}
+
+.genes-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 15px;
+}
+
+@media (max-width: 800px) {
+  .summary {
+    grid-template-columns: 1fr;
+  }
+}

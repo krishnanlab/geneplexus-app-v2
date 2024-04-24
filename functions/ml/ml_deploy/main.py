@@ -1,5 +1,10 @@
 import functions_framework
 import geneplexus
+import traceback
+from flask import current_app as app
+from flask_compress import Compress
+
+Compress(app)
 
 
 @functions_framework.http
@@ -56,7 +61,6 @@ def ml(request):
 
         # format response
         response = {}
-        response["input"] = request_json
         response["avgps"] = gp.avgps
         response["df_probs"] = gp.df_probs.to_dict(orient="records")
         response["df_sim"] = gp.df_sim.to_dict(orient="records")
@@ -71,5 +75,5 @@ def ml(request):
 
         return (response, 200, headers)
     except Exception as error:
-        message = f"Error running GenePlexus:\n\n{error}"
+        message = f"Error running GenePlexus:\n{error}\n{traceback.format_exc()}"
         return ({"message": message}, 500, headers)

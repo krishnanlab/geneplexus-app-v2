@@ -1,0 +1,10 @@
+.svg {
+  height: min(800px, 75vh);
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.node:focus {
+  stroke: var(--accent);
+  outline: none;
+}

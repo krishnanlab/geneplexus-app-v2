@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
+import { useCallback, useMemo, useState } from "react";
+import { FaCompressArrowsAlt, FaExpandArrowsAlt } from "react-icons/fa";
 import {
   FaAngleLeft,
   FaAngleRight,
@@ -12,8 +13,9 @@ import {
   FaSortDown,
   FaSortUp,
 } from "react-icons/fa6";
+import classNames from "classnames";
 import { clamp, isEqual, pick, sortBy, sum } from "lodash";
-import type { Column, FilterFn, NoInfer, RowData } from "@tanstack/react-table";
+import type { Column, FilterFn, NoInfer } from "@tanstack/react-table";
 import {
   createColumnHelper,
   flexRender,
@@ -28,6 +30,7 @@ import {
   type Table,
 } from "@tanstack/react-table";
 import Button from "@/components/Button";
+import Help from "@/components/Help";
 import Popover from "@/components/Popover";
 import Select from "@/components/Select";
 import type { Option } from "@/components/Select";
@@ -35,6 +38,7 @@ import Slider from "@/components/Slider";
 import TextBox from "@/components/TextBox";
 import Tooltip from "@/components/Tooltip";
 import { downloadCsv } from "@/util/download";
+import { formatNumber } from "@/util/string";
 import classes from "./Table.module.css";
 
 type Col<
@@ -47,17 +51,21 @@ type Col<
   name: string;
   /** is sortable (default true) */
   sortable?: boolean;
-  /** whether col is individually filterable */
+  /** whether col is individually filterable (default true) */
   filterable?: boolean;
   /**
    * how to treat cell value when filtering individually or searching globally
    * (default string)
    */
   filterType?: "string" | "number" | "enum" | "boolean";
-  /** horizontal alignment */
-  align?: "left" | "center" | "right";
-  /** visibility (default true) */
+  /** cell attributes */
+  attrs?: HTMLAttributes<HTMLTableCellElement>;
+  /** cell style */
+  style?: CSSProperties;
+  /** whether to start column visible (default true) */
   show?: boolean;
+  /** tooltip to show in header cell */
+  tooltip?: ReactNode;
   /** custom render function for cell */
   render?: (cell: NoInfer<Datum[Key]>) => ReactNode;
 };
@@ -75,16 +83,6 @@ type Props<Datum extends object> = {
   rows: Datum[];
 };
 
-/** https://tanstack.com/table/v8/docs/api/core/column-def#meta */
-declare module "@tanstack/table-core" {
-  // eslint-disable-next-line
-  interface ColumnMeta<TData extends RowData, TValue> {
-    filterable: NonNullable<Col["filterable"]>;
-    filterType: NonNullable<Col["filterType"]>;
-    align: NonNullable<Col["align"]>;
-  }
-}
-
 /** map column definition to multi-select option */
 const colToOption = <Datum extends object>(
   col: Props<Datum>["cols"][number],
@@ -101,10 +99,13 @@ const colToOption = <Datum extends object>(
  * https://codesandbox.io/p/devbox/tanstack-table-example-kitchen-sink-vv4871
  */
 const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
+  /** expanded state */
+  const [expanded, setExpanded] = useState(true);
+
   /** column visibility options for multi-select */
   const visibleOptions = cols.map(colToOption);
   /** visible columns */
-  const [visible, setVisible] = useState<Option["id"][]>(
+  const [visibleCols, setVisibleCols] = useState(
     cols
       .filter((col) => col.show === true || col.show === undefined)
       .map(colToOption)
@@ -116,17 +117,20 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
 
   /** per page options */
   const perPageOptions = [
-    { id: "5", text: "5" },
-    { id: "10", text: "10" },
-    { id: "50", text: "50" },
-    { id: "100", text: "100" },
-    { id: "500", text: "500" },
-  ];
+    { id: "5", text: 5 },
+    { id: "10", text: 10 },
+    { id: "50", text: 50 },
+    { id: "100", text: 100 },
+    { id: "500", text: 500 },
+  ].map((option) => ({ ...option, text: formatNumber(option.text) }));
+
+  /** get column definition (from props) by id */
+  const getCol = useCallback((id: string) => cols[Number(id)], [cols]);
 
   /** individual column filter func */
   const filterFunc = useMemo<FilterFn<Datum>>(
     () => (row, columnId, filterValue: unknown) => {
-      const type = cols[Number(columnId)]?.filterType;
+      const type = getCol(columnId)?.filterType ?? "string";
       if (!type) return true;
 
       /** string column */
@@ -163,7 +167,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
 
       return true;
     },
-    [cols],
+    [getCol],
   );
 
   /** global search func */
@@ -189,14 +193,15 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
       /** sortable */
       enableSorting: col.sortable ?? true,
       /** individually filterable */
-      enableColumnFilter: col.filterable ?? false,
+      enableColumnFilter: col.filterable ?? true,
       /** only include in table-wide search if column is visible */
-      // enableGlobalFilter: visible.includes(String(index)),
+      enableGlobalFilter: visibleCols.includes(String(index)),
       /** type of column */
       meta: {
-        filterable: col.filterable ?? false,
-        filterType: col.filterType ?? "string",
-        align: col.align ?? "left",
+        filterType: col.filterType,
+        attrs: col.attrs,
+        style: col.style,
+        tooltip: col.tooltip,
       },
       /** func to use for filtering individual column */
       filterFn: filterFunc,
@@ -237,7 +242,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
       columnVisibility: Object.fromEntries(
         cols.map((col, index) => [
           String(index),
-          !!visible.includes(String(index)),
+          !!visibleCols.includes(String(index)),
         ]),
       ),
     },
@@ -245,55 +250,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
 
   return (
     <div className="flex-col gap-md">
-      {/* top controls */}
-      <div className="flex-row gap-md">
-        {/* visible columns */}
-        <Select
-          label="Cols"
-          layout="horizontal"
-          multi={true}
-          options={visibleOptions}
-          value={visible}
-          onChange={setVisible}
-        />
-
-        {/* table-wide search */}
-        <TextBox
-          placeholder="Search"
-          width={150}
-          icon={<FaMagnifyingGlass />}
-          value={search}
-          onChange={setSearch}
-          tooltip="Search entire table for plain text or regex"
-        />
-
-        {/* download */}
-        <Button
-          icon={<FaDownload />}
-          text="CSV"
-          onClick={() => {
-            /** get col defs that are visible */
-            const defs = visible.map((visible) => cols[Number(visible)]!);
-
-            /** visible keys */
-            const keys = defs.map((def) => def.key);
-
-            /** visible names */
-            const names = defs.map((def) => def.name);
-
-            /** filtered row data */
-            const data = table
-              .getFilteredRowModel()
-              .rows.map((row) => Object.values(pick(row.original, keys)));
-
-            /** download */
-            downloadCsv([names, ...data], ["geneplexus", "table"]);
-          }}
-          design="accent"
-        />
-      </div>
-
-      <div className={classes.scroll}>
+      <div className={classNames(classes.scroll, expanded && "expanded")}>
         {/* table */}
         <table
           className={classes.table}
@@ -308,8 +265,10 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
-                    align={header.column.columnDef.meta?.align}
                     aria-colindex={Number(header.id) + 1}
+                    style={getCol(header.column.id)?.style}
+                    align="left"
+                    {...getCol(header.column.id)?.attrs}
                   >
                     {header.isPlaceholder ? null : (
                       <div className={classes.th}>
@@ -321,32 +280,44 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                           )}
                         </span>
 
+                        {/* header tooltip */}
+                        {getCol(header.column.id)?.tooltip && (
+                          <Help tooltip={getCol(header.column.id)?.tooltip} />
+                        )}
+
                         {/* header sort */}
-                        <Tooltip content="Sort this column">
-                          <button
-                            className={classes["header-button"]}
-                            data-active={
-                              header.column.getIsSorted() ? "" : undefined
-                            }
-                            onClick={header.column.getToggleSortingHandler()}
-                          >
-                            {header.column.getIsSorted() ? (
-                              header.column.getIsSorted() === "asc" ? (
-                                <FaSortUp />
+                        {header.column.getCanSort() && (
+                          <Tooltip content="Sort this column">
+                            <button
+                              className={classes["header-button"]}
+                              data-active={
+                                header.column.getIsSorted() ? "" : undefined
+                              }
+                              onClick={header.column.getToggleSortingHandler()}
+                            >
+                              {header.column.getIsSorted() ? (
+                                header.column.getIsSorted() === "asc" ? (
+                                  <FaSortUp />
+                                ) : (
+                                  <FaSortDown />
+                                )
                               ) : (
-                                <FaSortDown />
-                              )
-                            ) : (
-                              <FaSort />
-                            )}
-                          </button>
-                        </Tooltip>
+                                <FaSort />
+                              )}
+                            </button>
+                          </Tooltip>
+                        )}
 
                         {/* header filter */}
                         {header.column.getCanFilter() ? (
                           <Popover
                             label="Filter this column"
-                            content={<Filter column={header.column} />}
+                            content={
+                              <Filter
+                                column={header.column}
+                                def={getCol(header.column.id)}
+                              />
+                            }
                           >
                             <button
                               className={classes["header-button"]}
@@ -380,7 +351,12 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                   }
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} align={cell.column.columnDef.meta?.align}>
+                    <td
+                      key={cell.id}
+                      style={getCol(cell.column.id)?.style}
+                      align="left"
+                      {...getCol(cell.column.id)?.attrs}
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext(),
@@ -400,7 +376,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
         </table>
       </div>
 
-      {/* bottom controls */}
+      {/* controls */}
       <div className="flex-row gap-md">
         {/* pagination */}
         <div className={classes.pagination}>
@@ -429,8 +405,8 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                 table.setPageIndex(clamp(page, 1, table.getPageCount()) - 1);
               }}
             >
-              Page {table.getState().pagination.pageIndex + 1} of{" "}
-              {table.getPageCount() || 1}
+              Page {formatNumber(table.getState().pagination.pageIndex + 1)} of{" "}
+              {formatNumber(table.getPageCount())}
             </button>
           </Tooltip>
           <button
@@ -451,14 +427,70 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
           </button>
         </div>
 
-        {/* per page */}
-        <Select
-          label="Per page"
-          layout="horizontal"
-          options={perPageOptions}
-          onChange={(option) => table.setPageSize(Number(option))}
-          width={70}
+        <div className="flex-row gap-sm">
+          {/* per page */}
+          <Select
+            label="Rows"
+            layout="horizontal"
+            options={perPageOptions}
+            onChange={(option) => table.setPageSize(Number(option))}
+            width={70}
+          />
+          {/* visible columns */}
+          <Select
+            label="Cols"
+            layout="horizontal"
+            multi={true}
+            options={visibleOptions}
+            value={visibleCols}
+            onChange={setVisibleCols}
+            width={100}
+          />
+        </div>
+
+        {/* table-wide search */}
+        <TextBox
+          placeholder="Search"
+          width={140}
+          icon={<FaMagnifyingGlass />}
+          value={search}
+          onChange={setSearch}
+          tooltip="Search entire table for plain text or regex"
         />
+
+        <div className="flex-row gap-sm">
+          {/* download */}
+          <Button
+            icon={<FaDownload />}
+            text="CSV"
+            tooltip="Download table data as .csv"
+            onClick={() => {
+              /** get col defs that are visible */
+              const defs = visibleCols.map((visible) => cols[Number(visible)]!);
+
+              /** visible keys */
+              const keys = defs.map((def) => def.key);
+
+              /** visible names */
+              const names = defs.map((def) => def.name);
+
+              /** filtered row data */
+              const data = table
+                .getFilteredRowModel()
+                .rows.map((row) => Object.values(pick(row.original, keys)));
+
+              /** download */
+              downloadCsv([names, ...data], ["geneplexus", "table"]);
+            }}
+          />
+          {/* expand/collapse */}
+          <Button
+            icon={expanded ? <FaCompressArrowsAlt /> : <FaExpandArrowsAlt />}
+            design="hollow"
+            tooltip={expanded ? "Collapse table" : "Expand table"}
+            onClick={() => setExpanded(!expanded)}
+          />
+        </div>
       </div>
     </div>
   );
@@ -468,16 +500,18 @@ export default Table;
 
 type FilterProps<Datum extends object> = {
   column: Column<Datum>;
+  def?: Col<Datum>;
 };
 
 /** content of filter popup for column */
-const Filter = <Datum extends object>({ column }: FilterProps<Datum>) => {
+const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
   /** type of filter */
-  const type = column.columnDef.meta?.filterType;
+  const type = def?.filterType ?? "string";
 
   /** filter as number range */
   if (type === "number") {
     const [min = 0, max = 100] = column.getFacetedMinMaxValues() || [];
+
     return (
       <Slider
         min={min}

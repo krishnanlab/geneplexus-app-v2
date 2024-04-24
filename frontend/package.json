@@ -9,10 +9,9 @@
     "test:lint": "./lint.sh",
     "test:types": "tsc",
     "test:spelling": "bunx cspell src/**/*.{tsx,ts}",
-    "clean": "rm -rf node_modules bun.lockb && bun pm cache rm"
+    "clean": "rm -rf node_modules dist bun.lockb && bun pm cache rm"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.29.0",
     "@tanstack/react-table": "^8.15.3",
     "@zag-js/checkbox": "^0.45.0",
     "@zag-js/number-input": "^0.45.0",
@@ -26,6 +25,7 @@
     "@zag-js/tooltip": "^0.45.0",
     "classnames": "^2.5.1",
     "csv-stringify": "^6.4.6",
+    "d3": "^7.9.0",
     "javascript-time-ago": "^2.5.9",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
@@ -36,11 +36,11 @@
     "react-time-ago": "^7.3.1",
     "react-to-text": "^2.0.1",
     "react-use": "^17.5.0",
-    "use-debounce": "^10.0.0",
-    "use-query-params": "^2.2.1"
+    "use-debounce": "^10.0.0"
   },
   "devDependencies": {
     "@ianvs/prettier-plugin-sort-imports": "^4.2.1",
+    "@types/d3": "^7.4.3",
     "@types/lodash": "^4.17.0",
     "@types/node": "^20.12.7",
     "@types/react": "^18.2.75",

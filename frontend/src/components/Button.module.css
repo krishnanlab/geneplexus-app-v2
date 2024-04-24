@@ -18,27 +18,26 @@
   padding: 0;
 }
 
-.normal {
-  box-shadow: inset 0 0 0 2px var(--accent);
+.hollow {
+  padding: 5px;
   color: var(--accent);
 }
 
+.hollow:hover {
+  color: var(--deep);
+}
+
+.normal {
+  background: var(--accent);
+  color: var(--white);
+}
+
 .normal:hover {
-  background: var(--accent);
-  color: var(--white);
-}
-
-.accent {
-  background: var(--accent);
-  color: var(--white);
-}
-
-.accent:hover {
   background: var(--deep);
   color: var(--white);
 }
 
-.accent:focus {
+.normal:focus {
   outline-color: var(--accent);
 }
 

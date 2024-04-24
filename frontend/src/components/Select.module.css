@@ -72,5 +72,6 @@
 }
 
 .icon {
-  justify-self: center;
+  justify-self: flex-end;
+  padding-right: 10px;
 }

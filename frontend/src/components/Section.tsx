@@ -21,15 +21,10 @@ type Props = {
 const Section = ({ fill, full, className, ...props }: Props) => {
   return (
     <section
-      className={classNames(
-        classes.section,
-        className,
-        {
-          [classes.fill!]: fill,
-          [classes.full!]: full,
-        },
-        "flex-col gap-lg",
-      )}
+      className={classNames(classes.section, className, {
+        [classes.fill!]: fill,
+        [classes.full!]: full,
+      })}
       {...props}
     />
   );

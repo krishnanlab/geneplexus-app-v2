@@ -59,7 +59,7 @@ const Slider = ({
   /** defaults */
   const _min = min ?? 0;
   const _max = max ?? 100;
-  const _step = step ?? 1;
+  const _step = Math.min(step ?? 1, _max - _min);
 
   /** set up zag */
   const [state, send] = useMachine(
@@ -69,18 +69,17 @@ const Slider = ({
       /** link field to form */
       name,
       form: useForm(),
-      minStepsBetweenThumbs: _step,
-      /** slider props */
-      min: _min,
-      max: _max,
-      step: _step,
-
       /** when focused thumb changes */
       onFocusChange: (details) => setFocused(details.focusedIndex),
     }),
     /** https://zagjs.com/overview/programmatic-control#controlled-usage-in-reacts */
     {
       context: {
+        /** slider props */
+        minStepsBetweenThumbs: _step,
+        min: _min,
+        max: _max,
+        step: _step,
         /** initialize value state */
         value: multi
           ? value === undefined
@@ -90,10 +89,10 @@ const Slider = ({
             ? [_min]
             : [value],
         /** when value changes */
-        onValueChange: (details) =>
-          multi
-            ? onChange?.(details.value)
-            : details.value[0] && onChange?.(details.value[0]),
+        onValueChange: (details) => {
+          if (multi) onChange?.(details.value);
+          else details.value[0] && onChange?.(details.value[0]);
+        },
       },
     },
   );
@@ -103,8 +102,6 @@ const Slider = ({
 
   /** whether to show min/max marks */
   const active = api.isFocused || api.isDragging;
-  const showMin = (api.value[0] ?? _min) > (_max - _min) * 0.2;
-  const showMax = (api.value.at(-1) ?? _max) < (_max - _min) * 0.8;
 
   return (
     <Label {...forwardLabelProps(props, api.rootProps.id)}>
@@ -131,13 +128,23 @@ const Slider = ({
         {/* marks */}
         <div {...api.markerGroupProps} className={classes.markers}>
           {/* min value */}
-          <span
-            {...api.getMarkerProps({ value: _min })}
-            className={classes.marker}
-            data-faded={active && showMin ? "half" : "full"}
-          >
-            {formatNumber(_min, true)}
-          </span>
+          {active && (
+            <span
+              {...api.getMarkerProps({ value: _min })}
+              className={classes["back-marker"]}
+            >
+              {formatNumber(_min, true)}
+            </span>
+          )}
+          {/* max value */}
+          {active && (
+            <span
+              {...api.getMarkerProps({ value: _max })}
+              className={classes["back-marker"]}
+            >
+              {formatNumber(_max, true)}
+            </span>
+          )}
 
           {/* thumb values */}
           {api.value.map((value, index) => (
@@ -156,15 +163,6 @@ const Slider = ({
               {formatNumber(value, true)}
             </span>
           ))}
-
-          {/* max value */}
-          <span
-            {...api.getMarkerProps({ value: _max })}
-            className={classes.marker}
-            data-faded={active && showMax ? "half" : "full"}
-          >
-            {formatNumber(_max, true)}
-          </span>
         </div>
       </div>
     </Label>
