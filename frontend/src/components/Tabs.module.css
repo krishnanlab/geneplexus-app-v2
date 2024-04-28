@@ -4,9 +4,9 @@
 
 .button {
   padding: 5px 10px;
-  gap: 10px;
   border-bottom: solid 2px var(--light-gray);
   color: var(--dark-gray);
+  cursor: pointer;
   transition:
     color var(--fast),
     border-color var(--fast);
@@ -23,9 +23,5 @@
 }
 
 .content {
-  width: 100%;
-}
-
-.content[hidden] {
-  display: none;
+  display: contents;
 }

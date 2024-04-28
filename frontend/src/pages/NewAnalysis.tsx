@@ -27,10 +27,11 @@ import Button from "@/components/Button";
 import Heading from "@/components/Heading";
 import Mark, { YesNo } from "@/components/Mark";
 import Meta from "@/components/Meta";
-import Radios, { type Option as RadioOption } from "@/components/Radios";
+import Radios from "@/components/Radios";
+import type { Option as RadioOption } from "@/components/Radios";
 import Section from "@/components/Section";
-import type { Option as SelectOption } from "@/components/Select";
-import Select from "@/components/Select";
+import SelectSingle from "@/components/SelectSingle";
+import type { Option as SelectOption } from "@/components/SelectSingle";
 import Table from "@/components/Table";
 import Tabs, { Tab } from "@/components/Tabs";
 import TextBox from "@/components/TextBox";
@@ -229,12 +230,11 @@ const NewAnalysis = () => {
         />
 
         <div className="flex-row gap-sm">
-          <Select
+          <SelectSingle
             label="Species"
             tooltip="Species to lookup genes against and train model with."
             layout="horizontal"
             options={filteredSpeciesOptions}
-            width={120}
             value={speciesTrain}
             onChange={setSpeciesTrain}
           />
@@ -299,31 +299,33 @@ const NewAnalysis = () => {
 
         {checkGenesData && (
           <Tabs>
-            <Tab text="Summary" icon={<FaEye />} className={classes.summary}>
-              <Mark type="success">
-                <strong className={classes.success}>
-                  {formatNumber(checkGenesData.success)} genes
-                </strong>{" "}
-                converted to Entrez
-              </Mark>
-
-              {!!checkGenesData.error && (
-                <Mark type="error">
-                  <strong className={classes.error}>
-                    {formatNumber(checkGenesData.error)} genes
+            <Tab text="Summary" icon={<FaEye />}>
+              <div className={classes.summary}>
+                <Mark type="success">
+                  <strong className={classes.success}>
+                    {formatNumber(checkGenesData.success)} genes
                   </strong>{" "}
-                  couldn't be converted
+                  converted to Entrez
                 </Mark>
-              )}
 
-              <span className={classes.divider} />
+                {!!checkGenesData.error && (
+                  <Mark type="error">
+                    <strong className={classes.error}>
+                      {formatNumber(checkGenesData.error)} genes
+                    </strong>{" "}
+                    couldn't be converted
+                  </Mark>
+                )}
 
-              {checkGenesData.summary.map((row, index) => (
-                <Mark key={index} icon={<FaDna />}>
-                  <strong>{formatNumber(row.positiveGenes)} genes</strong> in{" "}
-                  {row.network} ({formatNumber(row.totalGenes, true)})
-                </Mark>
-              ))}
+                <span className={classes.divider} />
+
+                {checkGenesData.summary.map((row, index) => (
+                  <Mark key={index} icon={<FaDna />}>
+                    <strong>{formatNumber(row.positiveGenes)} genes</strong> in{" "}
+                    {row.network} ({formatNumber(row.totalGenes, true)})
+                  </Mark>
+                ))}
+              </div>
             </Tab>
 
             <Tab text="Detailed" icon={<FaTable />}>
@@ -369,9 +371,8 @@ const NewAnalysis = () => {
           Choose Parameters
         </Heading>
 
-        <Select
+        <SelectSingle
           label="Species"
-          layout="vertical"
           options={filteredSpeciesOptions.map((option) => ({
             ...option,
             ...(option.id === speciesTrain && {
@@ -381,7 +382,6 @@ const NewAnalysis = () => {
           }))}
           value={speciesTest}
           onChange={setSpeciesTest}
-          width={180}
           tooltip="Species for which model predictions will be made. If different from species selected above, model results will be translated into this species."
         />
 
@@ -409,12 +409,12 @@ const NewAnalysis = () => {
         </Heading>
 
         <TextBox
+          className="narrow"
           label="Name"
           tooltip="(Optional) Give your analysis a name to remember it by"
           placeholder="analysis"
           value={name}
           onChange={(value) => setName(value.replaceAll(/[^\w\d-_ ]*/g, ""))}
-          width={300}
         />
 
         <Button

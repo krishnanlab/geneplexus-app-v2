@@ -1,9 +1,7 @@
-.popup {
-  z-index: 999 !important;
-}
-
 .content {
   display: flex;
+  position: absolute;
+  top: 0;
   flex-direction: column;
   max-width: 320px;
   padding: 10px 15px;

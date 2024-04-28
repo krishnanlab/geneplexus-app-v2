@@ -1,5 +1,6 @@
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
 import { useCallback, useMemo, useState } from "react";
+import * as RAC from "react-aria-components";
 import { FaCompressArrowsAlt, FaExpandArrowsAlt } from "react-icons/fa";
 import {
   FaAngleLeft,
@@ -27,13 +28,13 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-  type Table,
 } from "@tanstack/react-table";
 import Button from "@/components/Button";
 import Help from "@/components/Help";
 import Popover from "@/components/Popover";
-import Select from "@/components/Select";
-import type { Option } from "@/components/Select";
+import SelectMulti from "@/components/SelectMulti";
+import type { Option } from "@/components/SelectSingle";
+import SelectSingle from "@/components/SelectSingle";
 import Slider from "@/components/Slider";
 import TextBox from "@/components/TextBox";
 import Tooltip from "@/components/Tooltip";
@@ -290,6 +291,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                           <Tooltip content="Sort this column">
                             <button
                               className={classes["header-button"]}
+                              type="button"
                               data-active={
                                 header.column.getIsSorted() ? "" : undefined
                               }
@@ -311,7 +313,6 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                         {/* header filter */}
                         {header.column.getCanFilter() ? (
                           <Popover
-                            label="Filter this column"
                             content={
                               <Filter
                                 column={header.column}
@@ -319,14 +320,14 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                               />
                             }
                           >
-                            <button
+                            <RAC.Button
                               className={classes["header-button"]}
                               data-active={
                                 header.column.getIsFiltered() ? "" : undefined
                               }
                             >
                               <FaFilter />
-                            </button>
+                            </RAC.Button>
                           </Popover>
                         ) : null}
                       </div>
@@ -382,6 +383,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
         <div className={classes.pagination}>
           <button
             className={classes["page-button"]}
+            type="button"
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
             aria-label="First page"
@@ -390,6 +392,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
           </button>
           <button
             className={classes["page-button"]}
+            type="button"
             onClick={table.previousPage}
             disabled={!table.getCanPreviousPage()}
             aria-label="Previous page"
@@ -399,6 +402,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
           <Tooltip content="Jump to page">
             <button
               className={classes["page-text"]}
+              type="button"
               onClick={() => {
                 const page = parseInt(window.prompt("Jump to page") || "");
                 if (Number.isNaN(page)) return;
@@ -411,6 +415,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
           </Tooltip>
           <button
             className={classes["page-button"]}
+            type="button"
             onClick={table.nextPage}
             disabled={!table.getCanNextPage()}
             aria-label="Next page"
@@ -419,6 +424,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
           </button>
           <button
             className={classes["page-button"]}
+            type="button"
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
             aria-label="Last page"
@@ -429,29 +435,25 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
 
         <div className="flex-row gap-sm">
           {/* per page */}
-          <Select
+          <SelectSingle
             label="Rows"
             layout="horizontal"
             options={perPageOptions}
             onChange={(option) => table.setPageSize(Number(option))}
-            width={70}
           />
           {/* visible columns */}
-          <Select
+          <SelectMulti
             label="Cols"
             layout="horizontal"
-            multi={true}
             options={visibleOptions}
             value={visibleCols}
             onChange={setVisibleCols}
-            width={100}
           />
         </div>
 
         {/* table-wide search */}
         <TextBox
           placeholder="Search"
-          width={140}
           icon={<FaMagnifyingGlass />}
           value={search}
           onChange={setSearch}
@@ -514,6 +516,7 @@ const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
 
     return (
       <Slider
+        label="Filter"
         min={min}
         max={max}
         multi={true}
@@ -541,7 +544,8 @@ const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
     }));
 
     return (
-      <Select
+      <SelectMulti
+        label="Filter"
         options={options}
         value={(column.getFilterValue() as Option["id"][]) ?? options}
         onChange={(value, count) =>
@@ -550,7 +554,6 @@ const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
             count === "all" || count === "none" ? undefined : value,
           )
         }
-        multi={true}
       />
     );
   }
@@ -577,7 +580,8 @@ const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
     ];
 
     return (
-      <Select
+      <SelectSingle
+        label="Filter"
         options={options}
         value={(column.getFilterValue() as Option["id"]) ?? options[0]!}
         onChange={(value) =>

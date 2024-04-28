@@ -1,36 +1,59 @@
 import type { ComponentProps, ReactElement, ReactNode } from "react";
 import { useId, useRef, useState } from "react";
 import { FaXmark } from "react-icons/fa6";
+import classNames from "classnames";
+import Asterisk from "@/components/Asterisk";
 import { useForm } from "@/components/Form";
-import type { LabelProps } from "@/components/Label";
-import Label, { forwardLabelProps } from "@/components/Label";
+import Help from "@/components/Help";
 import classes from "./TextBox.module.css";
 
 type Base = {
+  /** layout of label and control */
+  layout?: "vertical" | "horizontal";
+  /** label content */
+  label?: ReactNode;
+  /** tooltip on help icon */
+  tooltip?: ReactNode;
   /** hint icon to show on side */
   icon?: ReactElement;
   /** text state */
   value?: string;
   /** on text state change */
   onChange?: (value: string) => void;
-  /** field name */
-  name?: string;
+  /** className */
+  className?: string;
 };
 
 type Single = {
   /** single line */
   multi?: false;
-} & Pick<ComponentProps<"input">, "placeholder" | "type" | "autoComplete">;
+} & Pick<
+  ComponentProps<"input">,
+  "placeholder" | "type" | "autoComplete" | "name" | "required"
+>;
 
 type Multi = {
   /** multi-line */
   multi: true;
-} & Pick<ComponentProps<"textarea">, "placeholder" | "autoComplete">;
+} & Pick<
+  ComponentProps<"textarea">,
+  "placeholder" | "autoComplete" | "name" | "required"
+>;
 
-type Props = Base & LabelProps & (Single | Multi);
+type Props = Base & (Single | Multi);
 
 /** single or multi-line text input box */
-const TextBox = ({ multi, icon, value, onChange, name, ...props }: Props) => {
+const TextBox = ({
+  layout = "vertical",
+  label,
+  tooltip,
+  multi,
+  icon,
+  value,
+  onChange,
+  className,
+  ...props
+}: Props) => {
   const ref = useRef<HTMLInputElement & HTMLTextAreaElement>(null);
 
   /** track whether input is blank */
@@ -45,8 +68,8 @@ const TextBox = ({ multi, icon, value, onChange, name, ...props }: Props) => {
   if (!blank || value)
     sideElement = (
       <button
-        type="button"
         className={classes.side}
+        type="button"
         onClick={() => {
           if (ref.current) ref.current.value = "";
           onChange?.("");
@@ -59,7 +82,7 @@ const TextBox = ({ multi, icon, value, onChange, name, ...props }: Props) => {
     );
   else if (icon) sideElement = <div className={classes.side}>{icon}</div>;
 
-  /** link to form parent */
+  /** link to parent form component */
   const form = useForm();
 
   /** input field */
@@ -73,7 +96,6 @@ const TextBox = ({ multi, icon, value, onChange, name, ...props }: Props) => {
         onChange?.(event.target.value);
         setBlank(!event.target.value);
       }}
-      name={name}
       form={form}
       {...props}
     />
@@ -88,21 +110,33 @@ const TextBox = ({ multi, icon, value, onChange, name, ...props }: Props) => {
         onChange?.(event.target.value);
         setBlank(!event.target.value);
       }}
-      name={name}
       form={form}
       {...props}
     />
   );
 
+  const isLabel = label || tooltip || props.required;
+
   return (
-    <Label width="100%" {...forwardLabelProps(props, id)}>
-      <div className={classes.container}>
+    <div
+      className={classNames(classes.container, classes[layout], className)}
+      style={{ display: isLabel ? "" : "contents" }}
+    >
+      {isLabel && (
+        <label className={classes.label}>
+          {label}
+          {tooltip && <Help tooltip={tooltip} />}
+          {props.required && <Asterisk />}
+        </label>
+      )}
+
+      <div className={classes.wrapper}>
         {input}
 
         {/* side element */}
         {sideElement}
       </div>
-    </Label>
+    </div>
   );
 };
 

@@ -5,6 +5,7 @@ import type {
   ReactNode,
 } from "react";
 import { forwardRef } from "react";
+import * as RAC from "react-aria-components";
 import classNames from "classnames";
 import { useForm } from "@/components/Form";
 import Link from "@/components/Link";
@@ -17,7 +18,7 @@ type Base = {
   /** whether to flip text/icon sides */
   flip?: boolean;
   /** look */
-  design?: "hollow" | "normal" | "critical";
+  design?: "normal" | "hollow" | "critical";
   /** class */
   className?: string;
 };
@@ -76,7 +77,7 @@ const Button = forwardRef(
       [classes.square!]: !text && !!icon,
     });
 
-    /** link to form parent */
+    /** link to parent form component */
     const form = useForm();
 
     /** if "to", render as link */
@@ -95,7 +96,8 @@ const Button = forwardRef(
     /** otherwise, render as button */ else
       return (
         <Tooltip content={tooltip}>
-          <button
+          {/* needs to be react-aria button for popover to work */}
+          <RAC.Button
             ref={ref as ForwardedRef<HTMLButtonElement>}
             className={_class}
             type="button"
@@ -103,7 +105,7 @@ const Button = forwardRef(
             {...props}
           >
             {children}
-          </button>
+          </RAC.Button>
         </Tooltip>
       );
   },

@@ -11,7 +11,7 @@ import { LuLightbulb } from "react-icons/lu";
 import { PiGraphBold } from "react-icons/pi";
 import { useLocation } from "react-router";
 import { submitAnalysis } from "@/api/api";
-import { type Analysis, type AnalysisInputs } from "@/api/types";
+import type { Analysis, AnalysisInputs } from "@/api/types";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Heading from "@/components/Heading";

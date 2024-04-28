@@ -15,7 +15,7 @@ type Props = {
   /** label content */
   label?: ReactNode;
   /** whether to put label above, to left, or have no wrapping element at all */
-  layout?: "horizontal" | "vertical" | "none";
+  layout?: "vertical" | "horizontal" | "none";
   /** tooltip content */
   tooltip?: ReactNode;
   /** required field */

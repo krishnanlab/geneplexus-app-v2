@@ -1,10 +1,9 @@
 import type { ReactElement, ReactNode } from "react";
-import { Fragment, useId } from "react";
+import { Fragment } from "react";
+import * as RAC from "react-aria-components";
 import { useSearchParams } from "react-router-dom";
 import classNames from "classnames";
 import { kebabCase } from "lodash";
-import { normalizeProps, useMachine } from "@zag-js/react";
-import * as tabs from "@zag-js/tabs";
 import Tooltip from "@/components/Tooltip";
 import classes from "./Tabs.module.css";
 
@@ -22,8 +21,7 @@ type Props = {
 
 const Tabs = ({ syncWithUrl = "", children, defaultValue }: Props) => {
   /** tab props */
-  const tabProps = [children]
-    .flat()
+  const tabProps = (Array.isArray(children) ? children : [children])
     .filter((child): child is ReactElement => !!child)
     .map((child) => ({
       ...child.props,
@@ -36,71 +34,47 @@ const Tabs = ({ syncWithUrl = "", children, defaultValue }: Props) => {
   /** sync selected tab with url */
   const [searchParams, setSearchParams] = useSearchParams();
 
-  /** set up zag */
-  const [state, send] = useMachine(
-    tabs.machine({
-      /** unique id for component instance */
-      id: useId(),
-      value: defaultValue,
-    }),
-    /** https://zagjs.com/overview/programmatic-control#controlled-usage-in-reacts */
-    {
-      context: syncWithUrl
-        ? {
-            /** initialize selected tab state */
-            value: searchParams.get(syncWithUrl) ?? defaultValue,
-            /** when selected tab changes */
-            onValueChange: (details) =>
-              /** note: https://github.com/remix-run/react-router/issues/8393 */
-              setSearchParams(
-                (prev) => {
-                  prev.set(syncWithUrl, details.value);
-                  return prev;
-                },
-                { replace: true },
-              ),
-          }
-        : undefined,
-    },
-  );
-
-  /** interact with zag */
-  const api = tabs.connect(state, send, normalizeProps);
-
   return (
-    <div {...api.rootProps} className={classes.container}>
-      {/* list */}
-      <div {...api.listProps} className="flex-row gap-sm">
+    <RAC.Tabs
+      className={classes.container}
+      selectedKey={searchParams.get(syncWithUrl)}
+      defaultSelectedKey={defaultValue}
+      onSelectionChange={(value) =>
+        setSearchParams(
+          (prev) => {
+            prev.set(syncWithUrl, String(value));
+            return prev;
+          },
+          { replace: true },
+        )
+      }
+    >
+      {/* tab buttons */}
+      <RAC.TabList className="flex-row gap-sm">
         {tabProps.map((tab, index) => (
           <Tooltip key={index} content={tab.tooltip}>
-            <button
-              {...api.getTriggerProps({ value: tab.id })}
-              className={classes.button}
-              type="button"
+            <RAC.Tab
+              id={tab.id}
+              className={classNames(classes.button, "flex-row", "gap-xs")}
             >
               {tab.text}
               {tab.icon}
-            </button>
+            </RAC.Tab>
           </Tooltip>
         ))}
-      </div>
+      </RAC.TabList>
 
       {/* panels */}
       {tabProps.map((tab, index) => (
-        <div
+        <RAC.TabPanel
           key={index}
-          {...api.getContentProps({ value: tab.id })}
-          className={classNames(
-            "flex-col",
-            "gap-lg",
-            classes.content,
-            tab.className,
-          )}
+          id={tab.id}
+          className={classNames("flex-col", "gap-lg", classes.content)}
         >
           {tab.children}
-        </div>
+        </RAC.TabPanel>
       ))}
-    </div>
+    </RAC.Tabs>
   );
 };
 
@@ -116,8 +90,6 @@ type TabProps = {
   icon?: ReactElement;
   /** tab button tooltip content */
   tooltip?: ReactNode;
-  /** class on panel content container */
-  className?: string;
   /** tab panel content */
   children: ReactNode;
 };

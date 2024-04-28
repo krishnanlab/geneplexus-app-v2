@@ -92,6 +92,7 @@ const TableOfContents = () => {
         <Tooltip content={open ? "Close" : "Table of contents"}>
           <button
             className={classes.button}
+            type="button"
             aria-expanded={open}
             onClick={() => setOpen(!open)}
           >

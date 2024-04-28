@@ -20,7 +20,8 @@ import { clamp, cloneDeep, truncate } from "lodash";
 import type { AnalysisInputs, AnalysisResults } from "@/api/types";
 import Button from "@/components/Button";
 import CheckBox from "@/components/CheckBox";
-import Select, { type Option } from "@/components/Select";
+import type { Option } from "@/components/Select";
+import SelectSingle from "@/components/SelectSingle";
 import Slider from "@/components/Slider";
 import { downloadSvg } from "@/util/download";
 import { lerp } from "@/util/math";
@@ -548,7 +549,7 @@ const Network = ({ inputs, results }: Props) => {
 
       {/* controls */}
       <div className="flex-row gap-md">
-        <Select
+        <SelectSingle
           label="Node labels"
           layout="horizontal"
           options={labelKeyOptions}

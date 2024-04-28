@@ -37,7 +37,7 @@ button,
 li,
 label,
 blockquote {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 /** headings */
@@ -214,7 +214,6 @@ button {
 input,
 textarea {
   appearance: none;
-  width: 100px;
   min-width: 0;
   padding: 5px;
   border: solid 1px black;
@@ -239,7 +238,6 @@ textarea {
 
 :focus-visible,
 label:has(input:focus-visible) {
-  border-radius: var(--rounded) !important;
   outline: solid 2px currentColor;
   outline-offset: 2px;
 }

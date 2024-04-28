@@ -24,7 +24,6 @@ import {
   FaSliders,
   FaStop,
   FaTableCells,
-  FaTag,
 } from "react-icons/fa6";
 import { sample } from "lodash";
 import CustomIcon from "@/assets/custom-icon.svg?react";
@@ -35,14 +34,14 @@ import CheckBox from "@/components/CheckBox";
 import Collapsible from "@/components/Collapsible";
 import Form from "@/components/Form";
 import Heading from "@/components/Heading";
-import Label from "@/components/Label";
 import Link from "@/components/Link";
 import Meta from "@/components/Meta";
 import NumberBox from "@/components/NumberBox";
 import Popover from "@/components/Popover";
 import Radios from "@/components/Radios";
 import Section from "@/components/Section";
-import Select from "@/components/Select";
+import SelectMulti from "@/components/SelectMulti";
+import SelectSingle from "@/components/SelectSingle";
 import Slider from "@/components/Slider";
 import Table from "@/components/Table";
 import Tabs, { Tab } from "@/components/Tabs";
@@ -254,13 +253,26 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
           Text Box
         </Heading>
         <div className="grid full">
-          <TextBox placeholder="Search" onChange={logChange} />
+          <TextBox label="Label" placeholder="Search" onChange={logChange} />
           <TextBox
+            label="Label"
             placeholder="Search"
             multi={true}
             icon={<FaMagnifyingGlass />}
           />
-          <TextBox label="Label" placeholder="Search" />
+          <TextBox
+            layout="horizontal"
+            label="Label"
+            placeholder="Search"
+            onChange={logChange}
+          />
+          <TextBox
+            layout="horizontal"
+            label="Label"
+            placeholder="Search"
+            multi={true}
+            icon={<FaMagnifyingGlass />}
+          />
         </div>
       </Section>
 
@@ -270,8 +282,9 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
           Select
         </Heading>
         <div className="flex-row gap-md">
-          <Select
+          <SelectSingle
             label="Single"
+            tooltip="Tooltip"
             options={
               [
                 { id: "1", text: "Lorem" },
@@ -281,10 +294,10 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
             }
             onChange={logChange}
           />
-          <Select
-            label="Multi"
+          <SelectMulti
             layout="horizontal"
-            multi={true}
+            label="Multi"
+            tooltip="Tooltip"
             options={
               [
                 { id: "a", text: "Lorem" },
@@ -326,8 +339,8 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
             onChange={logChange}
           />
           <Slider
-            label="Range"
             layout="horizontal"
+            label="Range"
             multi={true}
             min={0}
             max={10000}
@@ -344,19 +357,21 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
         </Heading>
         <div className="flex-row gap-md">
           <NumberBox
-            label="Small"
+            label="Vertical"
             min={0}
             max={100}
             step={1}
             onChange={logChange}
+            tooltip="Tooltip"
           />
           <NumberBox
-            label="Big"
             layout="horizontal"
+            label="Horizontal"
             min={-10000}
             max={10000}
             step={100}
             onChange={logChange}
+            tooltip="Tooltip"
           />
         </div>
       </Section>
@@ -368,6 +383,7 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
         </Heading>
         <Radios
           label="Choice"
+          tooltip="Tooltip"
           options={
             [
               { id: "first", primary: "Primary lorem ipsum" },
@@ -378,7 +394,7 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
               },
               {
                 id: "third",
-                primary: "Primar lorem ipsumy",
+                primary: "Primar lorem ipsum",
                 icon: <FaCat />,
               },
             ] as const
@@ -594,7 +610,6 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
         </Heading>
         <div className="flex-row gap-sm">
           <Popover
-            label="Interactive content"
             content={
               <>
                 <p>
@@ -605,7 +620,9 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
                 </p>
                 <div className="flex-row gap-sm">
                   <Button text="Save" />
-                  <Select
+                  <SelectSingle
+                    layout="horizontal"
+                    label="Select"
                     options={
                       [
                         { id: "csv", text: "CSV" },
@@ -621,29 +638,6 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
           >
             <Button text="Menu" />
           </Popover>
-        </div>
-      </Section>
-
-      {/* label (for testing; not typically used directly) */}
-      <Section>
-        <Heading level={2} icon={<FaTag />}>
-          Label
-        </Heading>
-        <div className="flex-row gap-sm">
-          <Label htmlFor="123" label="Label" required={true} tooltip="Tooltip">
-            <input id="123" name="suppress lighthouse" />
-          </Label>
-          <Label
-            htmlFor="456"
-            label="Label"
-            layout="horizontal"
-            tooltip="Tooltip"
-          >
-            <input id="456" name="suppress lighthouse" />
-          </Label>
-          <Label htmlFor="789" layout="none" tooltip="Tooltip">
-            <input id="789" name="suppress lighthouse" />
-          </Label>
         </div>
       </Section>
 
@@ -679,9 +673,8 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
                 ]}
                 name="order"
               />
-              <Select
+              <SelectSingle
                 label="Select"
-                multi={true}
                 options={
                   [
                     { id: "a", text: "Lorem" },
@@ -689,10 +682,21 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
                     { id: "c", text: "Dolor", info: "123", icon: <FaHorse /> },
                   ] as const
                 }
-                name="select"
+                name="select-single"
+              />
+              <SelectMulti
+                label="Select"
+                options={
+                  [
+                    { id: "a", text: "Lorem" },
+                    { id: "b", text: "Ipsum", info: "123" },
+                    { id: "c", text: "Dolor", info: "123", icon: <FaHorse /> },
+                  ] as const
+                }
+                name="select-multi"
               />
             </div>
-            <CheckBox label="I consent" name="consent" />
+            <CheckBox label="I consent" name="consent" required={true} />
             <Button type="submit" text="Submit" design="critical" />
           </Form>
         </div>
