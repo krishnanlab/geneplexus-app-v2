@@ -1,11 +1,11 @@
 import type { ReactElement, ReactNode } from "react";
-import * as RAC from "react-aria-components";
+import * as Radix from "@radix-ui/react-popover";
 import classes from "./Popover.module.css";
 
 type Props = {
   /** content of popup */
   content: ReactNode;
-  /** trigger (must be RAC Button) */
+  /** element that triggers popup on click */
   children: ReactElement;
 };
 
@@ -15,13 +15,23 @@ type Props = {
  */
 const Popover = ({ content, children }: Props) => {
   return (
-    <RAC.DialogTrigger>
-      {children}
-      <RAC.Popover className={classes.content}>
-        <RAC.OverlayArrow className={classes.arrow} />
-        <RAC.Dialog>{content}</RAC.Dialog>
-      </RAC.Popover>
-    </RAC.DialogTrigger>
+    <Radix.Root>
+      <Radix.Trigger asChild={true}>{children}</Radix.Trigger>
+      <Radix.Portal>
+        <Radix.Content
+          className={classes.content}
+          sideOffset={5}
+          side="top"
+          collisionPadding={{
+            top: document.querySelector("header")?.clientHeight,
+          }}
+          onPointerDownOutside={console.log}
+        >
+          {content}
+          <Radix.Arrow className={classes.arrow} />
+        </Radix.Content>
+      </Radix.Portal>
+    </Radix.Root>
   );
 };
 

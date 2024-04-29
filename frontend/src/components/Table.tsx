@@ -1,6 +1,5 @@
 import type { CSSProperties, HTMLAttributes, ReactNode } from "react";
 import { useCallback, useMemo, useState } from "react";
-import * as RAC from "react-aria-components";
 import { FaCompressArrowsAlt, FaExpandArrowsAlt } from "react-icons/fa";
 import {
   FaAngleLeft,
@@ -290,8 +289,8 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                         {header.column.getCanSort() && (
                           <Tooltip content="Sort this column">
                             <button
-                              className={classes["header-button"]}
                               type="button"
+                              className={classes["header-button"]}
                               data-active={
                                 header.column.getIsSorted() ? "" : undefined
                               }
@@ -320,14 +319,15 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                               />
                             }
                           >
-                            <RAC.Button
+                            <button
+                              type="button"
                               className={classes["header-button"]}
                               data-active={
                                 header.column.getIsFiltered() ? "" : undefined
                               }
                             >
                               <FaFilter />
-                            </RAC.Button>
+                            </button>
                           </Popover>
                         ) : null}
                       </div>
@@ -382,8 +382,8 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
         {/* pagination */}
         <div className={classes.pagination}>
           <button
-            className={classes["page-button"]}
             type="button"
+            className={classes["page-button"]}
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
             aria-label="First page"
@@ -391,8 +391,8 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
             <FaAnglesLeft />
           </button>
           <button
-            className={classes["page-button"]}
             type="button"
+            className={classes["page-button"]}
             onClick={table.previousPage}
             disabled={!table.getCanPreviousPage()}
             aria-label="Previous page"
@@ -401,8 +401,8 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
           </button>
           <Tooltip content="Jump to page">
             <button
-              className={classes["page-text"]}
               type="button"
+              className={classes["page-text"]}
               onClick={() => {
                 const page = parseInt(window.prompt("Jump to page") || "");
                 if (Number.isNaN(page)) return;
@@ -414,8 +414,8 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
             </button>
           </Tooltip>
           <button
-            className={classes["page-button"]}
             type="button"
+            className={classes["page-button"]}
             onClick={table.nextPage}
             disabled={!table.getCanNextPage()}
             aria-label="Next page"
@@ -423,8 +423,8 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
             <FaAngleRight />
           </button>
           <button
-            className={classes["page-button"]}
             type="button"
+            className={classes["page-button"]}
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
             aria-label="Last page"
@@ -453,6 +453,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
 
         {/* table-wide search */}
         <TextBox
+          className={classes.search}
           placeholder="Search"
           icon={<FaMagnifyingGlass />}
           value={search}

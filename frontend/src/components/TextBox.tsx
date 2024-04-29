@@ -5,6 +5,7 @@ import classNames from "classnames";
 import Asterisk from "@/components/Asterisk";
 import { useForm } from "@/components/Form";
 import Help from "@/components/Help";
+import Tooltip from "@/components/Tooltip";
 import classes from "./TextBox.module.css";
 
 type Base = {
@@ -56,24 +57,23 @@ const TextBox = ({
 }: Props) => {
   const ref = useRef<HTMLInputElement & HTMLTextAreaElement>(null);
 
-  /** track whether input is blank */
-  const [blank, setBlank] = useState(!value?.trim());
+  /** local text state */
+  const [text, setText] = useState(value ?? "");
 
   /** unique id for component instance */
   const id = useId();
 
   /** side element */
   let sideElement: ReactNode = "";
-
-  if (!blank || value)
+  if (text || value)
     sideElement = (
       <button
-        className={classes.side}
         type="button"
+        className={classes.side}
         onClick={() => {
           if (ref.current) ref.current.value = "";
           onChange?.("");
-          setBlank(true);
+          setText("");
         }}
         aria-label="Clear text"
       >
@@ -94,7 +94,7 @@ const TextBox = ({
       value={value}
       onChange={(event) => {
         onChange?.(event.target.value);
-        setBlank(!event.target.value);
+        setText(event.target.value);
       }}
       form={form}
       {...props}
@@ -103,26 +103,23 @@ const TextBox = ({
     <input
       ref={ref}
       id={id}
-      className={classes.input}
+      className={classNames(
+        classes.input,
+        sideElement && classes["input-side"],
+      )}
       value={value}
-      data-side={sideElement ? "" : undefined}
       onChange={(event) => {
         onChange?.(event.target.value);
-        setBlank(!event.target.value);
+        setText(event.target.value);
       }}
       form={form}
       {...props}
     />
   );
 
-  const isLabel = label || tooltip || props.required;
-
   return (
-    <div
-      className={classNames(classes.container, classes[layout], className)}
-      style={{ display: isLabel ? "" : "contents" }}
-    >
-      {isLabel && (
+    <div className={classNames(classes.container, classes[layout], className)}>
+      {(label || props.required) && (
         <label className={classes.label}>
           {label}
           {tooltip && <Help tooltip={tooltip} />}
@@ -130,12 +127,15 @@ const TextBox = ({
         </label>
       )}
 
-      <div className={classes.wrapper}>
-        {input}
+      {/* if no label but need tooltip, put it around input */}
+      <Tooltip content={!label && tooltip ? tooltip : undefined}>
+        <div className={classes.wrapper}>
+          {input}
 
-        {/* side element */}
-        {sideElement}
-      </div>
+          {/* side element */}
+          {sideElement}
+        </div>
+      </Tooltip>
     </div>
   );
 };

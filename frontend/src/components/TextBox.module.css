@@ -67,7 +67,7 @@ button.side:hover {
   height: 40px;
 }
 
-.input[data-side] {
+.input-side {
   padding-right: 40px;
 }
 

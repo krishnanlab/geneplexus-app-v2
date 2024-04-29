@@ -14,11 +14,10 @@ import {
   useMatches,
   useRouteLoaderData,
 } from "react-router-dom";
-import FloatButtons from "@/components/FloatButtons";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import TableOfContents from "@/components/TableOfContents";
-import Toasts from "@/components/Toasts";
+import ViewCorner from "@/components/ViewCorner";
 import About from "@/pages/About";
 import Analysis from "@/pages/Analysis";
 import Home from "@/pages/Home";
@@ -59,8 +58,7 @@ const Layout = () => {
         <Outlet />
       </main>
       <Footer />
-      <Toasts />
-      <FloatButtons />
+      <ViewCorner />
     </IconContext.Provider>
   );
 };

@@ -1,10 +1,11 @@
-.container {
+.root {
   display: contents;
 }
 
 .button {
   padding: 5px 10px;
   border-bottom: solid 2px var(--light-gray);
+  border-radius: 0;
   color: var(--dark-gray);
   cursor: pointer;
   transition:
@@ -17,7 +18,7 @@
   color: var(--deep);
 }
 
-.button[data-selected] {
+.button[data-state="active"] {
   border-color: var(--accent);
   color: var(--accent);
 }

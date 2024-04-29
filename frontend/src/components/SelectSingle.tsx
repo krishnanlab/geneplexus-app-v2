@@ -84,7 +84,7 @@ const SelectSingle = <O extends Option>({
         {tooltip && <Help tooltip={tooltip} />}
       </HUI.Listbox.Label>
 
-      <Float placement="bottom-start">
+      <Float placement="bottom-start" floatingAs={Fragment} adaptiveWidth>
         {/* button */}
         <HUI.Listbox.Button
           className={classes.button}
@@ -115,7 +115,7 @@ const SelectSingle = <O extends Option>({
         </HUI.Listbox.Button>
 
         {/* dropdown */}
-        <HUI.Listbox.Options className={classes.list}>
+        <HUI.Listbox.Options className={classes.options}>
           {options.map((option) => (
             <HUI.Listbox.Option key={option.id} value={option.id} as={Fragment}>
               {({ active, selected }) => (
@@ -125,14 +125,17 @@ const SelectSingle = <O extends Option>({
                     active && classes["option-active"],
                   )}
                 >
+                  {/* check mark */}
                   <VscCircleFilled
                     className={classes.check}
                     style={{ opacity: selected ? 1 : 0 }}
                   />
+                  {/* text */}
                   <span className={classes.text}>{option.text}</span>
                   <span className={classNames(classes.info, "secondary")}>
                     {option.info}
                   </span>
+                  {/* icon */}
                   {option.icon &&
                     cloneElement(option.icon, {
                       className: classNames(classes.icon, "secondary"),

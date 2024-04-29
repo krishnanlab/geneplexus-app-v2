@@ -85,7 +85,7 @@ const SelectMulti = <O extends Option>({
               {tooltip && <Help tooltip={tooltip} />}
             </HUI.Listbox.Label>
 
-            <Float placement="bottom-start">
+            <Float placement="bottom-start" floatingAs={Fragment} adaptiveWidth>
               {/* button */}
               <HUI.Listbox.Button className={classes.button}>
                 <span className="truncate">{selectedLabel}</span>
@@ -93,7 +93,7 @@ const SelectMulti = <O extends Option>({
               </HUI.Listbox.Button>
 
               {/* dropdown */}
-              <HUI.Listbox.Options className={classes.list}>
+              <HUI.Listbox.Options className={classes.options}>
                 {options.map((option) => (
                   <HUI.Listbox.Option
                     key={option.id}
@@ -126,7 +126,7 @@ const SelectMulti = <O extends Option>({
               </HUI.Listbox.Options>
             </Float>
 
-            {/* for form usage */}
+            {/* for FormData */}
             <select
               className="sr-only"
               tabIndex={-1}

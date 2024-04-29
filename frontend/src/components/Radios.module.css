@@ -1,7 +1,11 @@
 .container {
   display: inline-flex;
+  appearance: none;
   flex-direction: column;
+  margin: 0;
+  padding: 0;
   gap: 10px;
+  border: none;
 }
 
 .label {

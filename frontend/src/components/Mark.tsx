@@ -24,17 +24,15 @@ const types = {
 };
 
 /** icon and text with color */
-const Mark = ({ type = "info", icon, children }: Props) => {
-  return (
-    <span
-      className={classes.mark}
-      style={{ "--color": types[type].color } as CSSProperties}
-    >
-      {icon ?? types[type].icon}
-      <div>{children}</div>
-    </span>
-  );
-};
+const Mark = ({ type = "info", icon, children }: Props) => (
+  <span
+    className={classes.mark}
+    style={{ "--color": types[type].color } as CSSProperties}
+  >
+    {icon ?? types[type].icon}
+    <div>{children}</div>
+  </span>
+);
 
 export default Mark;
 

@@ -1,9 +1,9 @@
 import type { ReactElement, ReactNode } from "react";
 import { Fragment } from "react";
-import * as RAC from "react-aria-components";
 import { useSearchParams } from "react-router-dom";
 import classNames from "classnames";
 import { kebabCase } from "lodash";
+import * as Radix from "@radix-ui/react-tabs";
 import Tooltip from "@/components/Tooltip";
 import classes from "./Tabs.module.css";
 
@@ -21,7 +21,7 @@ type Props = {
 
 const Tabs = ({ syncWithUrl = "", children, defaultValue }: Props) => {
   /** tab props */
-  const tabProps = (Array.isArray(children) ? children : [children])
+  const tabs = (Array.isArray(children) ? children : [children])
     .filter((child): child is ReactElement => !!child)
     .map((child) => ({
       ...child.props,
@@ -29,17 +29,16 @@ const Tabs = ({ syncWithUrl = "", children, defaultValue }: Props) => {
       id: kebabCase(child.props.text),
     }));
 
-  defaultValue ??= tabProps[0]?.id;
+  defaultValue ??= tabs[0]?.id;
 
   /** sync selected tab with url */
   const [searchParams, setSearchParams] = useSearchParams();
 
   return (
-    <RAC.Tabs
-      className={classes.container}
-      selectedKey={searchParams.get(syncWithUrl)}
-      defaultSelectedKey={defaultValue}
-      onSelectionChange={(value) =>
+    <Radix.Root
+      className={classes.root}
+      defaultValue={searchParams.get(syncWithUrl) ?? defaultValue}
+      onValueChange={(value) =>
         setSearchParams(
           (prev) => {
             prev.set(syncWithUrl, String(value));
@@ -50,31 +49,31 @@ const Tabs = ({ syncWithUrl = "", children, defaultValue }: Props) => {
       }
     >
       {/* tab buttons */}
-      <RAC.TabList className="flex-row gap-sm">
-        {tabProps.map((tab, index) => (
+      <Radix.List className="flex-row gap-sm">
+        {tabs.map((tab, index) => (
           <Tooltip key={index} content={tab.tooltip}>
-            <RAC.Tab
-              id={tab.id}
+            <Radix.Trigger
+              value={tab.id}
               className={classNames(classes.button, "flex-row", "gap-xs")}
             >
               {tab.text}
               {tab.icon}
-            </RAC.Tab>
+            </Radix.Trigger>
           </Tooltip>
         ))}
-      </RAC.TabList>
+      </Radix.List>
 
       {/* panels */}
-      {tabProps.map((tab, index) => (
-        <RAC.TabPanel
+      {tabs.map((tab, index) => (
+        <Radix.Content
           key={index}
-          id={tab.id}
+          value={tab.id}
           className={classNames("flex-col", "gap-lg", classes.content)}
         >
           {tab.children}
-        </RAC.TabPanel>
+        </Radix.Content>
       ))}
-    </RAC.Tabs>
+    </Radix.Root>
   );
 };
 

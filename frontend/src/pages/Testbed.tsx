@@ -58,7 +58,7 @@ const logChange = (...args: unknown[]) => {
 };
 
 /** test and example usage of formatting, elements, components, etc. */
-const Testbed = () => {
+const TestbedPage = () => {
   return (
     <>
       <Meta title="Testbed" />
@@ -505,24 +505,22 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
         <Heading level={2} icon={<FaArrowsUpDown />}>
           Collapsible
         </Heading>
-        <Collapsible
-          text="Expand Me"
-          tooltip="Tooltip"
-          className="flex-col gap-md"
-        >
-          <p>
-            Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            Facilisis sed odio morbi quis commodo odio aenean sed. Urna cursus
-            eget nunc scelerisque viverra mauris in aliquam. Elementum integer
-            enim neque volutpat ac tincidunt vitae semper quis. Non diam
-            phasellus vestibulum lorem sed risus. Amet luctus venenatis lectus
-            magna.
-          </p>
-          <div className="flex-row gap-md">
-            <span>abc</span>
-            <span>123</span>
-            <span>xyz</span>
+        <Collapsible text="Expand Me" tooltip="Tooltip">
+          <div className="flex-col gap-md">
+            <p>
+              Lorem ipsum dolor sit amet consectetur adipiscing elit, sed do
+              eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              Facilisis sed odio morbi quis commodo odio aenean sed. Urna cursus
+              eget nunc scelerisque viverra mauris in aliquam. Elementum integer
+              enim neque volutpat ac tincidunt vitae semper quis. Non diam
+              phasellus vestibulum lorem sed risus. Amet luctus venenatis lectus
+              magna.
+            </p>
+            <div className="flex-row gap-md">
+              <span>abc</span>
+              <span>123</span>
+              <span>xyz</span>
+            </div>
           </div>
         </Collapsible>
       </Section>
@@ -738,4 +736,4 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
   );
 };
 
-export default Testbed;
+export default TestbedPage;

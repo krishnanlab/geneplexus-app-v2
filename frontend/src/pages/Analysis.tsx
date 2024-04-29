@@ -29,7 +29,7 @@ import Summary from "@/pages/analysis/Summary";
 import { downloadJson } from "@/util/download";
 import { useQuery } from "@/util/hooks";
 
-const Analysis = () => {
+const AnalysisPage = () => {
   /** get info and state from route */
   const location = useLocation();
   const state = location.state ?? {};
@@ -161,4 +161,4 @@ const Analysis = () => {
   );
 };
 
-export default Analysis;
+export default AnalysisPage;

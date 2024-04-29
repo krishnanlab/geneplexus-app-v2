@@ -70,3 +70,7 @@
 .page-button:hover {
   color: var(--deep);
 }
+
+.search {
+  max-width: 150px;
+}

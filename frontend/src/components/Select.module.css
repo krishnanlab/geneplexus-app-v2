@@ -23,6 +23,7 @@
   padding: 5px;
   gap: 10px;
   border-bottom: solid 2px currentColor;
+  border-radius: 0;
   color: var(--accent);
   text-align: left;
   transition: color var(--fast);
@@ -36,9 +37,8 @@
   flex-grow: 1;
 }
 
-.list {
+.options {
   z-index: 999;
-  width: 100%;
   min-width: max-content;
   margin: 0;
   padding: 0;

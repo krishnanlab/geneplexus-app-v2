@@ -96,8 +96,7 @@ const Button = forwardRef(
     /** otherwise, render as button */ else
       return (
         <Tooltip content={tooltip}>
-          {/* needs to be react-aria button for popover to work */}
-          <RAC.Button
+          <button
             ref={ref as ForwardedRef<HTMLButtonElement>}
             className={_class}
             type="button"
@@ -105,7 +104,7 @@ const Button = forwardRef(
             {...props}
           >
             {children}
-          </RAC.Button>
+          </button>
         </Tooltip>
       );
   },

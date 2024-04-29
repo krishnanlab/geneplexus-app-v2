@@ -102,7 +102,7 @@ const genesetContextOptions: RadioOption<GenesetContext>[] = [
   },
 ];
 
-const NewAnalysis = () => {
+const NewAnalysisPage = () => {
   /** raw text list of input gene ids */
   const [inputGenes, setInputGenes] = useState("");
   const [debouncedInputGenes] = useDebounce(inputGenes, 500);
@@ -427,4 +427,4 @@ const NewAnalysis = () => {
   );
 };
 
-export default NewAnalysis;
+export default NewAnalysisPage;

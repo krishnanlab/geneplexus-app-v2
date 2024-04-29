@@ -1,6 +1,4 @@
 import type { CSSProperties } from "react";
-import { useRef } from "react";
-import * as RAC from "react-aria-components";
 import {
   FaCircleCheck,
   FaCircleExclamation,
@@ -9,10 +7,8 @@ import {
   FaXmark,
 } from "react-icons/fa6";
 import classNames from "classnames";
+import { atom, getDefaultStore, useAtom } from "jotai";
 import { uniqueId } from "lodash";
-import { useToast, useToastRegion } from "@react-aria/toast";
-import { ToastQueue, useToastQueue } from "@react-stately/toast";
-import type { QueuedToast, ToastState } from "@react-stately/toast";
 import Loading from "@/assets/loading.svg?react";
 import classes from "./Toasts.module.css";
 
@@ -32,20 +28,28 @@ type Toast = {
   type: keyof typeof types;
   /** content */
   text: string;
+  /** close timer */
+  timer: number;
 };
 
 /** list of "toasts" (notifications) in corner of screen. singleton. */
 const Toasts = () => {
-  const ref = useRef(null);
-
-  /** toasts state */
-  const state = useToastQueue<Toast>(toasts);
-  const { regionProps } = useToastRegion({}, state, ref);
+  const [getToasts] = useAtom(toasts);
 
   return (
-    <div ref={ref} {...regionProps} className={classes.list}>
-      {state.visibleToasts.toReversed().map((toast) => (
-        <Toast key={toast.key} toast={toast} state={state} />
+    <div className={classes.list}>
+      {getToasts.map((toast, index) => (
+        <div
+          key={index}
+          className={classNames(classes.toast, "card")}
+          style={{ "--color": types[toast.type].color } as CSSProperties}
+        >
+          {types[toast.type].icon}
+          <div role="alert">{toast.text}</div>
+          <button>
+            <FaXmark />
+          </button>
+        </div>
       ))}
     </div>
   );
@@ -53,59 +57,43 @@ const Toasts = () => {
 
 export default Toasts;
 
-type Props = {
-  toast: QueuedToast<Toast>;
-  state: ToastState<Toast>;
-};
-
-/** individual toast */
-const Toast = ({ state, toast }: Props) => {
-  const ref = useRef(null);
-
-  /** toast state */
-  const { toastProps, titleProps, closeButtonProps } = useToast(
-    { toast },
-    state,
-    ref,
-  );
-
-  /** toast details */
-  const {
-    content: { type, text },
-  } = toast;
-
-  return (
-    <div
-      ref={ref}
-      {...toastProps}
-      className={classNames(classes.toast, "card")}
-      style={{ "--color": types[type].color } as CSSProperties}
-    >
-      {types[type].icon}
-      <div {...titleProps}>{text}</div>
-      <RAC.Button {...closeButtonProps}>
-        <FaXmark />
-      </RAC.Button>
-    </div>
-  );
-};
-
 /** global toasts */
-const toasts = new ToastQueue<Toast>({ maxVisibleToasts: 5 });
+const toasts = atom<Toast[]>([]);
+
+/** add toast to end */
+const addToast = (toast: Toast) => {
+  removeToast(toast.id);
+  const newToasts = getDefaultStore().get(toasts).concat([toast]);
+  getDefaultStore().set(toasts, newToasts);
+};
+
+/** remove toast by id */
+const removeToast = (id: Toast["id"]) => {
+  const newToasts = getDefaultStore()
+    .get(toasts)
+    .filter((toast) => {
+      const existing = toast.id === id;
+      if (existing) window.clearTimeout(toast.timer);
+      return !existing;
+    });
+  getDefaultStore().set(toasts, newToasts);
+};
 
 /** add toast to global queue */
-const makeToast = async (
+const toast = async (
   text: Toast["text"],
   type?: Toast["type"],
   id?: Toast["id"],
+  /** timeout before close, in ms */
+  timeout = 5000,
 ) => {
-  toasts.visibleToasts
-    .filter((toast) => toast.content.id === id)
-    .forEach((toast) => toasts.close(toast.key));
-  toasts.add(
-    { id: id ?? uniqueId(), type: type ?? "info", text },
-    { timeout: 5000 },
-  );
+  const newToast = {
+    id: id ?? uniqueId(),
+    type: type ?? "info",
+    text,
+    timer: window.setTimeout(() => removeToast(newToast.id), timeout),
+  };
+  addToast(newToast);
 };
 
-export { makeToast as toast };
+export { toast };

@@ -1,40 +1,14 @@
-.popup {
-  z-index: 999 !important;
-}
-
 .content {
+  display: flex;
+  flex-direction: column;
   max-width: 400px;
   padding: 20px;
+  gap: 20px;
   border-radius: var(--rounded);
   background: var(--white);
   box-shadow: 0 0 0 9999px #00000040;
 }
 
-.content[data-placement="top"] {
-  transform: translateY(-5px);
-}
-
-.content[data-placement="bottom"] {
-  transform: translateY(5px);
-}
-
-.content > section {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  outline: none;
-}
-
 .arrow {
-  width: 10px;
-  height: 10px;
-  background: var(--white);
-}
-
-.arrow[data-placement="top"] {
-  transform: translate(-50%, -50%) rotate(45deg) !important;
-}
-
-.arrow[data-placement="bottom"] {
-  transform: translate(-50%, 50%) rotate(45deg) !important;
+  fill: var(--white);
 }

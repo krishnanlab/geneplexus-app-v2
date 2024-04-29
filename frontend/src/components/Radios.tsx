@@ -1,6 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
-import { cloneElement } from "react";
-import * as RAC from "react-aria-components";
+import { cloneElement, useId, useState } from "react";
 import { FaRegCircle, FaRegCircleDot } from "react-icons/fa6";
 import classNames from "classnames";
 import { useForm } from "@/components/Form";
@@ -50,79 +49,68 @@ const Radios = <O extends Option>({
   /** link to parent form component */
   const form = useForm();
 
+  /** fallback name */
+  const fallbackName = useId();
+
+  /** local checked state */
+  const [checked, setChecked] = useState(value);
+
+  /** ensure local selected value always defined */
+  const _checked =
+    !checked || !options.find((option) => option.id === checked)
+      ? options[0]!.id
+      : checked;
+
   return (
-    <RAC.RadioGroup
-      className={classes.container}
-      value={value}
-      onChange={onChange}
-    >
-      {({ state }) => (
-        <>
-          {/* auto-select first option if value not in options anymore */}
-          {(() => {
-            if (
-              !options.find((option) => option.id === state.selectedValue) &&
-              state.selectedValue !== options[0]!.id
-            )
-              state.setSelectedValue(options[0]!.id);
-          })()}
+    <div role="group" className={classes.container}>
+      <legend className={classes.label}>
+        {label}
+        {tooltip && <Help tooltip={tooltip} />}
+      </legend>
 
-          <RAC.Label className={classes.label}>
-            {label}
-            {tooltip && <Help tooltip={tooltip} />}
-          </RAC.Label>
+      <div className={classes.options}>
+        {options.map((option, index) => (
+          <label key={index} className={classes.option}>
+            <input
+              className="sr-only"
+              type="radio"
+              form={form}
+              name={name ?? fallbackName}
+              value={option.id}
+              checked={_checked === option.id}
+              onChange={() => {
+                setChecked(option.id);
+                onChange?.(option.id);
+              }}
+            />
 
-          <div className={classes.options}>
-            {options.map((option, index) => (
-              <RAC.Radio
-                className={classes.option}
-                key={index}
-                value={option.id}
-              >
-                {({ isSelected }) => (
-                  <>
-                    {/* check */}
-                    {isSelected ? (
-                      <FaRegCircleDot
-                        className={classNames(classes.check, classes.checked)}
-                      />
-                    ) : (
-                      <FaRegCircle className={classes.check} />
-                    )}
+            {/* check mark */}
+            {_checked === option.id ? (
+              <FaRegCircleDot
+                className={classNames(classes.check, classes.checked)}
+              />
+            ) : (
+              <FaRegCircle className={classes.check} />
+            )}
 
-                    {/* text content */}
-                    <div className={classes.text}>
-                      <span className="primary">{option.primary}</span>
-                      {option.secondary && (
-                        <span className="secondary">{option.secondary}</span>
-                      )}
-                      {option.tertiary && (
-                        <span className="secondary">{option.tertiary}</span>
-                      )}
-                    </div>
+            {/* text content */}
+            <div className={classes.text}>
+              <span className="primary">{option.primary}</span>
+              {option.secondary && (
+                <span className="secondary">{option.secondary}</span>
+              )}
+              {option.tertiary && (
+                <span className="secondary">{option.tertiary}</span>
+              )}
+            </div>
 
-                    {/* icon */}
-                    {option.icon &&
-                      cloneElement(option.icon, { className: classes.icon })}
-
-                    {/* hidden input */}
-                    {isSelected && (
-                      <input
-                        hidden
-                        readOnly
-                        name={name}
-                        form={form}
-                        value={option.id}
-                      />
-                    )}
-                  </>
-                )}
-              </RAC.Radio>
-            ))}
-          </div>
-        </>
-      )}
-    </RAC.RadioGroup>
+            {/* icon */}
+            {option.icon &&
+              cloneElement(option.icon, { className: classes.icon })}
+          </label>
+        ))}
+      </div>
+    </div>
   );
 };
 

@@ -37,6 +37,7 @@ const Header = () => {
       {/* nav toggle */}
       <Tooltip content={open ? "Collapse menu" : "Expand menu"}>
         <button
+          type="button"
           className={classes.toggle}
           onClick={() => setOpen(!open)}
           aria-expanded={open}

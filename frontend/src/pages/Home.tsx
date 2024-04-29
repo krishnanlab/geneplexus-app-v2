@@ -5,7 +5,7 @@ import Meta from "@/components/Meta";
 import Section from "@/components/Section";
 import classes from "./Home.module.css";
 
-const Home = () => {
+const HomePage = () => {
   return (
     <>
       <Meta title="Home" />
@@ -38,4 +38,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default HomePage;

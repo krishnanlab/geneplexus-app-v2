@@ -13,26 +13,22 @@ type Props = {
  * ? button to hover/click for help tooltip. for use in other components, not
  * directly.
  */
-const Help = ({ tooltip }: Props) => {
-  return (
-    <Tooltip content={tooltip}>
-      <button
-        type="button"
-        className={classes.help}
-        aria-label="Help"
-        onClick={async (event) => {
-          const target = event.currentTarget;
-          if (!target) return;
-          /** force open tooltip */
-          await sleep();
-          target.blur();
-          target.focus();
-        }}
-      >
-        <FaRegCircleQuestion />
-      </button>
-    </Tooltip>
-  );
-};
+const Help = ({ tooltip }: Props) => (
+  <Tooltip content={tooltip}>
+    <button
+      type="button"
+      className={classes.help}
+      onClick={async (event) => {
+        const target = event.currentTarget;
+        /** force open tooltip */
+        await sleep();
+        target.blur();
+        target.focus();
+      }}
+    >
+      <FaRegCircleQuestion />
+    </button>
+  </Tooltip>
+);
 
 export default Help;

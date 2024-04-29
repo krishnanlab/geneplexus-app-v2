@@ -3,7 +3,7 @@ import Heading from "@/components/Heading";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
 
-const About = () => {
+const AboutPage = () => {
   return (
     <>
       <Meta title="About" />
@@ -27,4 +27,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default AboutPage;

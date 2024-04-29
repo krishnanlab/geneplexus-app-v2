@@ -1,5 +1,4 @@
-import type { ReactNode } from "react";
-import * as RAC from "react-aria-components";
+import { useState, type ReactNode } from "react";
 import { FaRegSquare, FaRegSquareCheck } from "react-icons/fa6";
 import Asterisk from "@/components/Asterisk";
 import { useForm } from "@/components/Form";
@@ -21,9 +20,8 @@ type Props = {
   required?: boolean;
 };
 
-/** obscure values to be able to distinguish boolean (checkbox) in FormData */
-export const checkedValue = "__checkedValue__";
-export const uncheckedValue = "__uncheckedValue__";
+/** mark field name as boolean for nicer parsing of FormData */
+export const checkboxKeySuffix = "-checkbox";
 
 /** simple checkbox with label */
 const CheckBox = ({
@@ -37,40 +35,34 @@ const CheckBox = ({
   /** link to parent form component */
   const form = useForm();
 
-  return (
-    <RAC.Checkbox
-      className={classes.container}
-      isSelected={value}
-      onChange={onChange}
-    >
-      {({ isSelected }) => (
-        <>
-          {isSelected ? (
-            <FaRegSquareCheck className={classes.check} />
-          ) : (
-            <FaRegSquare className={classes.check} />
-          )}
-          {label}
-          {tooltip && <Help tooltip={tooltip} />}
-          {required && <Asterisk />}
+  /** local checked state */
+  const [checked, setChecked] = useState(value ?? false);
 
-          {/* for FormData */}
-          {/* https://github.com/adobe/react-spectrum/issues/4117 */}
-          <input
-            type="checkbox"
-            className="sr-only"
-            tabIndex={-1}
-            aria-hidden={true}
-            value={isSelected ? checkedValue : uncheckedValue}
-            checked={!(required && !isSelected)}
-            onChange={() => null}
-            required={required}
-            form={form}
-            name={name}
-          />
-        </>
+  return (
+    <label className={classes.container}>
+      <input
+        type="checkbox"
+        className="sr-only"
+        defaultChecked={value}
+        checked={value}
+        onChange={(event) => {
+          const value = event.currentTarget.checked;
+          onChange?.(value);
+          setChecked(value);
+        }}
+        form={form}
+        name={name + checkboxKeySuffix}
+        required={required}
+      />
+      {checked ? (
+        <FaRegSquareCheck className={classes.check} />
+      ) : (
+        <FaRegSquare className={classes.check} />
       )}
-    </RAC.Checkbox>
+      {label}
+      {tooltip && <Help tooltip={tooltip} />}
+      {required && <Asterisk />}
+    </label>
   );
 };
 
