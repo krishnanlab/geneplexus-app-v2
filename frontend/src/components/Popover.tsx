@@ -20,12 +20,11 @@ const Popover = ({ content, children }: Props) => {
       <Radix.Portal>
         <Radix.Content
           className={classes.content}
-          sideOffset={5}
           side="top"
+          sideOffset={5}
           collisionPadding={{
             top: document.querySelector("header")?.clientHeight,
           }}
-          onPointerDownOutside={console.log}
         >
           {content}
           <Radix.Arrow className={classes.arrow} />

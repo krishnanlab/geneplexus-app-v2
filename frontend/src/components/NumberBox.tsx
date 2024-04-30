@@ -67,7 +67,9 @@ const NumberBox = ({
             <RAC.Input
               className={classes.input}
               form={form}
-              size={state.inputValue.length}
+              style={{
+                width: state.inputValue.length + 0.1 + "ex",
+              }}
               onBlurCapture={(event) => {
                 /** https://github.com/adobe/react-spectrum/discussions/6261 */
                 if (!event.currentTarget.value.trim())

@@ -634,7 +634,9 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
               </>
             }
           >
-            <Button text="Menu" />
+            <Tooltip content="Click to open">
+              <Button text="Menu" />
+            </Tooltip>
           </Popover>
         </div>
       </Section>

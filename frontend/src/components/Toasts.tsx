@@ -9,16 +9,22 @@ import {
 import classNames from "classnames";
 import { atom, getDefaultStore, useAtom } from "jotai";
 import { uniqueId } from "lodash";
-import Loading from "@/assets/loading.svg?react";
 import classes from "./Toasts.module.css";
 
 /** available categories of toasts and associated styles */
 const types = {
-  info: { color: "var(--deep)", icon: <FaCircleInfo /> },
-  loading: { color: "var(--deep)", icon: <Loading /> },
-  success: { color: "var(--success)", icon: <FaCircleCheck /> },
-  warning: { color: "var(--warning)", icon: <FaCircleExclamation /> },
-  error: { color: "var(--error)", icon: <FaTriangleExclamation /> },
+  info: { color: "var(--deep)", icon: <FaCircleInfo />, timeout: 5 },
+  success: { color: "var(--success)", icon: <FaCircleCheck />, timeout: 3 },
+  warning: {
+    color: "var(--warning)",
+    icon: <FaCircleExclamation />,
+    timeout: 5,
+  },
+  error: {
+    color: "var(--error)",
+    icon: <FaTriangleExclamation />,
+    timeout: 20,
+  },
 };
 
 type Toast = {
@@ -37,7 +43,7 @@ const Toasts = () => {
   const [getToasts] = useAtom(toasts);
 
   return (
-    <div className={classes.list}>
+    <div className={classes.list} role="region" aria-label="Notifications">
       {getToasts.map((toast, index) => (
         <div
           key={index}
@@ -45,7 +51,9 @@ const Toasts = () => {
           style={{ "--color": types[toast.type].color } as CSSProperties}
         >
           {types[toast.type].icon}
-          <div role="alert">{toast.text}</div>
+          <div role={toast.type === "error" ? "alert" : "status"}>
+            {toast.text}
+          </div>
           <button>
             <FaXmark />
           </button>
@@ -82,11 +90,12 @@ const removeToast = (id: Toast["id"]) => {
 /** add toast to global queue */
 const toast = async (
   text: Toast["text"],
-  type?: Toast["type"],
+  type: Toast["type"] = "info",
   id?: Toast["id"],
-  /** timeout before close, in ms */
-  timeout = 5000,
 ) => {
+  /** timeout before close, in ms */
+  const timeout = types[type].timeout * 1000 + (text.length - 30) * 100;
+
   const newToast = {
     id: id ?? uniqueId(),
     type: type ?? "info",

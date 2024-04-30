@@ -13,6 +13,7 @@ import {
   FaSortDown,
   FaSortUp,
 } from "react-icons/fa6";
+import { MdFilterAltOff } from "react-icons/md";
 import classNames from "classnames";
 import { clamp, isEqual, pick, sortBy, sum } from "lodash";
 import type { Column, FilterFn, NoInfer } from "@tanstack/react-table";
@@ -319,15 +320,17 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                               />
                             }
                           >
-                            <button
-                              type="button"
-                              className={classes["header-button"]}
-                              data-active={
-                                header.column.getIsFiltered() ? "" : undefined
-                              }
-                            >
-                              <FaFilter />
-                            </button>
+                            <Tooltip content="Filter this column">
+                              <button
+                                type="button"
+                                className={classes["header-button"]}
+                                data-active={
+                                  header.column.getIsFiltered() ? "" : undefined
+                                }
+                              >
+                                <FaFilter />
+                              </button>
+                            </Tooltip>
                           </Popover>
                         ) : null}
                       </div>
@@ -461,11 +464,21 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
           tooltip="Search entire table for plain text or regex"
         />
 
-        <div className="flex-row gap-sm">
+        <div className="flex-row gap-xs">
+          {/* clear filters */}
+          <Button
+            icon={<MdFilterAltOff />}
+            design="hollow"
+            tooltip="Clear all filters"
+            onClick={() => {
+              table.resetColumnFilters();
+              setSearch("");
+            }}
+          />
           {/* download */}
           <Button
+            design="hollow"
             icon={<FaDownload />}
-            text="CSV"
             tooltip="Download table data as .csv"
             onClick={() => {
               /** get col defs that are visible */

@@ -1,5 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import classNames from "classnames";
 import { kebabCase } from "lodash";
@@ -34,27 +34,39 @@ const Tabs = ({ syncWithUrl = "", children, defaultValue }: Props) => {
   /** sync selected tab with url */
   const [searchParams, setSearchParams] = useSearchParams();
 
+  /** https://github.com/radix-ui/primitives/issues/602 */
+  /** local selected tab state */
+  const [selected, setSelected] = useState(
+    searchParams.get(syncWithUrl) ?? defaultValue,
+  );
+
   return (
     <Radix.Root
       className={classes.root}
-      defaultValue={searchParams.get(syncWithUrl) ?? defaultValue}
-      onValueChange={(value) =>
+      value={selected}
+      onValueChange={(value) => {
+        setSelected(value);
         setSearchParams(
           (prev) => {
             prev.set(syncWithUrl, String(value));
             return prev;
           },
           { replace: true },
-        )
-      }
+        );
+      }}
     >
       {/* tab buttons */}
-      <Radix.List className="flex-row gap-sm">
+      <Radix.List className="flex-row gap-xs">
         {tabs.map((tab, index) => (
           <Tooltip key={index} content={tab.tooltip}>
             <Radix.Trigger
               value={tab.id}
-              className={classNames(classes.button, "flex-row", "gap-xs")}
+              className={classNames(
+                classes.button,
+                tab.id === selected && classes.active,
+                "flex-row",
+                "gap-xs",
+              )}
             >
               {tab.text}
               {tab.icon}

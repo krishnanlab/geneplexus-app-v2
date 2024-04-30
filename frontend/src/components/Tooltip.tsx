@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from "react";
+import { forwardRef } from "react";
 import * as Radix from "@radix-ui/react-tooltip";
-import { shrinkWrap } from "@/util/dom";
+import { renderText, shrinkWrap } from "@/util/dom";
 import classes from "./Tooltip.module.css";
 
 type Props = {
@@ -17,28 +18,45 @@ type Props = {
  * popup of minimal, non-interactive help or contextual info when hovering or
  * focusing children. for use in other components, not directly.
  */
-const Tooltip = ({ content, children }: Props) => {
-  if (content)
-    return (
-      <Radix.Provider delayDuration={200}>
-        <Radix.Root>
-          <Radix.Trigger asChild>{children}</Radix.Trigger>
-          <Radix.Portal>
-            <Radix.Content
-              ref={(element) => {
-                shrinkWrap(element);
-                return element;
-              }}
-              className={classes.content}
+const Tooltip = forwardRef<HTMLButtonElement, Props>(
+  ({ content, children, ...rest }: Props, ref) => {
+    if (children.props.value === "drinks") console.log(children.props);
+
+    if (content)
+      return (
+        <Radix.Provider delayDuration={200}>
+          <Radix.Root>
+            {/* allows nesting tooltip within popover https://github.com/radix-ui/primitives/discussions/560#discussioncomment-5325935 */}
+            <Radix.Trigger
+              asChild
+              ref={ref}
+              {...rest}
+              aria-label={renderText(content)}
             >
-              {content}
-              <Radix.Arrow className={classes.arrow} />
-            </Radix.Content>
-          </Radix.Portal>
-        </Radix.Root>
-      </Radix.Provider>
-    );
-  else return children;
-};
+              {children}
+            </Radix.Trigger>
+
+            <Radix.Portal>
+              <Radix.Content
+                ref={(element) => {
+                  window.setTimeout(() => shrinkWrap(element));
+                  return element;
+                }}
+                className={classes.content}
+                sideOffset={5}
+                collisionPadding={{
+                  top: document.querySelector("header")?.clientHeight,
+                }}
+              >
+                {content}
+                <Radix.Arrow className={classes.arrow} />
+              </Radix.Content>
+            </Radix.Portal>
+          </Radix.Root>
+        </Radix.Provider>
+      );
+    else return children;
+  },
+);
 
 export default Tooltip;

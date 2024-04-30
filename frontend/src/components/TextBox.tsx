@@ -120,7 +120,7 @@ const TextBox = ({
   return (
     <div className={classNames(classes.container, classes[layout], className)}>
       {(label || props.required) && (
-        <label className={classes.label}>
+        <label className={classes.label} htmlFor={id}>
           {label}
           {tooltip && <Help tooltip={tooltip} />}
           {props.required && <Asterisk />}

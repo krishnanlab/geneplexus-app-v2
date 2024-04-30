@@ -25,12 +25,14 @@ const Ago = ({ date, className }: Props) => {
 
   return (
     <Tooltip content={full || "???"}>
-      <ReactTimeAgo
-        className={className}
-        date={parsed}
-        locale="en-US"
-        tabIndex={0}
-      />
+      <span>
+        <ReactTimeAgo
+          className={className}
+          date={parsed}
+          locale="en-US"
+          tabIndex={0}
+        />
+      </span>
     </Tooltip>
   );
 };
