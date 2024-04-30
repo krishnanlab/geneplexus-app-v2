@@ -487,12 +487,12 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
             onClick={() => {
               toast(
                 `ABC`,
-                sample(["info", "loading", "success", "warning", "error"]),
+                sample(["info", "success", "warning", "error"]),
                 "abc",
               );
               toast(
                 `ABC`,
-                sample(["info", "loading", "success", "warning", "error"]),
+                sample(["info", "success", "warning", "error"]),
                 "abc",
               );
             }}
@@ -588,10 +588,10 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
           </Tooltip>
           <Tooltip
             content={
-              <>
+              <span>
                 <em>Minimal</em>, <strong>non-interactive</strong> help or
                 contextual info
-              </>
+              </span>
             }
           >
             <span className="text-tooltip" tabIndex={0} role="button">

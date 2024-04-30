@@ -26,6 +26,7 @@ import Network from "@/pages/analysis/Network";
 import Predictions from "@/pages/analysis/Predictions";
 import Similarities from "@/pages/analysis/Similarities";
 import Summary from "@/pages/analysis/Summary";
+import { scrollTo } from "@/util/dom";
 import { downloadJson } from "@/util/download";
 import { useQuery } from "@/util/hooks";
 
@@ -50,6 +51,11 @@ const AnalysisPage = () => {
     /** submit query once on mounted, if appropriate */
     if (!upload && stateInput && queryStatus === "empty") runQuery();
   }, [upload, stateInput, queryStatus, runQuery]);
+
+  /** scroll down to check section after entering genes */
+  useEffect(() => {
+    if (queryStatus !== "empty") scrollTo("#results");
+  }, [queryStatus]);
 
   /** "final" input and results */
   const inputs = upload?.inputs ?? stateInput;
@@ -120,7 +126,7 @@ const AnalysisPage = () => {
           {inputs && results && (
             <>
               <Summary results={results} />
-              <Tabs defaultValue="predictions">
+              <Tabs defaultValue="predictions" syncWithUrl="results">
                 <Tab
                   text="Input Genes"
                   icon={<FaDna />}

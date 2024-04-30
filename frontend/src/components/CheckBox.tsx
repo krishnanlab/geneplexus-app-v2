@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { FaRegSquare, FaRegSquareCheck } from "react-icons/fa6";
 import Asterisk from "@/components/Asterisk";
 import { useForm } from "@/components/Form";
@@ -38,12 +38,16 @@ const CheckBox = ({
   /** local checked state */
   const [checked, setChecked] = useState(value ?? false);
 
+  /** update local state from controlled value */
+  useEffect(() => {
+    if (typeof value === "boolean") setChecked(value);
+  }, [value]);
+
   return (
     <label className={classes.container}>
       <input
         type="checkbox"
         className="sr-only"
-        defaultChecked={value}
         checked={value}
         onChange={(event) => {
           const value = event.currentTarget.checked;

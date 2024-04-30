@@ -20,8 +20,6 @@ type Props = {
  */
 const Tooltip = forwardRef<HTMLButtonElement, Props>(
   ({ content, children, ...rest }: Props, ref) => {
-    if (children.props.value === "drinks") console.log(children.props);
-
     if (content)
       return (
         <Radix.Provider delayDuration={200}>
