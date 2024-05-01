@@ -25,6 +25,7 @@ const Ago = ({ date, className }: Props) => {
 
   return (
     <Tooltip content={full || "???"}>
+      {/* span needed because tooltip component needs child ref, and time-ago library does not forward it */}
       <span>
         <ReactTimeAgo
           className={className}

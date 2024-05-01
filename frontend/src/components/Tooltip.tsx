@@ -19,7 +19,7 @@ type Props = {
  * focusing children. for use in other components, not directly.
  */
 const Tooltip = forwardRef<HTMLButtonElement, Props>(
-  ({ content, children, ...rest }: Props, ref) => {
+  ({ content, children, ...props }: Props, ref) => {
     if (content)
       return (
         <Radix.Provider delayDuration={200}>
@@ -28,7 +28,7 @@ const Tooltip = forwardRef<HTMLButtonElement, Props>(
             <Radix.Trigger
               asChild
               ref={ref}
-              {...rest}
+              {...props}
               aria-label={renderText(content)}
             >
               {children}

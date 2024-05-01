@@ -5,6 +5,7 @@ import classes from "./Asterisk.module.css";
 /** asterisk for things like required form fields */
 const Asterisk = () => (
   <Tooltip content="Required">
+    {/* https://github.com/react-icons/react-icons/issues/336 */}
     <span>
       <FaAsterisk className={classes.asterisk} />
     </span>
