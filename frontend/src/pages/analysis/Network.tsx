@@ -20,7 +20,7 @@ import { clamp, cloneDeep, truncate } from "lodash";
 import type { AnalysisInputs, AnalysisResults } from "@/api/types";
 import Button from "@/components/Button";
 import CheckBox from "@/components/CheckBox";
-import type { Option } from "@/components/Select";
+import type { Option } from "@/components/SelectSingle";
 import SelectSingle from "@/components/SelectSingle";
 import Slider from "@/components/Slider";
 import { downloadSvg } from "@/util/download";
