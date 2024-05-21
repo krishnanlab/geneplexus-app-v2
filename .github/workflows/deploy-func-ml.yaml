@@ -1,5 +1,6 @@
 name: 'Deploy GCP function gpz-ml'
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
