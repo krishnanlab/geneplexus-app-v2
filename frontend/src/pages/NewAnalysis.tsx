@@ -24,6 +24,7 @@ import type {
 } from "@/api/types";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
+import Flex from "@/components/Flex";
 import Heading from "@/components/Heading";
 import Mark, { YesNo } from "@/components/Mark";
 import Meta from "@/components/Meta";
@@ -220,23 +221,27 @@ const NewAnalysisPage = () => {
         </Heading>
 
         <TextBox
+          className="full"
           value={inputGenes}
           onChange={(value) => {
             setInputGenes(value);
             setFilename("");
           }}
-          multi={true}
+          multi
           placeholder="Comma, tab, or line-separated list of entrez IDs, symbols, or ensembl gene/protein/transcript IDs"
         />
 
-        <div className="flex-row gap-sm">
+        <Flex>
           <SelectSingle
             label="Species"
             tooltip="Species to lookup genes against and train model with."
             layout="horizontal"
             options={filteredSpeciesOptions}
             value={speciesTrain}
-            onChange={setSpeciesTrain}
+            onChange={(value) => {
+              setSpeciesTrain(value);
+              setSpeciesTest(value);
+            }}
           />
 
           <Button
@@ -247,9 +252,16 @@ const NewAnalysisPage = () => {
             tooltip="Try some example genes for this species"
           />
 
-          <div className="flex-row gap-sm">
+          <Flex>
             <UploadButton
-              accept="text/plain, text/csv, text/tsv, text/tab-separated-values"
+              accept={[
+                "text/plain",
+                "text/csv",
+                "text/tab-separated-values",
+                ".txt",
+                ".csv",
+                ".tsv",
+              ]}
               text="Upload"
               icon={<FaUpload />}
               design="hollow"
@@ -260,8 +272,8 @@ const NewAnalysisPage = () => {
               }}
             />
             {filename}
-          </div>
-        </div>
+          </Flex>
+        </Flex>
       </Section>
 
       <Section>

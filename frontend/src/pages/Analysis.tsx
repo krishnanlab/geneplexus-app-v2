@@ -14,6 +14,7 @@ import { submitAnalysis } from "@/api/api";
 import type { Analysis, AnalysisInputs } from "@/api/types";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
+import Flex from "@/components/Flex";
 import Heading from "@/components/Heading";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
@@ -70,7 +71,7 @@ const AnalysisPage = () => {
           Analysis
         </Heading>
 
-        <div className="flex-row gap-sm">
+        <Flex>
           {inputs && results && (
             <Button
               text="Download"
@@ -87,7 +88,7 @@ const AnalysisPage = () => {
             />
           )}
           <UploadButton
-            accept="application/json"
+            accept={["application/json"]}
             text="Upload"
             icon={<FaUpload />}
             tooltip="Upload previously saved analysis"
@@ -103,7 +104,7 @@ const AnalysisPage = () => {
               }
             }}
           />
-        </div>
+        </Flex>
       </Section>
 
       {inputs && <Inputs inputs={inputs} />}

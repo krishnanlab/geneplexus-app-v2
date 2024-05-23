@@ -1,5 +1,6 @@
 import { FaArrowRight, FaFlaskVial, FaPlus } from "react-icons/fa6";
 import Button from "@/components/Button";
+import Flex from "@/components/Flex";
 import Heading from "@/components/Heading";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
@@ -10,17 +11,17 @@ const HomePage = () => {
     <>
       <Meta title="Home" />
 
-      <Section fill={true}>
+      <Section fill>
         <Heading level={1} className="sr-only">
           Home
         </Heading>
 
         <p className={classes.hero}>{import.meta.env.VITE_DESCRIPTION}</p>
-        <div className="flex-row gap-sm">
+        <Flex>
           <Button to="/new-analysis" text="New Analysis" icon={<FaPlus />} />
           <Button to="/analysis" text="Load Analysis" icon={<FaArrowRight />} />
           <Button to="/testbed" text="Testbed" icon={<FaFlaskVial />} />
-        </div>
+        </Flex>
       </Section>
 
       <Section>

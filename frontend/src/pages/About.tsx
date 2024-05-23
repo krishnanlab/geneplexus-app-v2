@@ -1,7 +1,5 @@
 import * as React from "react";
 import { FaPenNib } from "react-icons/fa6";
-import * as Popover from "@radix-ui/react-popover";
-import * as Tooltip from "@radix-ui/react-tooltip";
 import Heading from "@/components/Heading";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
