@@ -5,7 +5,7 @@ import Heading from "@/components/Heading";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
 
-const NotFound = () => {
+const NotFoundPage = () => {
   return (
     <>
       <Meta title="Not Found" />
@@ -17,10 +17,10 @@ const NotFound = () => {
 
         <p>The page you're looking for doesn't exist!</p>
 
-        <Button to="/" text="To Home Page" icon={<FaArrowLeft />} flip={true} />
+        <Button to="/" text="To Home Page" icon={<FaArrowLeft />} flip />
       </Section>
     </>
   );
 };
 
-export default NotFound;
+export default NotFoundPage;

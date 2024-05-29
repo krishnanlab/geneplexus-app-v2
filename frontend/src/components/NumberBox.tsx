@@ -1,85 +1,91 @@
-import { useId } from "react";
-import { FaAngleDown, FaAngleUp } from "react-icons/fa6";
-import * as numberInput from "@zag-js/number-input";
-import { normalizeProps, useMachine } from "@zag-js/react";
+import type { ReactNode } from "react";
+import * as RAC from "react-aria-components";
+import { FaMinus, FaPlus } from "react-icons/fa6";
+import classNames from "classnames";
 import { useForm } from "@/components/Form";
-import type { LabelProps } from "@/components/Label";
-import Label, { forwardLabelProps } from "@/components/Label";
+import Help from "@/components/Help";
 import classes from "./NumberBox.module.css";
 
-type Base = {
+type Props = {
+  /** layout of label and control */
+  layout?: "vertical" | "horizontal";
+  /** label content */
+  label: ReactNode;
+  /** tooltip on help icon */
+  tooltip?: ReactNode;
   /** min value */
   min?: number;
   /** max value */
   max?: number;
   /** inc/dec interval */
   step?: number;
+  /** initial state */
+  defaultValue?: number;
   /** number state */
   value?: number;
   /** on number state change */
   onChange?: (value: number) => void;
-  /** field name */
+  /** field name in form data */
   name?: string;
 };
 
-type Props = Base & LabelProps;
-
 /** number input box. use for numeric values that need precise adjustment. */
 const NumberBox = ({
-  min,
-  max,
-  step,
+  layout = "vertical",
+  label,
+  tooltip,
+  min = 0,
+  max = 100,
+  step = 1,
+  defaultValue,
   value,
   onChange,
   name,
-  ...props
 }: Props) => {
-  /** set up zag */
-  const [state, send] = useMachine(
-    numberInput.machine({
-      /** unique id for component instance */
-      id: useId(),
-      /** link field and form */
-      name,
-      form: useForm(),
-      /** settings */
-      allowMouseWheel: true,
-    }),
-    /** https://zagjs.com/overview/programmatic-control#controlled-usage-in-reacts */
-    {
-      context: {
-        /** regular number box props */
-        min: min ?? 0,
-        max: max ?? 100,
-        step: step ?? 1,
-        /** initialize value state */
-        value: String(value || 0),
-        /** when value changes */
-        onValueChange: (details) => onChange?.(details.valueAsNumber),
-      },
-    },
-  );
-
-  /** interact with zag */
-  const api = numberInput.connect(state, send, normalizeProps);
+  /** link to parent form component */
+  const form = useForm();
 
   return (
-    <Label {...api.labelProps} {...forwardLabelProps(props, api.inputProps.id)}>
-      <div className={classes.container}>
-        {/* ↑ */}
-        <button {...api.incrementTriggerProps} className={classes.inc}>
-          <FaAngleUp />
-        </button>
+    <RAC.NumberField
+      className={classNames(classes.container, classes[layout])}
+      minValue={min}
+      maxValue={max}
+      step={step}
+      defaultValue={defaultValue ?? min}
+      value={value}
+      onChange={onChange}
+      name={name}
+      formatOptions={{
+        maximumFractionDigits: 10,
+      }}
+    >
+      {({ state }) => (
+        <>
+          <RAC.Label className={classes.label}>
+            {label}
+            {tooltip && <Help tooltip={tooltip} />}
+          </RAC.Label>
 
-        {/* input */}
-        <input {...api.inputProps} className={classes.input} />
-
-        {/* ↓ */}
-        <button {...api.decrementTriggerProps} className={classes.dec}>
-          <FaAngleDown />
-        </button>
-      </div>
-    </Label>
+          <RAC.Group className={classes.group}>
+            <RAC.Button slot="decrement" className={classes.button}>
+              <FaMinus />
+            </RAC.Button>
+            <RAC.Input
+              className={classes.input}
+              form={form}
+              onBlurCapture={(event) => {
+                /** https://github.com/adobe/react-spectrum/discussions/6261 */
+                if (!event.currentTarget.value.trim())
+                  state.setInputValue(String(min));
+              }}
+            />
+            <RAC.Button slot="increment" className={classes.button}>
+              <FaPlus />
+            </RAC.Button>
+          </RAC.Group>
+        </>
+      )}
+    </RAC.NumberField>
   );
 };
 

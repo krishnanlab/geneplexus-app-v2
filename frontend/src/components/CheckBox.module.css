@@ -1,10 +1,12 @@
-.label {
-  display: flex;
-  align-items: center;
-  padding: 5px 0;
-  gap: 10px;
+.container {
+  padding: 2px 5px;
   border-radius: var(--rounded);
   cursor: pointer;
+  transition: background var(--fast);
+}
+
+.container:hover {
+  background: var(--off-white);
 }
 
 .check {
@@ -13,6 +15,12 @@
   transition: color var(--fast);
 }
 
-.label:hover .check {
+.container:hover .check {
   color: var(--deep);
+}
+
+.required {
+  position: relative;
+  top: -10px;
+  color: var(--accent);
 }

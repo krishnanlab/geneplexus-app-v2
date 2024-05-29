@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import classNames from "classnames";
+import Flex from "@/components/Flex";
 import classes from "./Section.module.css";
 
 type Props = {
@@ -18,16 +19,17 @@ type Props = {
  * contents limited to a readable width by default. alternating background
  * colors. do not nest sections.
  */
-const Section = ({ fill, full, className, ...props }: Props) => {
-  return (
-    <section
-      className={classNames(classes.section, className, {
-        [classes.fill!]: fill,
-        [classes.full!]: full,
-      })}
-      {...props}
-    />
-  );
-};
+const Section = ({ fill, full, className, ...props }: Props) => (
+  <Flex
+    direction="column"
+    gap="lg"
+    vAlign="top"
+    className={classNames(classes.section, className, {
+      [classes.fill!]: fill,
+      [classes.full!]: full,
+    })}
+    {...props}
+  />
+);
 
 export default Section;

@@ -20,7 +20,9 @@ import { clamp, cloneDeep, truncate } from "lodash";
 import type { AnalysisInputs, AnalysisResults } from "@/api/types";
 import Button from "@/components/Button";
 import CheckBox from "@/components/CheckBox";
-import Select, { type Option } from "@/components/Select";
+import Flex from "@/components/Flex";
+import type { Option } from "@/components/SelectSingle";
+import SelectSingle from "@/components/SelectSingle";
 import Slider from "@/components/Slider";
 import { downloadSvg } from "@/util/download";
 import { lerp } from "@/util/math";
@@ -346,7 +348,7 @@ const Network = ({ inputs, results }: Props) => {
   return (
     <>
       {/* filters */}
-      <div className="flex-row gap-md">
+      <Flex>
         <Slider
           label="Max nodes"
           layout="horizontal"
@@ -365,7 +367,7 @@ const Network = ({ inputs, results }: Props) => {
           value={minProbability}
           onChange={setMinProbability}
         />
-      </div>
+      </Flex>
 
       {/* svg viz */}
       <svg
@@ -547,8 +549,8 @@ const Network = ({ inputs, results }: Props) => {
       </svg>
 
       {/* controls */}
-      <div className="flex-row gap-md">
-        <Select
+      <Flex>
+        <SelectSingle
           label="Node labels"
           layout="horizontal"
           options={labelKeyOptions}
@@ -579,7 +581,7 @@ const Network = ({ inputs, results }: Props) => {
             });
           }}
         />
-      </div>
+      </Flex>
     </>
   );
 };

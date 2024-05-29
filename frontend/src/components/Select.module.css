@@ -1,13 +1,29 @@
-.root,
-.control {
-  display: contents;
+.container {
+  display: flex;
+  gap: 10px 15px;
+}
+
+.horizontal {
+  align-items: center;
+}
+
+.vertical {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .button {
+  flex-grow: 1;
   padding: 5px;
   gap: 10px;
   border-bottom: solid 2px currentColor;
-  border-radius: var(--rounded) var(--rounded) 0 0;
+  border-radius: 0;
   color: var(--accent);
   text-align: left;
   transition: color var(--fast);
@@ -21,33 +37,31 @@
   flex-grow: 1;
 }
 
-.popup {
-  z-index: 999 !important;
-  border-radius: var(--rounded);
-  background: var(--white);
-  box-shadow: var(--shadow);
-}
-
-.list {
+.options {
+  z-index: 1 !important;
+  min-width: max-content;
   margin: 0;
   padding: 0;
+  outline: none;
+  background: var(--white);
+  box-shadow: var(--shadow);
   list-style: none;
 }
 
 .option {
-  display: grid;
-  grid-template-columns: 30px 2fr 1fr 30px;
+  display: flex;
   align-items: center;
-  width: 100%;
+  max-width: calc(100vw - 80px);
   margin: 0;
-  padding: 0;
+  padding: 5px;
+  gap: 5px;
+  line-height: var(--compact);
   text-align: left;
   cursor: pointer;
   transition: background var(--fast);
 }
 
-.option:hover,
-.option[data-highlighted] {
+.option-active {
   background: var(--off-white);
 }
 
@@ -62,10 +76,11 @@
 }
 
 .text {
-  padding-right: 10px;
+  flex-grow: 2;
 }
 
 .info {
+  flex-grow: 1;
   justify-self: flex-end;
   padding-right: 10px;
   text-align: right;
@@ -73,5 +88,5 @@
 
 .icon {
   justify-self: flex-end;
-  padding-right: 10px;
+  width: 30px;
 }

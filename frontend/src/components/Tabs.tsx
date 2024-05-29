@@ -1,10 +1,9 @@
 import type { ReactElement, ReactNode } from "react";
-import { Fragment, useId } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Fragment, useEffect, useState } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import classNames from "classnames";
 import { kebabCase } from "lodash";
-import { normalizeProps, useMachine } from "@zag-js/react";
-import * as tabs from "@zag-js/tabs";
+import * as Radix from "@radix-ui/react-tabs";
 import Tooltip from "@/components/Tooltip";
 import classes from "./Tabs.module.css";
 
@@ -21,9 +20,11 @@ type Props = {
 };
 
 const Tabs = ({ syncWithUrl = "", children, defaultValue }: Props) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   /** tab props */
-  const tabProps = [children]
-    .flat()
+  const tabs = (Array.isArray(children) ? children : [children])
     .filter((child): child is ReactElement => !!child)
     .map((child) => ({
       ...child.props,
@@ -31,76 +32,63 @@ const Tabs = ({ syncWithUrl = "", children, defaultValue }: Props) => {
       id: kebabCase(child.props.text),
     }));
 
-  defaultValue ??= tabProps[0]?.id;
+  defaultValue ??= tabs[0]!.id;
+
+  /** https://github.com/radix-ui/primitives/issues/602 */
+  /** local selected tab state */
+  const [selected, setSelected] = useState(defaultValue ?? "");
 
   /** sync selected tab with url */
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
 
-  /** set up zag */
-  const [state, send] = useMachine(
-    tabs.machine({
-      /** unique id for component instance */
-      id: useId(),
-      value: defaultValue,
-    }),
-    /** https://zagjs.com/overview/programmatic-control#controlled-usage-in-reacts */
-    {
-      context: syncWithUrl
-        ? {
-            /** initialize selected tab state */
-            value: searchParams.get(syncWithUrl) ?? defaultValue,
-            /** when selected tab changes */
-            onValueChange: (details) =>
-              /** note: https://github.com/remix-run/react-router/issues/8393 */
-              setSearchParams(
-                (prev) => {
-                  prev.set(syncWithUrl, details.value);
-                  return prev;
-                },
-                { replace: true },
-              ),
-          }
-        : undefined,
-    },
-  );
-
-  /** interact with zag */
-  const api = tabs.connect(state, send, normalizeProps);
+  /** update selected from url */
+  const fromUrl = searchParams.get(syncWithUrl) ?? defaultValue ?? "";
+  useEffect(() => {
+    setSelected(fromUrl);
+  }, [fromUrl]);
 
   return (
-    <div {...api.rootProps} className={classes.container}>
-      {/* list */}
-      <div {...api.listProps} className="flex-row gap-sm">
-        {tabProps.map((tab, index) => (
+    <Radix.Root
+      className={classes.root}
+      value={selected}
+      onValueChange={(value) => {
+        setSelected(value);
+        /** update url from selected */
+        if (syncWithUrl) {
+          if (value === defaultValue) searchParams.delete(syncWithUrl);
+          else searchParams.set(syncWithUrl, value);
+          navigate(
+            { ...location, search: "?" + searchParams.toString() },
+            { state: location.state },
+          );
+        }
+      }}
+    >
+      {/* tab buttons */}
+      <Radix.List className={classes.buttons}>
+        {tabs.map((tab, index) => (
           <Tooltip key={index} content={tab.tooltip}>
-            <button
-              {...api.getTriggerProps({ value: tab.id })}
-              className={classes.button}
-              type="button"
+            <Radix.Trigger
+              value={tab.id}
+              className={classNames(
+                classes.button,
+                tab.id === selected && classes.active,
+              )}
             >
               {tab.text}
               {tab.icon}
-            </button>
+            </Radix.Trigger>
           </Tooltip>
         ))}
-      </div>
+      </Radix.List>
 
       {/* panels */}
-      {tabProps.map((tab, index) => (
-        <div
-          key={index}
-          {...api.getContentProps({ value: tab.id })}
-          className={classNames(
-            "flex-col",
-            "gap-lg",
-            classes.content,
-            tab.className,
-          )}
-        >
+      {tabs.map((tab, index) => (
+        <Radix.Content key={index} value={tab.id} className={classes.content}>
           {tab.children}
-        </div>
+        </Radix.Content>
       ))}
-    </div>
+    </Radix.Root>
   );
 };
 
@@ -116,8 +104,6 @@ type TabProps = {
   icon?: ReactElement;
   /** tab button tooltip content */
   tooltip?: ReactNode;
-  /** class on panel content container */
-  className?: string;
   /** tab panel content */
   children: ReactNode;
 };

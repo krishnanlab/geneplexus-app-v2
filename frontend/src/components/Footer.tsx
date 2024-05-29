@@ -1,33 +1,31 @@
 import { FaEnvelope, FaGithub, FaTwitter } from "react-icons/fa6";
-import classNames from "classnames";
+import Flex from "@/components/Flex";
 import Link from "@/components/Link";
 import classes from "./Footer.module.css";
 
 /** at bottom of every page. singleton. */
-const Footer = () => {
-  return (
-    <footer className={classNames(classes.footer, "flex-col", "gap-sm")}>
-      <div className={classNames(classes.icons, "flex-row", "gap-xs")}>
-        <Link to="" tooltip="Email us">
-          <FaEnvelope />
-        </Link>
-        <Link to="" tooltip="GitHub">
-          <FaGithub />
-        </Link>
-        <Link to="" tooltip="Twitter">
-          <FaTwitter />
-        </Link>
-      </div>
+const Footer = () => (
+  <Flex tag="footer" direction="column" gap="sm" className={classes.footer}>
+    <Flex gap="sm" className={classes.icons}>
+      <Link to="" tooltip="Email us">
+        <FaEnvelope />
+      </Link>
+      <Link to="" tooltip="GitHub">
+        <FaGithub />
+      </Link>
+      <Link to="" tooltip="Twitter">
+        <FaTwitter />
+      </Link>
+    </Flex>
 
-      <div>
-        A project of the{" "}
-        <Link to="https://www.thekrishnanlab.org" noIcon={true}>
-          Krishnan Lab
-        </Link>{" "}
-        &copy; 2023
-      </div>
-    </footer>
-  );
-};
+    <div>
+      A project of the{" "}
+      <Link to="https://www.thekrishnanlab.org" noIcon>
+        Krishnan Lab
+      </Link>{" "}
+      &copy; 2023
+    </div>
+  </Flex>
+);
 
 export default Footer;

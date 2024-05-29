@@ -46,7 +46,10 @@ const Inputs = ({ inputs }: Props) => {
                 <span key={index}>{gene}</span>
               ))}
             {inputs.genes.length > limit && (
-              <button onClick={() => setShowAllGenes(!showAllGenes)}>
+              <button
+                type="button"
+                onClick={() => setShowAllGenes(!showAllGenes)}
+              >
                 {showAllGenes ? "< show less" : "... show all"}
               </button>
             )}

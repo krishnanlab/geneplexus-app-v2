@@ -1,8 +1,8 @@
 html {
   font-weight: var(--regular);
-  font-size: 13pt;
   line-height: var(--compact);
   font-family: var(--sans);
+  text-underline-offset: 0.2em;
 }
 
 *,
@@ -37,7 +37,7 @@ button,
 li,
 label,
 blockquote {
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 /** headings */
@@ -54,22 +54,18 @@ h4 {
 
 h1 {
   font-size: 1.4rem;
-  text-align: center;
 }
 
 h2 {
   font-size: 1.3rem;
-  text-align: center;
 }
 
 h3 {
   font-size: 1.1rem;
-  text-align: center;
 }
 
 h4 {
   font-size: 1rem;
-  text-align: left;
 }
 
 hr {
@@ -205,6 +201,7 @@ button {
   margin: 0;
   padding: 0;
   border: none;
+  border-radius: var(--rounded);
   background: none;
   color: var(--accent);
   font: inherit;
@@ -214,7 +211,6 @@ button {
 input,
 textarea {
   appearance: none;
-  width: 100px;
   min-width: 0;
   padding: 5px;
   border: solid 1px black;
@@ -224,8 +220,8 @@ textarea {
 /** scrollbar */
 
 :not(html) ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 999px;
   background-color: var(--off-white);
 }
@@ -239,7 +235,6 @@ textarea {
 
 :focus-visible,
 label:has(input:focus-visible) {
-  border-radius: var(--rounded) !important;
   outline: solid 2px currentColor;
   outline-offset: 2px;
 }

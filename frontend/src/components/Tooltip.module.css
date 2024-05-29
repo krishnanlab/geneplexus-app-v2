@@ -1,24 +1,16 @@
-.popup {
-  z-index: 999 !important;
-}
-
 .content {
   display: flex;
+  z-index: 3;
   flex-direction: column;
   max-width: 320px;
   padding: 10px 15px;
   gap: 5px;
+  border-radius: var(--rounded);
   background: var(--off-black);
   color: var(--white);
   text-wrap: pretty;
 }
 
 .arrow {
-  --arrow-size: 10px;
-  --arrow-background: var(--off-black);
-}
-
-.arrow div {
-  box-shadow: var(--shadow);
-  clip-path: polygon(-50% -50%, 150% -50%, -50% 150%);
+  fill: var(--off-black);
 }

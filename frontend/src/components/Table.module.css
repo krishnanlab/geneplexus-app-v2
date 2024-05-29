@@ -15,11 +15,6 @@
   min-width: min(max-content, var(--content));
 }
 
-.th {
-  display: inline-flex;
-  gap: 5px;
-}
-
 .th-label {
   padding-right: 2px;
 }
@@ -43,12 +38,6 @@
   text-align: center;
 }
 
-.pagination {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
 .page-text {
   padding: 0 5px;
   color: var(--accent);
@@ -69,4 +58,8 @@
 
 .page-button:hover {
   color: var(--deep);
+}
+
+.search {
+  max-width: 150px;
 }

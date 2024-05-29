@@ -13,6 +13,7 @@ import {
   FaSortDown,
   FaSortUp,
 } from "react-icons/fa6";
+import { MdFilterAltOff } from "react-icons/md";
 import classNames from "classnames";
 import { clamp, isEqual, pick, sortBy, sum } from "lodash";
 import type { Column, FilterFn, NoInfer } from "@tanstack/react-table";
@@ -27,13 +28,14 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-  type Table,
 } from "@tanstack/react-table";
 import Button from "@/components/Button";
+import Flex from "@/components/Flex";
 import Help from "@/components/Help";
 import Popover from "@/components/Popover";
-import Select from "@/components/Select";
-import type { Option } from "@/components/Select";
+import SelectMulti from "@/components/SelectMulti";
+import type { Option } from "@/components/SelectSingle";
+import SelectSingle from "@/components/SelectSingle";
 import Slider from "@/components/Slider";
 import TextBox from "@/components/TextBox";
 import Tooltip from "@/components/Tooltip";
@@ -249,7 +251,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
   });
 
   return (
-    <div className="flex-col gap-md">
+    <Flex direction="column">
       <div className={classNames(classes.scroll, expanded && "expanded")}>
         {/* table */}
         <table
@@ -271,7 +273,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                     {...getCol(header.column.id)?.attrs}
                   >
                     {header.isPlaceholder ? null : (
-                      <div className={classes.th}>
+                      <Flex hAlign="left" gap="xs">
                         {/* header label */}
                         <span className={classes["th-label"]}>
                           {flexRender(
@@ -289,6 +291,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                         {header.column.getCanSort() && (
                           <Tooltip content="Sort this column">
                             <button
+                              type="button"
                               className={classes["header-button"]}
                               data-active={
                                 header.column.getIsSorted() ? "" : undefined
@@ -311,7 +314,6 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                         {/* header filter */}
                         {header.column.getCanFilter() ? (
                           <Popover
-                            label="Filter this column"
                             content={
                               <Filter
                                 column={header.column}
@@ -319,17 +321,20 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                               />
                             }
                           >
-                            <button
-                              className={classes["header-button"]}
-                              data-active={
-                                header.column.getIsFiltered() ? "" : undefined
-                              }
-                            >
-                              <FaFilter />
-                            </button>
+                            <Tooltip content="Filter this column">
+                              <button
+                                type="button"
+                                className={classes["header-button"]}
+                                data-active={
+                                  header.column.getIsFiltered() ? "" : undefined
+                                }
+                              >
+                                <FaFilter />
+                              </button>
+                            </Tooltip>
                           </Popover>
                         ) : null}
-                      </div>
+                      </Flex>
                     )}
                   </th>
                 ))}
@@ -377,10 +382,11 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
       </div>
 
       {/* controls */}
-      <div className="flex-row gap-md">
+      <Flex gap="lg">
         {/* pagination */}
-        <div className={classes.pagination}>
+        <Flex gap="xs">
           <button
+            type="button"
             className={classes["page-button"]}
             onClick={() => table.setPageIndex(0)}
             disabled={!table.getCanPreviousPage()}
@@ -389,6 +395,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
             <FaAnglesLeft />
           </button>
           <button
+            type="button"
             className={classes["page-button"]}
             onClick={table.previousPage}
             disabled={!table.getCanPreviousPage()}
@@ -398,6 +405,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
           </button>
           <Tooltip content="Jump to page">
             <button
+              type="button"
               className={classes["page-text"]}
               onClick={() => {
                 const page = parseInt(window.prompt("Jump to page") || "");
@@ -410,6 +418,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
             </button>
           </Tooltip>
           <button
+            type="button"
             className={classes["page-button"]}
             onClick={table.nextPage}
             disabled={!table.getCanNextPage()}
@@ -418,6 +427,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
             <FaAngleRight />
           </button>
           <button
+            type="button"
             className={classes["page-button"]}
             onClick={() => table.setPageIndex(table.getPageCount() - 1)}
             disabled={!table.getCanNextPage()}
@@ -425,44 +435,55 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
           >
             <FaAnglesRight />
           </button>
-        </div>
+        </Flex>
 
-        <div className="flex-row gap-sm">
+        {/* filters */}
+        <Flex gap="sm">
           {/* per page */}
-          <Select
+          <SelectSingle
             label="Rows"
             layout="horizontal"
             options={perPageOptions}
-            onChange={(option) => table.setPageSize(Number(option))}
-            width={70}
+            onChange={(option) => {
+              table.setPageSize(Number(option));
+            }}
           />
           {/* visible columns */}
-          <Select
+          <SelectMulti
             label="Cols"
             layout="horizontal"
-            multi={true}
             options={visibleOptions}
             value={visibleCols}
             onChange={setVisibleCols}
-            width={100}
           />
-        </div>
+        </Flex>
 
         {/* table-wide search */}
         <TextBox
+          className={classes.search}
           placeholder="Search"
-          width={140}
           icon={<FaMagnifyingGlass />}
           value={search}
           onChange={setSearch}
           tooltip="Search entire table for plain text or regex"
         />
 
-        <div className="flex-row gap-sm">
+        {/* actions */}
+        <Flex gap="xs">
+          {/* clear filters */}
+          <Button
+            icon={<MdFilterAltOff />}
+            design="hollow"
+            tooltip="Clear all filters"
+            onClick={() => {
+              table.resetColumnFilters();
+              setSearch("");
+            }}
+          />
           {/* download */}
           <Button
+            design="hollow"
             icon={<FaDownload />}
-            text="CSV"
             tooltip="Download table data as .csv"
             onClick={() => {
               /** get col defs that are visible */
@@ -490,9 +511,9 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
             tooltip={expanded ? "Collapse table" : "Expand table"}
             onClick={() => setExpanded(!expanded)}
           />
-        </div>
-      </div>
-    </div>
+        </Flex>
+      </Flex>
+    </Flex>
   );
 };
 
@@ -514,9 +535,10 @@ const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
 
     return (
       <Slider
+        label="Filter"
         min={min}
         max={max}
-        multi={true}
+        multi
         value={(column.getFilterValue() as [number, number]) ?? [min, max]}
         onChange={(value) => {
           /** return as "unfiltered" if value equals min/max range */
@@ -541,7 +563,8 @@ const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
     }));
 
     return (
-      <Select
+      <SelectMulti
+        label="Filter"
         options={options}
         value={(column.getFilterValue() as Option["id"][]) ?? options}
         onChange={(value, count) =>
@@ -550,7 +573,6 @@ const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
             count === "all" || count === "none" ? undefined : value,
           )
         }
-        multi={true}
       />
     );
   }
@@ -577,7 +599,8 @@ const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
     ];
 
     return (
-      <Select
+      <SelectSingle
+        label="Filter"
         options={options}
         value={(column.getFilterValue() as Option["id"]) ?? options[0]!}
         onChange={(value) =>

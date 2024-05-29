@@ -17,7 +17,7 @@ type Base = {
   /** whether to flip text/icon sides */
   flip?: boolean;
   /** look */
-  design?: "hollow" | "normal" | "critical";
+  design?: "normal" | "hollow" | "critical";
   /** class */
   className?: string;
 };
@@ -76,7 +76,7 @@ const Button = forwardRef(
       [classes.square!]: !text && !!icon,
     });
 
-    /** link to form parent */
+    /** link to parent form component */
     const form = useForm();
 
     /** if "to", render as link */
@@ -86,7 +86,7 @@ const Button = forwardRef(
           ref={ref as ForwardedRef<HTMLAnchorElement>}
           className={_class}
           tooltip={tooltip}
-          noIcon={true}
+          noIcon
           {...props}
         >
           {children}

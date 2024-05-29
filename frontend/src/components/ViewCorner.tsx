@@ -1,15 +1,19 @@
 import { FaAngleUp } from "react-icons/fa6";
 import { useWindowScroll } from "react-use";
-import classes from "./FloatButtons.module.css";
+import Flex from "@/components/Flex";
+import Toasts from "@/components/Toasts";
+import classes from "./ViewCorner.module.css";
 
-/** buttons that stay in corner of view at all times. singleton. */
-const FloatButtons = () => {
+/** buttons and other stuff that stays in corner of view at all times. singleton. */
+const ViewCorner = () => {
   const { y } = useWindowScroll();
 
   return (
-    <div className={classes.list}>
+    <Flex direction="column" hAlign="right" gap="sm" className={classes.list}>
+      <Toasts />
       {y > 100 && (
         <button
+          type="button"
           className={classes.button}
           onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           aria-label="Scroll to top of page"
@@ -19,8 +23,8 @@ const FloatButtons = () => {
       )}
 
       {/* possibly other buttons/actions in future */}
-    </div>
+    </Flex>
   );
 };
 
-export default FloatButtons;
+export default ViewCorner;

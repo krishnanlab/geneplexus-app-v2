@@ -11,9 +11,10 @@ import { LuLightbulb } from "react-icons/lu";
 import { PiGraphBold } from "react-icons/pi";
 import { useLocation } from "react-router";
 import { submitAnalysis } from "@/api/api";
-import { type Analysis, type AnalysisInputs } from "@/api/types";
+import type { Analysis, AnalysisInputs } from "@/api/types";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
+import Flex from "@/components/Flex";
 import Heading from "@/components/Heading";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
@@ -26,10 +27,11 @@ import Network from "@/pages/analysis/Network";
 import Predictions from "@/pages/analysis/Predictions";
 import Similarities from "@/pages/analysis/Similarities";
 import Summary from "@/pages/analysis/Summary";
+import { scrollTo } from "@/util/dom";
 import { downloadJson } from "@/util/download";
 import { useQuery } from "@/util/hooks";
 
-const Analysis = () => {
+const AnalysisPage = () => {
   /** get info and state from route */
   const location = useLocation();
   const state = location.state ?? {};
@@ -51,6 +53,11 @@ const Analysis = () => {
     if (!upload && stateInput && queryStatus === "empty") runQuery();
   }, [upload, stateInput, queryStatus, runQuery]);
 
+  /** scroll down to check section after entering genes */
+  useEffect(() => {
+    if (queryStatus !== "empty") scrollTo("#results");
+  }, [queryStatus]);
+
   /** "final" input and results */
   const inputs = upload?.inputs ?? stateInput;
   const results = upload?.results ?? queryData;
@@ -64,7 +71,7 @@ const Analysis = () => {
           Analysis
         </Heading>
 
-        <div className="flex-row gap-sm">
+        <Flex>
           {inputs && results && (
             <Button
               text="Download"
@@ -81,7 +88,7 @@ const Analysis = () => {
             />
           )}
           <UploadButton
-            accept="application/json"
+            accept={["application/json"]}
             text="Upload"
             icon={<FaUpload />}
             tooltip="Upload previously saved analysis"
@@ -97,7 +104,7 @@ const Analysis = () => {
               }
             }}
           />
-        </div>
+        </Flex>
       </Section>
 
       {inputs && <Inputs inputs={inputs} />}
@@ -120,7 +127,7 @@ const Analysis = () => {
           {inputs && results && (
             <>
               <Summary results={results} />
-              <Tabs defaultValue="predictions">
+              <Tabs defaultValue="predictions" syncWithUrl="results">
                 <Tab
                   text="Input Genes"
                   icon={<FaDna />}
@@ -161,4 +168,4 @@ const Analysis = () => {
   );
 };
 
-export default Analysis;
+export default AnalysisPage;

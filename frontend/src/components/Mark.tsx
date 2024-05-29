@@ -1,9 +1,10 @@
-import { type CSSProperties, type ReactElement, type ReactNode } from "react";
+import type { CSSProperties, ReactElement, ReactNode } from "react";
 import {
   FaCircleCheck,
   FaCircleExclamation,
   FaTriangleExclamation,
 } from "react-icons/fa6";
+import Flex from "@/components/Flex";
 import classes from "./Mark.module.css";
 
 type Props = {
@@ -24,17 +25,18 @@ const types = {
 };
 
 /** icon and text with color */
-const Mark = ({ type = "info", icon, children }: Props) => {
-  return (
-    <span
-      className={classes.mark}
-      style={{ "--color": types[type].color } as CSSProperties}
-    >
-      {icon ?? types[type].icon}
-      <div>{children}</div>
-    </span>
-  );
-};
+const Mark = ({ type = "info", icon, children }: Props) => (
+  <Flex
+    display="inline"
+    gap="sm"
+    wrap={false}
+    className={classes.mark}
+    style={{ "--color": types[type].color } as CSSProperties}
+  >
+    {icon ?? types[type].icon}
+    <div>{children}</div>
+  </Flex>
+);
 
 export default Mark;
 
