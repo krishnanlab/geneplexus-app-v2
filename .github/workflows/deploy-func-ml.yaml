@@ -9,11 +9,16 @@ on:
 
 jobs:
   deploy-ml-func:
-    uses: ./.github/workflows/helper-deploy-func.yaml
-    with:
-      func-name: "gpz-ml"
-      func-src-dir: "functions/ml/ml_deploy"
-      func-entrypoint: "ml"
-      func-memory-mb: 8192
-      func-data-gcs-url: "gs://geneplexus-func-data/ml/ml_data.tar.gz"
-    secrets: inherit
+    runs-on: 'ubuntu-latest'
+    env:
+      DATA_ARCHIVE_HASH: 'none'
+
+    steps:
+      - name: Deploy GCP Function
+        uses: ./.github/actions/deploy-gcp-func.yaml
+        with:
+          func-name: "gpz-ml"
+          func-src-dir: "functions/ml/ml_deploy"
+          func-entrypoint: "ml"
+          func-memory-mb: 8192
+          func-data-gcs-url: "gs://geneplexus-func-data/ml/ml_data.tar.gz"
