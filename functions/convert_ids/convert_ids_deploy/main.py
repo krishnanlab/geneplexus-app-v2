@@ -28,9 +28,12 @@ def convert_ids(request):
         body = request.get_json()
         genes = body["genes"]
         species = body["species"]
-    except:
-        message = "Problem with input headers, body, or params."
-        return ({"message": message}, 400, headers)
+    except KeyError as ex:
+        message = f"Missing required parameter: {ex}"
+        return ({"message": message, "exception": f"KeyError: {str(ex)}"}, 400, headers)
+    except Exception as ex:
+        message = f"Problem with input headers, body, or params"
+        return ({"message": message, "exception": str(ex)}, 400, headers)
 
     try:
         # set up geneplexus
