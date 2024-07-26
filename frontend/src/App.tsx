@@ -21,6 +21,7 @@ import ViewCorner from "@/components/ViewCorner";
 import About from "@/pages/About";
 import Analysis from "@/pages/Analysis";
 import Home from "@/pages/Home";
+import LoadAnalysis from "@/pages/LoadAnalysis";
 import NewAnalysis from "@/pages/NewAnalysis";
 import NotFound from "@/pages/NotFound";
 import Testbed from "@/pages/Testbed";
@@ -92,6 +93,11 @@ const routes = [
       {
         path: "about",
         element: <About />,
+        loader: () => ({ toc: true }) satisfies Meta,
+      },
+      {
+        path: "load-analysis",
+        element: <LoadAnalysis />,
         loader: () => ({ toc: true }) satisfies Meta,
       },
       {

@@ -291,6 +291,8 @@ const NewAnalysisPage = () => {
 
           <Flex>
             <UploadButton
+              text="Upload"
+              icon={<FaUpload />}
               accept={[
                 "text/plain",
                 "text/csv",
@@ -299,8 +301,6 @@ const NewAnalysisPage = () => {
                 ".csv",
                 ".tsv",
               ]}
-              text="Upload"
-              icon={<FaUpload />}
               design="hollow"
               onUpload={async (file, filename) => {
                 const text = await file.text();

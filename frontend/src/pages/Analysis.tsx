@@ -1,17 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { BiCopy } from "react-icons/bi";
+import { FaFeatherAlt } from "react-icons/fa";
 import {
   FaChartBar,
   FaDna,
   FaDownload,
   FaMagnifyingGlassChart,
-  FaUpload,
 } from "react-icons/fa6";
 import { LuLightbulb } from "react-icons/lu";
 import { PiGraphBold } from "react-icons/pi";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { submitAnalysis } from "@/api/api";
-import type { Analysis, AnalysisInputs } from "@/api/types";
+import type { AnalysisInputs, AnalysisResults } from "@/api/types";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Flex from "@/components/Flex";
@@ -19,48 +19,51 @@ import Heading from "@/components/Heading";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
 import Tabs, { Tab } from "@/components/Tabs";
-import { toast } from "@/components/Toasts";
-import UploadButton from "@/components/UploadButton";
 import InputGenes from "@/pages/analysis/InputGenes";
 import Inputs from "@/pages/analysis/Inputs";
 import Network from "@/pages/analysis/Network";
 import Predictions from "@/pages/analysis/Predictions";
 import Similarities from "@/pages/analysis/Similarities";
 import Summary from "@/pages/analysis/Summary";
-import { scrollTo } from "@/util/dom";
+import { setInputs } from "@/pages/NewAnalysis";
+import { scrollTo, waitFor } from "@/util/dom";
 import { downloadJson } from "@/util/download";
 import { useQuery } from "@/util/hooks";
 
 const AnalysisPage = () => {
+  const navigate = useNavigate();
+
   /** get info and state from route */
   const location = useLocation();
   const state = location.state ?? {};
-  const stateInput = state.inputs as AnalysisInputs | undefined;
+  const stateInputs = state.inputs as AnalysisInputs | undefined;
+  const stateResults = state.results as AnalysisResults | undefined;
 
   /** query results */
   const {
     data: queryData,
     status: queryStatus,
     query: runQuery,
-    reset: resetQuery,
-  } = useQuery(async () => await submitAnalysis(stateInput!), stateInput);
-
-  /** upload analysis */
-  const [upload, setUpload] = useState<Analysis>();
+  } = useQuery(async () => await submitAnalysis(stateInputs!), stateInputs);
 
   useEffect(() => {
-    /** submit query once on mounted, if appropriate */
-    if (!upload && stateInput && queryStatus === "empty") runQuery();
-  }, [upload, stateInput, queryStatus, runQuery]);
+    /** submit query once on mounted, if needed */
+    if (stateInputs && !stateResults && queryStatus === "empty") runQuery();
+  }, [stateInputs, stateResults, queryStatus, runQuery]);
 
   /** scroll down to check section after entering genes */
   useEffect(() => {
-    if (queryStatus !== "empty") scrollTo("#results");
+    if (queryStatus === "loading") scrollTo("#results");
   }, [queryStatus]);
 
   /** "final" input and results */
-  const inputs = upload?.inputs ?? stateInput;
-  const results = upload?.results ?? queryData;
+  const inputs = stateInputs;
+  const results = queryData ?? stateResults;
+
+  /** if no analysis inputs or results, redirect */
+  useEffect(() => {
+    if (!inputs && !results) navigate("/load-analysis");
+  });
 
   return (
     <>
@@ -76,7 +79,7 @@ const AnalysisPage = () => {
             <Button
               text="Download"
               icon={<FaDownload />}
-              tooltip="Save analysis to your device"
+              tooltip="Save analysis (inputs + results) to your device"
               onClick={() =>
                 downloadJson(
                   { inputs, results },
@@ -87,23 +90,19 @@ const AnalysisPage = () => {
               }
             />
           )}
-          <UploadButton
-            accept={["application/json"]}
-            text="Upload"
-            icon={<FaUpload />}
-            tooltip="Upload previously saved analysis"
-            onUpload={async (file, filename) => {
-              const text = await file.text();
-              try {
-                const json = JSON.parse(text) as Analysis;
-                json.inputs.name ??= filename;
-                setUpload(json);
-                resetQuery();
-              } catch (error) {
-                toast("Error parsing file", "error");
-              }
-            }}
-          />
+          {inputs && (
+            <Button
+              text="Duplicate and Edit"
+              icon={<FaFeatherAlt />}
+              tooltip={`Go back to "New Analysis" page, make changes to inputs, and re-submit`}
+              onClick={async () => {
+                await navigate("/new-analysis");
+                /** wait for new analysis page component to mount */
+                await waitFor("#submit-analysis");
+                setInputs(inputs);
+              }}
+            />
+          )}
         </Flex>
       </Section>
 

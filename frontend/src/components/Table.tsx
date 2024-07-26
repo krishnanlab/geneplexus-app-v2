@@ -273,7 +273,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
                     {...getCol(header.column.id)?.attrs}
                   >
                     {header.isPlaceholder ? null : (
-                      <Flex hAlign="left" gap="xs">
+                      <Flex hAlign="left" gap="xs" wrap={false}>
                         {/* header label */}
                         <span className={classes["th-label"]}>
                           {flexRender(
@@ -531,15 +531,25 @@ const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
 
   /** filter as number range */
   if (type === "number") {
-    const [min = 0, max = 100] = column.getFacetedMinMaxValues() || [];
+    /**
+     * need flat for tanstack table bug
+     * https:github.com/TanStack/table/pull/5676
+     */
+    const [min = 0, max = 100] = (column.getFacetedMinMaxValues() ?? []).flat();
 
     return (
       <Slider
         label="Filter"
         min={min}
         max={max}
+        step={(max - min) / 100}
         multi
-        value={(column.getFilterValue() as [number, number]) ?? [min, max]}
+        value={
+          (column.getFilterValue() as [number, number] | undefined) ?? [
+            min,
+            max,
+          ]
+        }
         onChange={(value) => {
           /** return as "unfiltered" if value equals min/max range */
           column.setFilterValue(isEqual(value, [min, max]) ? undefined : value);
@@ -559,7 +569,7 @@ const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
     ).map(({ name, count }) => ({
       id: String(name),
       text: String(name),
-      info: String(count),
+      info: count.toLocaleString(),
     }));
 
     return (
@@ -584,17 +594,21 @@ const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
       {
         id: "all",
         text: "All",
-        info: String(sum(Array.from(column.getFacetedUniqueValues().values()))),
+        info: sum(
+          Array.from(column.getFacetedUniqueValues().values()),
+        ).toLocaleString(),
       },
       {
         id: "true",
         text: "True/Yes",
-        info: String(column.getFacetedUniqueValues().get(true) ?? 0),
+        info: (column.getFacetedUniqueValues().get(true) ?? 0).toLocaleString(),
       },
       {
         id: "false",
         text: "False/No",
-        info: String(column.getFacetedUniqueValues().get(false) ?? 0),
+        info: (
+          column.getFacetedUniqueValues().get(false) ?? 0
+        ).toLocaleString(),
       },
     ];
 
@@ -602,7 +616,7 @@ const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
       <SelectSingle
         label="Filter"
         options={options}
-        value={(column.getFilterValue() as Option["id"]) ?? options[0]!}
+        value={(column.getFilterValue() as Option["id"]) ?? options[0]!.id}
         onChange={(value) =>
           /** return as "unfiltered" if all are selected */
           column.setFilterValue(value === "all" ? undefined : value)
@@ -615,7 +629,7 @@ const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
   return (
     <TextBox
       placeholder="Search"
-      value={(column.getFilterValue() as string) ?? ""}
+      value={(column.getFilterValue() as string | undefined) ?? ""}
       onChange={column.setFilterValue}
       icon={<FaMagnifyingGlass />}
     />
