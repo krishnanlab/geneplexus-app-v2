@@ -14,6 +14,7 @@ import {
 } from "react-icons/fa6";
 import { GiFly, GiRat } from "react-icons/gi";
 import { useNavigate } from "react-router";
+import { useEvent, useLocalStorage } from "react-use";
 import { useDebounce } from "use-debounce";
 import { checkGenes } from "@/api/api";
 import type {
@@ -22,6 +23,7 @@ import type {
   Network,
   Species,
 } from "@/api/types";
+import { storageKey } from "@/App";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Flex from "@/components/Flex";
@@ -105,7 +107,10 @@ const genesetContextOptions: RadioOption<GenesetContext>[] = [
 
 const NewAnalysisPage = () => {
   /** raw text list of input gene ids */
-  const [inputGenes, setInputGenes] = useState("");
+  const [inputGenes = "", setInputGenes] = useLocalStorage(
+    storageKey + "input-genes",
+    "",
+  );
   const [debouncedInputGenes] = useDebounce(inputGenes, 500);
 
   /** array of input gene ids */
@@ -204,6 +209,38 @@ const NewAnalysisPage = () => {
   useEffect(() => {
     setSpeciesTest(speciesTrain);
   }, [speciesTrain]);
+
+  /**
+   * allow setting inputs from outside component. history.state is persisted on
+   * refresh/back/forward, which interferes with localStorage-synced state, so
+   * use one-time event instead.
+   */
+  useEvent("set-inputs", (event: CustomEvent<AnalysisInputs>) => {
+    /** get input values from event */
+    const {
+      name,
+      genes,
+      speciesTrain,
+      speciesTest,
+      network,
+      genesetContext,
+      ...rest
+    } = event.detail;
+
+    /** make sure all inputs consumed (statically and at run-time) */
+    const allInputsUsed = <T extends Record<PropertyKey, never>>(rest: T) => {
+      if (Object.keys(rest).length) throw Error("Not all inputs used");
+    };
+    allInputsUsed(rest);
+
+    /** set inputs */
+    setInputGenes(genes.join(", "));
+    setName(name);
+    setSpeciesTrain(speciesTrain);
+    setSpeciesTest(speciesTest);
+    setNetwork(network);
+    setGenesetContext(genesetContext);
+  });
 
   return (
     <>
@@ -440,3 +477,7 @@ const NewAnalysisPage = () => {
 };
 
 export default NewAnalysisPage;
+
+/** set analysis inputs */
+export const setInputs = (inputs: AnalysisInputs) =>
+  window.dispatchEvent(new CustomEvent("set-inputs", { detail: inputs }));
