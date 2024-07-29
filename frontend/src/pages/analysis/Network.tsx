@@ -75,8 +75,8 @@ type LinkDatum = d3.SimulationLinkDatum<NodeDatum> & {
 };
 
 const labelKeyOptions: Option<keyof Node>[] = [
-  { id: "entrez", text: "Entrez", icon: <FaBarcode /> },
   { id: "symbol", text: "Symbol", icon: <FaAt /> },
+  { id: "entrez", text: "Entrez", icon: <FaBarcode /> },
   { id: "rank", text: "Rank", icon: <FaRankingStar /> },
   { id: "probability", text: "Probability", icon: <FaPercent /> },
 ] as const;

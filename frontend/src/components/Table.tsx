@@ -126,6 +126,9 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
     { id: "500", text: 500 },
   ].map((option) => ({ ...option, text: formatNumber(option.text) }));
 
+  /** initial per page */
+  const defaultPerPage = perPageOptions[1]!.id;
+
   /** get column definition (from props) by id */
   const getCol = useCallback((id: string) => cols[Number(id)], [cols]);
 
@@ -233,7 +236,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
       sorting: [{ id: "0", desc: false }],
       pagination: {
         pageIndex: 0,
-        pageSize: Number(perPageOptions[0]!.id),
+        pageSize: Number(defaultPerPage),
       },
     },
     /** sync some controls with table state */
@@ -443,6 +446,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
           <SelectSingle
             label="Rows"
             layout="horizontal"
+            value={defaultPerPage}
             options={perPageOptions}
             onChange={(option) => {
               table.setPageSize(Number(option));

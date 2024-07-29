@@ -98,7 +98,6 @@ const routes = [
       {
         path: "load-analysis",
         element: <LoadAnalysis />,
-        loader: () => ({ toc: true }) satisfies Meta,
       },
       {
         path: "analysis",

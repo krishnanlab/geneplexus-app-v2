@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { FaBars, FaXmark } from "react-icons/fa6";
+import { Link, useLocation } from "react-router-dom";
 import { useClickAway, useEvent } from "react-use";
 import classNames from "classnames";
 import Tooltip from "@/components/Tooltip";
@@ -21,6 +22,8 @@ const getHeadings = () => [
 const TableOfContents = () => {
   const root = useRef<HTMLElement>(null);
   const list = useRef<HTMLDivElement>(null);
+
+  const { state } = useLocation();
 
   /** open/closed state */
   const [open, setOpen] = useState(window.innerWidth > 1500);
@@ -72,11 +75,7 @@ const TableOfContents = () => {
   );
 
   /** if not much value in showing toc, hide */
-  if (
-    headings.length <= 1 ||
-    document.documentElement.getBoundingClientRect().height < 2000
-  )
-    return <></>;
+  if (headings.length <= 1) return <></>;
 
   return (
     <aside ref={root} className={classes.table} aria-label="Table of contents">
@@ -105,15 +104,18 @@ const TableOfContents = () => {
       {open && (
         <div ref={list} className={classes.list}>
           {headings.map((heading, index) => (
-            <a
+            <Link
               key={index}
               className={classes.link}
-              href={"#" + heading.id}
+              to={{ hash: "#" + heading.id }}
+              /** preserve state */
+              state={state}
+              replace={true}
               data-active={heading.id === active ? "" : undefined}
               style={{ paddingLeft: heading.level * 10 }}
             >
               {heading.text}
-            </a>
+            </Link>
           ))}
         </div>
       )}
