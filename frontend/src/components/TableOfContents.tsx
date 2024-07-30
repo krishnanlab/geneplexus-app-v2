@@ -45,6 +45,15 @@ const TableOfContents = () => {
   useEvent("scroll", () => {
     /** get active heading */
     setActive(firstInView(getHeadings())?.id || "");
+
+    if (root.current) {
+      const { x, y, width, height } =
+        root.current?.getBoundingClientRect() ?? {};
+      /** top-most element under bottom right corner of toc */
+      const covering = document.elementFromPoint(x + width, y + height);
+      /** close if covering something important */
+      if (!covering?.matches("section")) setOpen(false);
+    }
   });
 
   /** scroll toc list active item into view */
