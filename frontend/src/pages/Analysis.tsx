@@ -62,7 +62,7 @@ const AnalysisPage = () => {
 
   /** if no analysis inputs or results, redirect */
   useEffect(() => {
-    if (!inputs && !results) navigate("/load-analysis");
+    if (!inputs && !results) navigate("/load-analysis", { replace: true });
   });
 
   return (
