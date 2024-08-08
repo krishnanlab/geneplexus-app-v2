@@ -47,7 +47,6 @@
     "@typescript-eslint/eslint-plugin": "^8.0.1",
     "@typescript-eslint/parser": "^8.0.1",
     "@vitejs/plugin-react-swc": "^3.7.0",
-    "bun-types": "^1.1.22",
     "eslint-plugin-jsx-a11y": "^6.9.0",
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-react-hooks": "^4.6.2",
