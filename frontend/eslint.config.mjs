@@ -16,7 +16,7 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ["**/mockServiceWorker.js"],
+    ignores: ["dist", "**/mockServiceWorker.js"],
   },
   ...fixupConfigRules(
     compat.extends(
