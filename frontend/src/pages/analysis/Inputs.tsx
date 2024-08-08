@@ -1,13 +1,8 @@
 import { useState } from "react";
-import { FaFeatherAlt } from "react-icons/fa";
 import { FaArrowRightToBracket } from "react-icons/fa6";
-import { useNavigate } from "react-router";
 import type { AnalysisInputs } from "@/api/types";
-import Button from "@/components/Button";
 import Heading from "@/components/Heading";
 import Section from "@/components/Section";
-import { setInputs } from "@/pages/NewAnalysis";
-import { waitFor } from "@/util/dom";
 import { formatNumber } from "@/util/string";
 import classes from "./Inputs.module.css";
 
@@ -19,8 +14,6 @@ type Props = {
 const limit = 50;
 
 const Inputs = ({ inputs }: Props) => {
-  const navigate = useNavigate();
-
   /** show all genes */
   const [showAllGenes, setShowAllGenes] = useState(false);
 
@@ -63,18 +56,6 @@ const Inputs = ({ inputs }: Props) => {
           </span>
         </div>
       </div>
-
-      <Button
-        text="Duplicate and Edit"
-        icon={<FaFeatherAlt />}
-        tooltip={`Go back to "New Analysis" page, make changes to these inputs, and re-submit`}
-        onClick={async () => {
-          await navigate("/new-analysis");
-          /** wait for new analysis page component to mount */
-          await waitFor("#submit-analysis");
-          setInputs(inputs);
-        }}
-      />
     </Section>
   );
 };

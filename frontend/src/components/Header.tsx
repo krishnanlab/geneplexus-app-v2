@@ -24,6 +24,7 @@ const Header = () => {
 
   return (
     <Flex
+      tag="header"
       hAlign="space"
       className={classes.header}
       data-scrolled={y > 0 ? "" : undefined}
@@ -57,7 +58,7 @@ const Header = () => {
         <Link className={classes.link} to="/new-analysis">
           New Analysis
         </Link>
-        <Link className={classes.link} to="/analysis">
+        <Link className={classes.link} to="/load-analysis">
           Load Analysis
         </Link>
         <Link className={classes.link} to="/about">

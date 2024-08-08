@@ -34,6 +34,7 @@ export const useQuery = <Data>(
 ) => {
   /** unique key based on dependencies */
   const key = JSON.stringify(dependencies);
+
   const [state, setState] = useState<{
     /** current status */
     status: "empty" | "loading" | "error" | "success";
@@ -42,9 +43,6 @@ export const useQuery = <Data>(
     /** dependencies corresponding with current data */
     key?: string;
   }>({ status: "empty" });
-
-  /** cache store for this query */
-  const cache = useRef(new Map<typeof dependencies, Data>());
 
   /** keep track of latest query function run */
   const latest = useRef(Symbol());
@@ -64,14 +62,8 @@ export const useQuery = <Data>(
 
       setState({ status: "loading" });
 
-      /** check if data already cached */
-      const cached = cache.current.get(key);
-
       /** use cached data or run provided function to get data */
-      const result = (await cached) ?? (await func());
-
-      /** set cache */
-      if (!cached) cache.current.set(key, result);
+      const result = await func();
 
       /** if this query function run is still the latest */
       if (current === latest.current)

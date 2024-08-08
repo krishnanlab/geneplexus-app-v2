@@ -26,10 +26,10 @@ export const checkGenes = async (
 };
 
 /** submit full analysis */
-export const submitAnalysis = async (input: AnalysisInputs) => {
+export const submitAnalysis = async (inputs: AnalysisInputs) => {
   const headers = new Headers();
   headers.append("Content-Type", "application/json");
-  const params = revertAnalysisInputs(input);
+  const params = revertAnalysisInputs(inputs);
   const response = await request<_AnalysisResults>(`${api}/gpz-ml`, undefined, {
     method: "POST",
     headers,

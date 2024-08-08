@@ -19,7 +19,11 @@ const HomePage = () => {
         <p className={classes.hero}>{import.meta.env.VITE_DESCRIPTION}</p>
         <Flex>
           <Button to="/new-analysis" text="New Analysis" icon={<FaPlus />} />
-          <Button to="/analysis" text="Load Analysis" icon={<FaArrowRight />} />
+          <Button
+            to="/load-analysis"
+            text="Load Analysis"
+            icon={<FaArrowRight />}
+          />
           <Button to="/testbed" text="Testbed" icon={<FaFlaskVial />} />
         </Flex>
       </Section>

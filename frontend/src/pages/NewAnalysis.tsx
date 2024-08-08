@@ -15,7 +15,6 @@ import {
 import { GiFly, GiRat } from "react-icons/gi";
 import { useNavigate } from "react-router";
 import { useEvent, useLocalStorage } from "react-use";
-import { useDebounce } from "use-debounce";
 import { checkGenes } from "@/api/api";
 import type {
   AnalysisInputs,
@@ -111,10 +110,9 @@ const NewAnalysisPage = () => {
     storageKey + "input-genes",
     "",
   );
-  const [debouncedInputGenes] = useDebounce(inputGenes, 500);
 
   /** array of input gene ids */
-  const splitInputGenes = debouncedInputGenes
+  const splitInputGenes = inputGenes
     .split(/,|\t|\n/)
     .map((id) => id.trim())
     .filter(Boolean);
@@ -291,6 +289,8 @@ const NewAnalysisPage = () => {
 
           <Flex>
             <UploadButton
+              text="Upload"
+              icon={<FaUpload />}
               accept={[
                 "text/plain",
                 "text/csv",
@@ -299,8 +299,6 @@ const NewAnalysisPage = () => {
                 ".csv",
                 ".tsv",
               ]}
-              text="Upload"
-              icon={<FaUpload />}
               design="hollow"
               onUpload={async (file, filename) => {
                 const text = await file.text();
