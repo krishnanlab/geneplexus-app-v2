@@ -14,7 +14,7 @@ import {
   FaRankingStar,
 } from "react-icons/fa6";
 import { useMeasure } from "react-use";
-import classNames from "classnames";
+import clsx from "clsx";
 import * as d3 from "d3";
 import { clamp, cloneDeep, truncate } from "lodash";
 import type { AnalysisInputs, AnalysisResults } from "@/api/types";
@@ -406,7 +406,7 @@ const Network = ({ inputs, results }: Props) => {
               });
           }
         }}
-        className={classNames("expanded", classes.svg)}
+        className={clsx("expanded", classes.svg)}
         onClick={(event) => {
           /** clear selected if svg was direct click target */
           if ((event.target as Element).matches("svg"))

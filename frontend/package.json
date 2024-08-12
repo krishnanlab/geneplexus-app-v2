@@ -18,7 +18,7 @@
     "@radix-ui/react-tabs": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.2",
     "@tanstack/react-table": "^8.20.1",
-    "classnames": "^2.5.1",
+    "clsx": "^2.1.1",
     "csv-stringify": "^6.5.1",
     "d3": "^7.9.0",
     "javascript-time-ago": "^2.5.10",
@@ -32,7 +32,8 @@
     "react-router-dom": "^6.26.0",
     "react-time-ago": "^7.3.3",
     "react-to-text": "^2.0.1",
-    "react-use": "^17.5.1"
+    "react-use": "^17.5.1",
+    "use-debounce": "^10.0.2"
   },
   "devDependencies": {
     "@eslint/compat": "^1.1.1",

@@ -15,7 +15,7 @@ export async function request<Response>(
   /** fetch options */
   options: RequestInit = {},
   /** parse response mode */
-  parse: "text" | "json" = "json",
+  parse: "json" | "text" = "json",
 ) {
   /** artificial delay for testing loading spinners */
   await sleep(0);
@@ -51,7 +51,7 @@ export async function request<Response>(
   }
   console.debug(`📣 Response ${log}`, { response, parsed });
   /** throw error after details have been logged */
-  if (error || undefined) throw Error(error);
+  if (error || parsed === undefined) throw Error(error);
   /** set cache for next time */
   cache.set(id, response);
   return parsed;
