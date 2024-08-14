@@ -30,6 +30,9 @@ export const types = {
   error: { color: "var(--error)", icon: <FaTriangleExclamation /> },
 };
 
+/** mark type */
+export type Type = keyof typeof types;
+
 /** icon and text with color */
 const Mark = ({ type = "info", icon, className, children }: Props) => (
   <Flex

@@ -131,7 +131,7 @@ const TableOfContents = () => {
               to={{ hash: "#" + heading.id }}
               /** preserve state */
               state={state}
-              replace={true}
+              replace
               style={{ paddingLeft: heading.level * 10 }}
             >
               {heading.text}
