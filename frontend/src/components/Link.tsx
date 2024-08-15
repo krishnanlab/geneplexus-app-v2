@@ -2,17 +2,17 @@ import type { ForwardedRef, ReactNode } from "react";
 import { forwardRef } from "react";
 import { FaArrowUpRightFromSquare } from "react-icons/fa6";
 import { Link as RouterLink } from "react-router-dom";
-import classNames from "classnames";
+import clsx from "clsx";
 import Tooltip from "@/components/Tooltip";
 import classes from "./Link.module.css";
 
 type Props = {
   /** url to link to, local or external */
   to: string;
-  /** force link to open in new tab */
+  /** force link opening in new/same tab */
   newTab?: boolean;
-  /** disable arrow icon */
-  noIcon?: boolean;
+  /** force showing/hiding arrow icon */
+  showArrow?: boolean;
   /** tooltip content */
   tooltip?: ReactNode;
   /** class */
@@ -24,17 +24,17 @@ type Props = {
 /** link to internal route or external url */
 const Link = forwardRef(
   (
-    { to, children, newTab, noIcon, tooltip, className, ...props }: Props,
+    { to, children, newTab, showArrow, tooltip, className, ...props }: Props,
     ref: ForwardedRef<HTMLAnchorElement>,
   ) => {
     /** whether link is external (some other site) or internal (within router) */
     const external = to.startsWith("http");
 
     /** whether to open link in new tab */
-    const target = newTab ?? external ? "_blank" : "";
+    const target = (newTab ?? external) ? "_blank" : "";
 
-    /** whether to show icon */
-    const showIcon = target && !noIcon;
+    /** whether to show arrow icon */
+    const _showArrow = showArrow ?? target;
 
     /** full element to render */
     const element = external ? (
@@ -42,22 +42,22 @@ const Link = forwardRef(
         ref={ref}
         href={to}
         target={target}
-        className={classNames(classes.link, className)}
+        className={clsx(classes.link, className)}
         {...props}
       >
         {children}
-        {showIcon && <FaArrowUpRightFromSquare className={classes.icon} />}
+        {_showArrow && <FaArrowUpRightFromSquare className={classes.icon} />}
       </a>
     ) : (
       <RouterLink
         ref={ref}
         to={to}
         target={target}
-        className={classNames(classes.link, className)}
+        className={clsx(classes.link, className)}
         {...props}
       >
         {children}
-        {showIcon && <FaArrowUpRightFromSquare className={classes.icon} />}
+        {_showArrow && <FaArrowUpRightFromSquare className={classes.icon} />}
       </RouterLink>
     );
 

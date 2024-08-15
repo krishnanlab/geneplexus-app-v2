@@ -14,7 +14,7 @@ import {
   FaRankingStar,
 } from "react-icons/fa6";
 import { useMeasure } from "react-use";
-import classNames from "classnames";
+import clsx from "clsx";
 import * as d3 from "d3";
 import { clamp, cloneDeep, truncate } from "lodash";
 import type { AnalysisInputs, AnalysisResults } from "@/api/types";
@@ -48,10 +48,12 @@ const attractionStrength = 1;
 /** equilibrium distance between linked nodes */
 const springDistance = 40;
 /** node circle fill colors (keep light to allow dark text) */
-const nodeColors: Record<Node["classLabel"], string> = {
+const nodeColors: Record<Node["classLabel"] | "Node", string> = {
   Positive: "#b3e2ff",
   Negative: "#ffcada",
   Neutral: "#e8e8e8",
+  /** fallback */
+  Node: "#e8e8e8",
 };
 /** link line stroke color */
 const linkColor = "#a0a0a0";
@@ -75,8 +77,8 @@ type LinkDatum = d3.SimulationLinkDatum<NodeDatum> & {
 };
 
 const labelKeyOptions: Option<keyof Node>[] = [
-  { id: "entrez", text: "Entrez", icon: <FaBarcode /> },
   { id: "symbol", text: "Symbol", icon: <FaAt /> },
+  { id: "entrez", text: "Entrez", icon: <FaBarcode /> },
   { id: "rank", text: "Rank", icon: <FaRankingStar /> },
   { id: "probability", text: "Probability", icon: <FaPercent /> },
 ] as const;
@@ -143,21 +145,39 @@ const Network = ({ inputs, results }: Props) => {
   );
 
   /** legend info */
-  const legendInfo: [number, string, string][] = [
-    [4.5, "Nodes", formatNumber(nodes.length)],
-    [5.5, "Links", formatNumber(links.length)],
-  ];
+  const legend: (readonly [string, string])[][] = [];
+
+  /** colors */
+  legend.push(
+    Object.entries(nodeColors)
+      /** don't show color if no nodes of that color */
+      .filter(
+        ([label]) => nodes.filter((node) => node.classLabel === label).length,
+      )
+      .map(([label, color]) => [color, label] as const),
+  );
+
+  /** counts */
+  legend.push([
+    ["Nodes", formatNumber(nodes.length)],
+    ["Links", formatNumber(links.length)],
+  ]);
+
+  /** selected node info */
   if (selectedNode)
-    legendInfo.push(
-      [7, "Selected Node", ""],
-      [8, "Rank", formatNumber(selectedNode.rank)],
-      [9, "Prob.", formatNumber(selectedNode.probability)],
-      [10, "Entrz.", selectedNode.entrez],
-      [11, "Sym.", selectedNode.symbol],
-      [12, "Name", selectedNode.name],
-      [13, "K/N", selectedNode.knownNovel],
-      [14, "Class", selectedNode.classLabel],
-    );
+    legend.push([
+      ["Selected Node", ""],
+      ["Rank", formatNumber(selectedNode.rank)],
+      ["Prob.", formatNumber(selectedNode.probability)],
+      ["Entrz.", selectedNode.entrez],
+      ["Sym.", selectedNode.symbol],
+      ["Name", selectedNode.name],
+      ["K/N", selectedNode.knownNovel],
+      ["Class", selectedNode.classLabel],
+    ]);
+
+  /** incrementing legend line (y) number */
+  let legendLine = -0.5;
 
   /** camera zoom handler */
   const zoom = useMemo(
@@ -379,8 +399,6 @@ const Network = ({ inputs, results }: Props) => {
             /** attach zoom behavior */
             zoom(d3.select(el));
             svg
-              /** always prevent scroll on wheel, not just when at scale limit */
-              // .on("wheel", (event) => event.preventDefault())
               /** auto-fit on dbl click */
               .on("dblclick.zoom", () => {
                 fitZoom();
@@ -388,7 +406,7 @@ const Network = ({ inputs, results }: Props) => {
               });
           }
         }}
-        className={classNames("expanded", classes.svg)}
+        className={clsx("expanded", classes.svg)}
         onClick={(event) => {
           /** clear selected if svg was direct click target */
           if ((event.target as Element).matches("svg"))
@@ -455,7 +473,7 @@ const Network = ({ inputs, results }: Props) => {
                   nodeRadius,
                   nodeRadius / 2,
                 )}
-                fill={nodeColors[node.classLabel]}
+                fill={nodeColors[node.classLabel || "Node"]}
                 stroke={node.entrez === selectedNode?.entrez ? "#000000" : ""}
                 tabIndex={0}
                 onClick={() => setSelectedNode(node)}
@@ -503,48 +521,54 @@ const Network = ({ inputs, results }: Props) => {
           {/* background */}
           <rect fill="#ffffff" stroke="#e0e0e0" />
 
-          {/* colors */}
-          {Object.entries(nodeColors).map(([label, color], index) => (
-            <Fragment key={index}>
-              <circle
-                cx={legendCell * legendSpacing}
-                cy={(index + 1) * legendCell * legendSpacing}
-                r={legendCell / 1.2}
-                fill={color}
-              />
-              <text
-                x={legendCell * legendSpacing * 1.75}
-                y={(index + 1) * legendCell * legendSpacing}
-                fontSize={legendCell}
-                dominantBaseline="central"
-              >
-                {label}
-              </text>
-            </Fragment>
-          ))}
-
           {/* info */}
-          {legendInfo?.map(([line, key, value], index) => (
-            <Fragment key={index}>
-              <text
-                x={legendCell}
-                y={line * legendCell * legendSpacing}
-                fontSize={legendCell}
-                dominantBaseline="central"
-                fill="#808080"
-              >
-                {key}
-              </text>
-              <text
-                x={legendCell * 5}
-                y={line * legendCell * legendSpacing}
-                fontSize={legendCell}
-                dominantBaseline="central"
-              >
-                {truncate(value, { length: 20 })}
-              </text>
-            </Fragment>
-          ))}
+          {legend?.map((group) => {
+            /** small gap between groups */
+            legendLine += 0.5;
+
+            return group.map(([key, value]) => {
+              /** new line */
+              legendLine++;
+
+              /** is colored icon to show */
+              const icon = key.startsWith("#");
+              /** line y */
+              const y = legendLine * legendCell * legendSpacing;
+
+              return (
+                <Fragment key={y}>
+                  {icon ? (
+                    <circle
+                      cx={legendCell * legendSpacing}
+                      cy={y}
+                      r={legendCell / 1.2}
+                      fill={key}
+                    />
+                  ) : (
+                    <text
+                      x={legendCell}
+                      y={y}
+                      fontSize={legendCell}
+                      dominantBaseline="central"
+                      fill="#808080"
+                    >
+                      {key}
+                    </text>
+                  )}
+                  <text
+                    x={
+                      icon ? legendCell * legendSpacing * 1.75 : legendCell * 5
+                    }
+                    y={y}
+                    fontSize={legendCell}
+                    dominantBaseline="central"
+                  >
+                    {truncate(value, { length: 20 })}
+                  </text>
+                </Fragment>
+              );
+            });
+          })}
         </g>
       </svg>
 

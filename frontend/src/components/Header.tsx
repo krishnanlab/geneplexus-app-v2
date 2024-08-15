@@ -1,40 +1,40 @@
 import { useEffect, useState } from "react";
 import { FaBars, FaXmark } from "react-icons/fa6";
-import { useWindowScroll } from "react-use";
-import classNames from "classnames";
+import { useMeasure } from "react-use";
+import clsx from "clsx";
 import Logo from "@/assets/logo.svg?react";
 import Flex from "@/components/Flex";
 import Link from "@/components/Link";
 import Tooltip from "@/components/Tooltip";
 import classes from "./Header.module.css";
 
+/** doc element abbrev */
+const doc = document.documentElement;
+
+/** set page scroll as css variable */
+const updateY = () => doc.style.setProperty("--y", doc.scrollTop + "px");
+window.addEventListener("scroll", updateY);
+updateY();
+
 /** at top of every page. singleton. */
 const Header = () => {
   /** nav menu expanded/collapsed state */
   const [open, setOpen] = useState(false);
 
-  /** document scroll */
-  const { y } = useWindowScroll();
+  /** header height */
+  const [ref, { height }] = useMeasure<HTMLElement>();
 
   useEffect(() => {
     /** make sure all scrolls take into account header height */
-    document.documentElement.style.scrollPaddingTop =
-      (document.querySelector("header")?.clientHeight || 0) + 20 + "px";
-  });
+    doc.style.scrollPaddingTop = height + 20 + "px";
+  }, [height]);
 
   return (
-    <Flex
-      hAlign="space"
-      className={classes.header}
-      data-scrolled={y > 0 ? "" : undefined}
-    >
+    <Flex ref={ref} tag="header" hAlign="space" className={classes.header}>
       {/* logo and text */}
       <div className={classes.title}>
         <Logo className={classes.logo} />
-        <Link
-          className={classNames(classes.link, classes["title-link"])}
-          to="/"
-        >
+        <Link className={clsx(classes.link, classes["title-link"])} to="/">
           {import.meta.env.VITE_TITLE}
         </Link>
       </div>
@@ -57,7 +57,7 @@ const Header = () => {
         <Link className={classes.link} to="/new-analysis">
           New Analysis
         </Link>
-        <Link className={classes.link} to="/analysis">
+        <Link className={classes.link} to="/load-analysis">
           Load Analysis
         </Link>
         <Link className={classes.link} to="/about">

@@ -1,9 +1,14 @@
 import type { ReactElement, ReactNode } from "react";
 import { cloneElement, Fragment } from "react";
 import { FaAngleDown, FaCheck } from "react-icons/fa6";
-import classNames from "classnames";
-import { Float } from "@headlessui-float/react";
-import * as HUI from "@headlessui/react";
+import clsx from "clsx";
+import {
+  Label,
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+} from "@headlessui/react";
 import { useForm } from "@/components/Form";
 import Help from "@/components/Help";
 import classes from "./Select.module.css";
@@ -50,8 +55,8 @@ const SelectMulti = <O extends Option>({
   const form = useForm();
 
   return (
-    <HUI.Listbox
-      className={classNames(classes.container, classes[layout])}
+    <Listbox
+      className={clsx(classes.container, classes[layout])}
       as="div"
       multiple
       value={value}
@@ -80,51 +85,49 @@ const SelectMulti = <O extends Option>({
         return (
           <>
             {/* label */}
-            <HUI.Listbox.Label className={classes.label}>
+            <Label className={classes.label}>
               {label}
               {tooltip && <Help tooltip={tooltip} />}
-            </HUI.Listbox.Label>
+            </Label>
 
-            <Float placement="bottom-start" floatingAs={Fragment} adaptiveWidth>
-              {/* button */}
-              <HUI.Listbox.Button className={classes.button}>
-                <span className="truncate">{selectedLabel}</span>
-                <FaAngleDown />
-              </HUI.Listbox.Button>
+            {/* button */}
+            <ListboxButton className={classes.button}>
+              <span className="truncate">{selectedLabel}</span>
+              <FaAngleDown />
+            </ListboxButton>
 
-              {/* dropdown */}
-              <HUI.Listbox.Options className={classes.options}>
-                {options.map((option) => (
-                  <HUI.Listbox.Option
-                    key={option.id}
-                    value={option.id}
-                    as={Fragment}
-                  >
-                    {({ active, selected }) => (
-                      <li
-                        className={classNames(
-                          classes.option,
-                          active && classes["option-active"],
-                        )}
-                      >
-                        <FaCheck
-                          className={classes.check}
-                          style={{ opacity: selected ? 1 : 0 }}
-                        />
-                        <span className={classes.text}>{option.text}</span>
-                        <span className={classNames(classes.info, "secondary")}>
-                          {option.info}
-                        </span>
-                        {option.icon &&
-                          cloneElement(option.icon, {
-                            className: classNames(classes.icon, "secondary"),
-                          })}
-                      </li>
-                    )}
-                  </HUI.Listbox.Option>
-                ))}
-              </HUI.Listbox.Options>
-            </Float>
+            {/* dropdown */}
+            <ListboxOptions
+              className={classes.options}
+              anchor="bottom start"
+              modal={false}
+            >
+              {options.map((option) => (
+                <ListboxOption key={option.id} value={option.id} as={Fragment}>
+                  {({ focus, selected }) => (
+                    <li
+                      className={clsx(
+                        classes.option,
+                        focus && classes["option-active"],
+                      )}
+                    >
+                      <FaCheck
+                        className={classes.check}
+                        style={{ opacity: selected ? 1 : 0 }}
+                      />
+                      <span className={classes.text}>{option.text}</span>
+                      <span className={clsx(classes.info, "secondary")}>
+                        {option.info}
+                      </span>
+                      {option.icon &&
+                        cloneElement(option.icon, {
+                          className: clsx(classes.icon, "secondary"),
+                        })}
+                    </li>
+                  )}
+                </ListboxOption>
+              ))}
+            </ListboxOptions>
 
             {/* for FormData */}
             <select
@@ -146,7 +149,7 @@ const SelectMulti = <O extends Option>({
           </>
         );
       }}
-    </HUI.Listbox>
+    </Listbox>
   );
 };
 

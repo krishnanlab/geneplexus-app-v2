@@ -21,6 +21,7 @@ import ViewCorner from "@/components/ViewCorner";
 import About from "@/pages/About";
 import Analysis from "@/pages/Analysis";
 import Home from "@/pages/Home";
+import LoadAnalysis from "@/pages/LoadAnalysis";
 import NewAnalysis from "@/pages/NewAnalysis";
 import NotFound from "@/pages/NotFound";
 import Testbed from "@/pages/Testbed";
@@ -44,8 +45,7 @@ const Layout = () => {
 
   /** scroll to hash in url */
   useEffect(() => {
-    if (!hash) return;
-    scrollTo(hash);
+    if (hash) scrollTo(hash);
   }, [hash]);
 
   return (
@@ -93,6 +93,10 @@ const routes = [
         path: "about",
         element: <About />,
         loader: () => ({ toc: true }) satisfies Meta,
+      },
+      {
+        path: "load-analysis",
+        element: <LoadAnalysis />,
       },
       {
         path: "analysis",

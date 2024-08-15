@@ -1,6 +1,6 @@
 import type { ChangeEvent, ComponentProps, DragEvent } from "react";
 import { useRef, useState } from "react";
-import classNames from "classnames";
+import clsx from "clsx";
 import Button from "@/components/Button";
 import classes from "./UploadButton.module.css";
 
@@ -54,16 +54,13 @@ const UploadButton = ({ onUpload, accept = [], tooltip, ...props }: Props) => {
     <span>
       <Button
         {...props}
+        className={clsx({ [classes.drag!]: drag })}
         tooltip={
-          tooltip || (
-            <>
-              Choose or drag & drop a file
-              <br />
-              {accept.filter((type) => type.startsWith(".")).join(" / ")}
-            </>
-          )
+          <>
+            {tooltip}Choose or drag & drop a{" "}
+            {accept.filter((type) => type.startsWith(".")).join("/")} file.
+          </>
         }
-        className={classNames({ [classes.drag!]: drag })}
         onClick={onClick}
         onDragEnter={() => setDrag(true)}
         onDragLeave={() => setDrag(false)}
@@ -78,7 +75,7 @@ const UploadButton = ({ onUpload, accept = [], tooltip, ...props }: Props) => {
       <input
         ref={ref}
         type="file"
-        accept={accept.map((ext) => "." + ext).join(", ")}
+        accept={accept.join(",")}
         style={{ display: "none" }}
         onChange={onChange}
       />

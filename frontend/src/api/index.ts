@@ -3,56 +3,42 @@ import { sleep } from "@/util/misc";
 /** base api url */
 export const api = import.meta.env.VITE_API;
 
-/** primitive param type */
-type Param = string | number | boolean | undefined | null;
-/** collection of params */
-export type Params = Record<string, Param | Param[]>;
+/** request cache */
+const cache = new Map<string, Response>();
 
-/** generic fetch request wrapper */
-export const request = async <Response>(
-  /** request path */
-  path = "",
-  /**
-   * key/value object for url parameters
-   *
-   * e.g. { ids: [1,2,3], sort: "asc" } -> ?ids=1,2,3&sort=asc
-   */
-  params: Params = {},
+/** general request */
+export async function request<Response>(
+  /** request url */
+  url: string | URL,
+  /** url parameters */
+  params: Record<string, string | string[]> = {},
   /** fetch options */
   options: RequestInit = {},
   /** parse response mode */
-  parse: "text" | "json" = "json",
-): Promise<Response> => {
+  parse: "json" | "text" = "json",
+) {
   /** artificial delay for testing loading spinners */
   await sleep(0);
-
-  /** get string of url parameters */
-  const paramsObject = new URLSearchParams();
+  /** make url object */
+  url = new URL(url);
+  /** construct params */
   for (const [key, value] of Object.entries(params))
-    paramsObject.append(key, [value].flat().join(","));
-
-  /** assemble url to query */
-  const url = path + "?" + paramsObject.toString();
-
-  /** make request object */
+    for (const param of [value].flat()) url.searchParams.append(key, param);
+  /** construct request */
   const request = new Request(url, options);
-
-  console.debug(`📞 Request ${path}`, {
-    url,
-    params,
-    options,
-    request,
-  });
-
-  /* make new request */
-  const response = await fetch(request);
-
+  /** unique request id for caching */
+  const id = JSON.stringify(request, ["url", "method", "headers"]);
+  /** get response from cache */
+  const cached = cache.get(id);
+  /** log info */
+  const log = `(${cached ? "cached" : "new"}) ${url}`;
+  console.debug(`📞 Request ${log}`, { params, options, request });
+  /** make request */
+  const response = cached ?? (await fetch(request));
   /** capture error for throwing later */
   let error = "";
-
-  /** check response code */
-  if (!response.ok) error = `Response not OK`;
-
+  /** check status code */
+  if (!response.ok) error = "Response not OK";
   /** parse response */
   let parsed: Response | undefined;
   try {
@@ -63,17 +49,10 @@ export const request = async <Response>(
   } catch (e) {
     error = `Couldn't parse response as ${parse}`;
   }
-
-  console.debug(`📣 Response ${path}`, {
-    url,
-    params,
-    options,
-    parsed,
-    response,
-  });
-
+  console.debug(`📣 Response ${log}`, { response, parsed });
   /** throw error after details have been logged */
   if (error || parsed === undefined) throw Error(error);
-
+  /** set cache for next time */
+  cache.set(id, response);
   return parsed;
-};
+}

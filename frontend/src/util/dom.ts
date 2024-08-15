@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import reactToText from "react-to-text";
+import { debounce } from "lodash";
 import { sleep } from "@/util/misc";
 
 /** wait for element matching selector to appear, checking periodically */
@@ -16,18 +17,28 @@ export const waitFor = async <El extends Element>(
   }
 };
 
-/** scroll to element by selector */
-export const scrollTo = async (selector: string) => {
+/** scroll to element, optionally by selector */
+export const scrollTo = async (
+  selector?: string | Element | null,
+  options?: ScrollIntoViewOptions,
+) => {
   /** wait for element to appear */
-  const element = await waitFor(selector);
+  const element =
+    typeof selector === "string" ? await waitFor(selector) : selector;
   if (!element) return;
 
   /** wait for layout shifts */
   await sleep(100);
 
   /** scroll to element */
-  element.scrollIntoView({ behavior: "smooth" });
+  element.scrollIntoView({ behavior: "smooth", ...options });
 };
+
+/**
+ * debounced version of scroll-to
+ * https://stackoverflow.com/questions/49318497/google-chrome-simultaneously-smooth-scrollintoview-with-more-elements-doesn
+ */
+export const debouncedScrollTo = debounce(scrollTo, 100);
 
 /** get text content of react node */
 export const renderText = (node: ReactNode) => {
@@ -80,6 +91,37 @@ export const shrinkWrap = (element: HTMLElement | null) => {
   range.setStartBefore(start);
   range.setEndAfter(end);
   const { width } = range.getBoundingClientRect();
-  element.style.width = width + 1 + "px";
+  element.style.width = width + "px";
   element.style.boxSizing = "content-box";
+};
+
+/** is element covering anything "important" */
+export const isCovering = (element: HTMLElement | undefined | null) => {
+  if (!element) return;
+
+  /** don't consider covering if user interacting with element */
+  if (element.matches(":hover, :focus-within")) return;
+
+  /** density of points to check */
+  const gap = 10;
+
+  const { left, top, width, height } = element.getBoundingClientRect() ?? {};
+
+  /** check a grid of points under element */
+  for (let x = left; x < width; x += gap) {
+    for (let y = top; y < height; y += gap) {
+      const covering = document
+        /** get elements under point */
+        .elementsFromPoint(x, y)
+        /** only count elements "under" this one */
+        .filter((element) => element !== element && !element?.contains(element))
+        /** top-most */
+        .shift();
+
+      /** is "important" element */
+      if (!covering?.matches("section")) return true;
+    }
+  }
+
+  return false;
 };

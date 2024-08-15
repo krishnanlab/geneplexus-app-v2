@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import classNames from "classnames";
+import clsx from "clsx";
 import Flex from "@/components/Flex";
 import classes from "./Section.module.css";
 
@@ -21,10 +21,11 @@ type Props = {
  */
 const Section = ({ fill, full, className, ...props }: Props) => (
   <Flex
+    tag="section"
     direction="column"
     gap="lg"
     vAlign="top"
-    className={classNames(classes.section, className, {
+    className={clsx(classes.section, className, {
       [classes.fill!]: fill,
       [classes.full!]: full,
     })}
