@@ -34,7 +34,11 @@ const Summary = ({ results }: Props) => {
             />
             3-fold cross validation
           </span>
-          <span>{results.crossValidation.join(", ")}</span>
+          <span>
+            {results.crossValidation
+              .map((value) => value.toFixed(2))
+              .join(", ")}
+          </span>
         </>
       )}
       <span>
