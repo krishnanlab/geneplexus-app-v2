@@ -23,9 +23,7 @@ const Header = () => {
 
   /** header height */
   const ref = useRef<HTMLElement | null>(null);
-  const [, height] = useElementSize(ref, {
-    box: "border-box",
-  });
+  const [, height] = useElementSize(ref, { box: "border-box" });
 
   useEffect(() => {
     /** make sure all scrolls take into account header height */
