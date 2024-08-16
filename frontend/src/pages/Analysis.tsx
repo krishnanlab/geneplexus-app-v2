@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { BiCopy } from "react-icons/bi";
-import { FaFeatherAlt } from "react-icons/fa";
 import {
   FaChartBar,
   FaDna,
   FaDownload,
+  FaFeatherPointed,
   FaMagnifyingGlassChart,
 } from "react-icons/fa6";
 import { LuLightbulb } from "react-icons/lu";
@@ -25,6 +25,7 @@ import Network from "@/pages/analysis/Network";
 import Predictions from "@/pages/analysis/Predictions";
 import Similarities from "@/pages/analysis/Similarities";
 import Summary from "@/pages/analysis/Summary";
+import { saveRecent } from "@/pages/LoadAnalysis";
 import { setInputs } from "@/pages/NewAnalysis";
 import { scrollTo, waitFor } from "@/util/dom";
 import { downloadJson } from "@/util/download";
@@ -65,6 +66,11 @@ const AnalysisPage = () => {
     if (!inputs && !results) navigate("/load-analysis", { replace: true });
   });
 
+  /** save recent analysis inputs */
+  useEffect(() => {
+    if (inputs) saveRecent(inputs);
+  }, [inputs]);
+
   return (
     <>
       <Meta title="Analysis" />
@@ -93,7 +99,7 @@ const AnalysisPage = () => {
           {inputs && (
             <Button
               text="Duplicate and Edit"
-              icon={<FaFeatherAlt />}
+              icon={<FaFeatherPointed />}
               tooltip={`Go back to "New Analysis" page, make changes to inputs, and re-submit`}
               onClick={async () => {
                 await navigate("/new-analysis");

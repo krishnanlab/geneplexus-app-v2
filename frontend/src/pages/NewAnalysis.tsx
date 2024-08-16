@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { FaBeer } from "react-icons/fa";
 import {
+  FaBeerMugEmpty,
   FaDna,
   FaEye,
   FaFish,
@@ -22,7 +22,6 @@ import type {
   Network,
   Species,
 } from "@/api/types";
-import { storageKey } from "@/App";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Flex from "@/components/Flex";
@@ -60,7 +59,7 @@ const speciesOptions: SelectOption<Species>[] = [
   { id: "Fly", text: "Fly", icon: <GiFly /> },
   { id: "Zebrafish", text: "Zebrafish", icon: <FaFish /> },
   { id: "Worm", text: "Worm", icon: <FaWorm /> },
-  { id: "Yeast", text: "Yeast", icon: <FaBeer /> },
+  { id: "Yeast", text: "Yeast", icon: <FaBeerMugEmpty /> },
 ] as const;
 
 const networkOptions: RadioOption<Network>[] = [
@@ -106,10 +105,7 @@ const genesetContextOptions: RadioOption<GenesetContext>[] = [
 
 const NewAnalysisPage = () => {
   /** raw text list of input gene ids */
-  const [inputGenes, setInputGenes] = useLocalStorage(
-    storageKey + "input-genes",
-    "",
-  );
+  const [inputGenes, setInputGenes] = useLocalStorage("input-genes", "");
 
   /** array of input gene ids */
   const splitInputGenes =

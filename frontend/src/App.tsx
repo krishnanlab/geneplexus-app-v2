@@ -120,6 +120,3 @@ const routes = [
 const router = createBrowserRouter(routes, {
   basename: import.meta.env.BASE_URL,
 });
-
-/** prefix for localStorage keys */
-export const storageKey = "geneplexus-";
