@@ -1,11 +1,14 @@
+<!doctype html>
 <html>
   <body>
     <script type="text/javascript">
       // redirect to root and pass page to router
-      console.debug("Redirecting from:", window.location);
-      const { origin, pathname, search, hash } = window.location;
-      window.sessionStorage.redirect = pathname + search + hash;
-      window.location = "/";
+      console.debug("Redirecting from:", location);
+      console.debug("With state:", history.state);
+      const { origin, pathname, search, hash } = location;
+      sessionStorage.redirectPath = pathname + search + hash;
+      sessionStorage.redirectState = JSON.stringify(history.state);
+      location = "/";
     </script>
   </body>
 </html>
