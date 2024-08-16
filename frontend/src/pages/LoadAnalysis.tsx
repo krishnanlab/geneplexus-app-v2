@@ -105,7 +105,7 @@ const LoadAnalysis = () => {
 export default LoadAnalysis;
 
 /** limit to how many analyses can be stored */
-const recentLimit = 50;
+const recentLimit = 10;
 
 /** global list of recent analyses */
 const recentAnalyses = atomWithStorage<AnalysisInputs[]>("recent-analyses", []);
