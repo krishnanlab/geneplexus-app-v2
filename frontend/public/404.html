@@ -7,7 +7,13 @@
       console.debug("With state:", history.state);
       const { origin, pathname, search, hash } = location;
       sessionStorage.redirectPath = pathname + search + hash;
-      sessionStorage.redirectState = JSON.stringify(history.state);
+      try {
+        // remove entries that could exceed storage limit
+        delete history.state.usr.results;
+        sessionStorage.redirectState = JSON.stringify(history.state);
+      } catch (error) {
+        console.error(error);
+      }
       location = "/";
     </script>
   </body>
