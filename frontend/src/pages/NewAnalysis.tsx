@@ -14,7 +14,7 @@ import {
 } from "react-icons/fa6";
 import { GiFly, GiRat } from "react-icons/gi";
 import { useNavigate } from "react-router";
-import { useEvent, useLocalStorage } from "react-use";
+import { useEventListener, useLocalStorage } from "@reactuses/core";
 import { checkGenes } from "@/api/api";
 import type {
   AnalysisInputs,
@@ -106,16 +106,17 @@ const genesetContextOptions: RadioOption<GenesetContext>[] = [
 
 const NewAnalysisPage = () => {
   /** raw text list of input gene ids */
-  const [inputGenes = "", setInputGenes] = useLocalStorage(
+  const [inputGenes, setInputGenes] = useLocalStorage(
     storageKey + "input-genes",
     "",
   );
 
   /** array of input gene ids */
-  const splitInputGenes = inputGenes
-    .split(/,|\t|\n/)
-    .map((id) => id.trim())
-    .filter(Boolean);
+  const splitInputGenes =
+    inputGenes
+      ?.split(/,|\t|\n/)
+      .map((id) => id.trim())
+      .filter(Boolean) ?? [];
 
   /** filename when file uploaded */
   const [filename, setFilename] = useState("");
@@ -213,7 +214,7 @@ const NewAnalysisPage = () => {
    * refresh/back/forward, which interferes with localStorage-synced state, so
    * use one-time event instead.
    */
-  useEvent("set-inputs", (event: CustomEvent<AnalysisInputs>) => {
+  useEventListener("set-inputs", (event: CustomEvent<AnalysisInputs>) => {
     /** get input values from event */
     const {
       name,
@@ -257,7 +258,7 @@ const NewAnalysisPage = () => {
 
         <TextBox
           className="full"
-          value={inputGenes}
+          value={inputGenes ?? ""}
           onChange={(value) => {
             setInputGenes(value);
             setFilename("");

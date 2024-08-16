@@ -27,12 +27,12 @@ export async function request<Response>(
   /** construct request */
   const request = new Request(url, options);
   /** unique request id for caching */
-  const id = JSON.stringify(request, ["url", "method", "headers"]);
+  const id = JSON.stringify({ url, params, options, parse });
   /** get response from cache */
   const cached = cache.get(id);
   /** log info */
   const log = `(${cached ? "cached" : "new"}) ${url}`;
-  console.debug(`📞 Request ${log}`, { params, options, request });
+  console.debug(`📞 Request ${log}`, { params, options, request, id });
   /** make request */
   const response = cached ?? (await fetch(request));
   /** capture error for throwing later */
