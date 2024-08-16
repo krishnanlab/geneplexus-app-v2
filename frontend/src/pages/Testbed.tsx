@@ -96,6 +96,7 @@ const TestbedPage = () => {
           ].map((color, index) => (
             <Tooltip key={index} content={color}>
               <div
+                aria-hidden
                 style={{
                   width: 50,
                   height: 50,

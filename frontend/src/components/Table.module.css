@@ -21,6 +21,7 @@
 
 .header-button {
   color: var(--light-gray);
+  padding: 2px;
   transition: color var(--fast);
 }
 
