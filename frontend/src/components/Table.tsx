@@ -569,7 +569,7 @@ const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
     ).map(({ name, count }) => ({
       id: String(name),
       text: String(name),
-      info: count.toLocaleString(),
+      info: formatNumber(count),
     }));
 
     return (
@@ -594,9 +594,9 @@ const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
       {
         id: "all",
         text: "All",
-        info: sum(
-          Array.from(column.getFacetedUniqueValues().values()),
-        ).toLocaleString(),
+        info: formatNumber(
+          sum(Array.from(column.getFacetedUniqueValues().values())),
+        ),
       },
       {
         id: "true",

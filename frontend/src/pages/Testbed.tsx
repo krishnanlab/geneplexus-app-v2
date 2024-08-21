@@ -175,7 +175,7 @@ const TestbedPage = () => {
           Some <code>inline code</code>.
         </p>
 
-        <pre>
+        <pre tabIndex={0}>
           {`const popup = document.querySelector("#popup"); 
 popup.style.width = "100%";
 popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
