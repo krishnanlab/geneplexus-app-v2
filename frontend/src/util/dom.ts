@@ -109,13 +109,13 @@ export const isCovering = (
   if (element.matches(":hover, :focus-within")) return;
 
   /** density of points to check */
-  const gap = 10;
+  const gap = 20;
 
   const { left, top, width, height } = element.getBoundingClientRect() ?? {};
 
   /** check a grid of points under element */
-  for (let x = left; x < width; x += gap) {
-    for (let y = top; y < height; y += gap) {
+  for (let x = left + gap; x < width - gap; x += gap) {
+    for (let y = top + gap; y < height - gap; y += gap) {
       const covering = document
         /** get elements under point */
         .elementsFromPoint(x, y)
