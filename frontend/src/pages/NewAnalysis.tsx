@@ -65,11 +65,6 @@ const speciesOptions: SelectOption<Species>[] = [
 
 const networkOptions: RadioOption<Network>[] = [
   {
-    id: "BioGRID",
-    primary: "BioGRID",
-    secondary: "Physical interactions",
-  },
-  {
     id: "STRING",
     primary: "STRING",
     secondary: "Derived from a variety of sources",
@@ -79,9 +74,19 @@ const networkOptions: RadioOption<Network>[] = [
     primary: "IMP",
     secondary: "Expression-derived interactions",
   },
+  {
+    id: "BioGRID",
+    primary: "BioGRID",
+    secondary: "Physical interactions",
+  },
 ] as const;
 
 const genesetContextOptions: RadioOption<GenesetContext>[] = [
+  {
+    id: "Combined",
+    primary: "Combined",
+    secondary: "All sets",
+  },
   {
     id: "GO",
     primary: "GO",
@@ -96,11 +101,6 @@ const genesetContextOptions: RadioOption<GenesetContext>[] = [
     id: "DisGeNet",
     primary: "DisGeNet",
     secondary: "Diseases",
-  },
-  {
-    id: "Combined",
-    primary: "Combined",
-    secondary: "All sets",
   },
 ];
 
