@@ -45,7 +45,8 @@ import meta from "./meta.json";
 import classes from "./NewAnalysis.module.css";
 
 const example: Record<Species, string> = {
-  Human: "CASP3,CYP1A2,CYP1A1,NFE2L2,CYP2C19,CYP2D6,CYP7A1,NR1H4,TP53,CYP19A1",
+  Human:
+    "BBIP1,BBS18,BBS1,BBS2,BBS4,BBS5,BBS7,BBS9,TTC8,BBS8,ARL6,BBS3,BBS10,BBS12,MKKS,BBS6,CFAP418,BBS21,CEP164,CEP290,BBS14,IFT27,BBS19,IFT74,BBS20,IFT172,BBS20,LZTFL1,BBS17,MKS1,BBS13,SCAPER,SCLT1,SDCCAG8,BBS16,TRIM32,BBS11,WDPCP,BBS15",
   Mouse: "Mpo,Inmt,Gnmt,Fos,Calr,Selenbp2,Rgn,Stat6,Etfa,Atp5f1b",
   Fly: "SC35,Rbp1-like,x16,Rsf1,B52,norpA,SF2,Srp54k,Srp54,Rbp1",
   Zebrafish: "upf1,dhx34,lsm1,xrn1,xrn2,lsm7,mrto4,pnrc2,lsm4,nbas",
