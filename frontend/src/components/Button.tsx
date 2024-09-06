@@ -32,6 +32,7 @@ type _Button = Pick<
   ComponentProps<"button">,
   | "type"
   | "onClick"
+  | "onClickCapture"
   | "onDrag"
   | "onDragEnter"
   | "onDragLeave"
@@ -42,8 +43,8 @@ type _Button = Pick<
 type Props = Base & Description & (_Link | _Button);
 
 /**
- * looks like a button and either goes somewhere (<a>) or does something
- * (<button>)
+ * looks like a button and either goes somewhere (link) or does something
+ * (button)
  */
 const Button = forwardRef(
   (

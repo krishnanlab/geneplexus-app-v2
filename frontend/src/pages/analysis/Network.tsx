@@ -13,10 +13,10 @@ import {
   FaPercent,
   FaRankingStar,
 } from "react-icons/fa6";
-import { useMeasure } from "react-use";
 import clsx from "clsx";
 import * as d3 from "d3";
 import { clamp, cloneDeep, truncate } from "lodash";
+import { useElementSize } from "@reactuses/core";
 import type { AnalysisInputs, AnalysisResults } from "@/api/types";
 import Button from "@/components/Button";
 import CheckBox from "@/components/CheckBox";
@@ -358,7 +358,7 @@ const Network = ({ inputs, results }: Props) => {
    * fit zoom any time svg resizes (on window resize, but also when hidden ->
    * visible)
    */
-  const [svgSizeRef, svgSize] = useMeasure();
+  const svgSize = useElementSize(svgRef);
   const svgSizeDeep = JSON.stringify(svgSize);
   useEffect(() => {
     fitZoom();
@@ -394,7 +394,6 @@ const Network = ({ inputs, results }: Props) => {
         ref={(el) => {
           svgRef.current = el;
           if (el) {
-            svgSizeRef(el);
             const svg = d3.select(el);
             /** attach zoom behavior */
             zoom(d3.select(el));

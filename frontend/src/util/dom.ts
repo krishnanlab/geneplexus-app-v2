@@ -95,31 +95,37 @@ export const shrinkWrap = (element: HTMLElement | null) => {
   element.style.boxSizing = "content-box";
 };
 
-/** is element covering anything "important" */
-export const isCovering = (element: HTMLElement | undefined | null) => {
+/**
+ * is element covering anything "important" (above anything besides a
+ * "background" element)
+ */
+export const isCovering = (
+  element: HTMLElement | undefined | null,
+  background = "section",
+) => {
   if (!element) return;
 
   /** don't consider covering if user interacting with element */
   if (element.matches(":hover, :focus-within")) return;
 
   /** density of points to check */
-  const gap = 10;
+  const gap = 20;
 
   const { left, top, width, height } = element.getBoundingClientRect() ?? {};
 
   /** check a grid of points under element */
-  for (let x = left; x < width; x += gap) {
-    for (let y = top; y < height; y += gap) {
+  for (let x = left + gap; x < width - gap; x += gap) {
+    for (let y = top + gap; y < height - gap; y += gap) {
       const covering = document
         /** get elements under point */
         .elementsFromPoint(x, y)
         /** only count elements "under" this one */
-        .filter((element) => element !== element && !element?.contains(element))
+        .filter((el) => el !== element && !element.contains(el))
         /** top-most */
         .shift();
 
       /** is "important" element */
-      if (!covering?.matches("section")) return true;
+      if (!covering?.matches(background)) return covering;
     }
   }
 

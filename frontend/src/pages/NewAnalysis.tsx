@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { FaBeer } from "react-icons/fa";
 import {
+  FaBeerMugEmpty,
   FaDna,
   FaEye,
   FaFish,
@@ -14,7 +14,7 @@ import {
 } from "react-icons/fa6";
 import { GiFly, GiRat } from "react-icons/gi";
 import { useNavigate } from "react-router";
-import { useEvent, useLocalStorage } from "react-use";
+import { useEventListener, useLocalStorage } from "@reactuses/core";
 import { checkGenes } from "@/api/api";
 import type {
   AnalysisInputs,
@@ -22,7 +22,6 @@ import type {
   Network,
   Species,
 } from "@/api/types";
-import { storageKey } from "@/App";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Flex from "@/components/Flex";
@@ -46,7 +45,8 @@ import meta from "./meta.json";
 import classes from "./NewAnalysis.module.css";
 
 const example: Record<Species, string> = {
-  Human: "CASP3,CYP1A2,CYP1A1,NFE2L2,CYP2C19,CYP2D6,CYP7A1,NR1H4,TP53,CYP19A1",
+  Human:
+    "BBIP1,BBS18,BBS1,BBS2,BBS4,BBS5,BBS7,BBS9,TTC8,BBS8,ARL6,BBS3,BBS10,BBS12,MKKS,BBS6,CFAP418,BBS21,CEP164,CEP290,BBS14,IFT27,BBS19,IFT74,BBS20,IFT172,BBS20,LZTFL1,BBS17,MKS1,BBS13,SCAPER,SCLT1,SDCCAG8,BBS16,TRIM32,BBS11,WDPCP,BBS15",
   Mouse: "Mpo,Inmt,Gnmt,Fos,Calr,Selenbp2,Rgn,Stat6,Etfa,Atp5f1b",
   Fly: "SC35,Rbp1-like,x16,Rsf1,B52,norpA,SF2,Srp54k,Srp54,Rbp1",
   Zebrafish: "upf1,dhx34,lsm1,xrn1,xrn2,lsm7,mrto4,pnrc2,lsm4,nbas",
@@ -60,15 +60,10 @@ const speciesOptions: SelectOption<Species>[] = [
   { id: "Fly", text: "Fly", icon: <GiFly /> },
   { id: "Zebrafish", text: "Zebrafish", icon: <FaFish /> },
   { id: "Worm", text: "Worm", icon: <FaWorm /> },
-  { id: "Yeast", text: "Yeast", icon: <FaBeer /> },
+  { id: "Yeast", text: "Yeast", icon: <FaBeerMugEmpty /> },
 ] as const;
 
 const networkOptions: RadioOption<Network>[] = [
-  {
-    id: "BioGRID",
-    primary: "BioGRID",
-    secondary: "Physical interactions",
-  },
   {
     id: "STRING",
     primary: "STRING",
@@ -79,9 +74,19 @@ const networkOptions: RadioOption<Network>[] = [
     primary: "IMP",
     secondary: "Expression-derived interactions",
   },
+  {
+    id: "BioGRID",
+    primary: "BioGRID",
+    secondary: "Physical interactions",
+  },
 ] as const;
 
 const genesetContextOptions: RadioOption<GenesetContext>[] = [
+  {
+    id: "Combined",
+    primary: "Combined",
+    secondary: "All sets",
+  },
   {
     id: "GO",
     primary: "GO",
@@ -97,25 +102,18 @@ const genesetContextOptions: RadioOption<GenesetContext>[] = [
     primary: "DisGeNet",
     secondary: "Diseases",
   },
-  {
-    id: "Combined",
-    primary: "Combined",
-    secondary: "All sets",
-  },
 ];
 
 const NewAnalysisPage = () => {
   /** raw text list of input gene ids */
-  const [inputGenes = "", setInputGenes] = useLocalStorage(
-    storageKey + "input-genes",
-    "",
-  );
+  const [inputGenes, setInputGenes] = useLocalStorage("input-genes", "");
 
   /** array of input gene ids */
-  const splitInputGenes = inputGenes
-    .split(/,|\t|\n/)
-    .map((id) => id.trim())
-    .filter(Boolean);
+  const splitInputGenes =
+    inputGenes
+      ?.split(/,|\t|\n/)
+      .map((id) => id.trim())
+      .filter(Boolean) ?? [];
 
   /** filename when file uploaded */
   const [filename, setFilename] = useState("");
@@ -213,7 +211,7 @@ const NewAnalysisPage = () => {
    * refresh/back/forward, which interferes with localStorage-synced state, so
    * use one-time event instead.
    */
-  useEvent("set-inputs", (event: CustomEvent<AnalysisInputs>) => {
+  useEventListener("set-inputs", (event: CustomEvent<AnalysisInputs>) => {
     /** get input values from event */
     const {
       name,
@@ -257,7 +255,7 @@ const NewAnalysisPage = () => {
 
         <TextBox
           className="full"
-          value={inputGenes}
+          value={inputGenes ?? ""}
           onChange={(value) => {
             setInputGenes(value);
             setFilename("");
