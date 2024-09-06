@@ -1,4 +1,4 @@
-import { FaPenNib } from "react-icons/fa6";
+import { FaPenNib, FaScaleBalanced } from "react-icons/fa6";
 import Heading from "@/components/Heading";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
@@ -11,6 +11,12 @@ const AboutPage = () => {
       <Section>
         <Heading level={1} icon={<FaPenNib />}>
           About
+        </Heading>
+      </Section>
+
+      <Section>
+        <Heading level={2} icon={<FaScaleBalanced />}>
+          Terms of Use
         </Heading>
 
         <p>
