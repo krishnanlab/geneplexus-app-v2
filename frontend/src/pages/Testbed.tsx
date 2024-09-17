@@ -87,11 +87,7 @@ const TestbedPage = () => {
               <Tooltip key={index} content={variable}>
                 <div
                   aria-hidden
-                  style={{
-                    width: 50,
-                    height: 50,
-                    background: color,
-                  }}
+                  style={{ width: 50, height: 50, background: color }}
                 />
               </Tooltip>
             ))}

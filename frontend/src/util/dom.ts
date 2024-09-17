@@ -3,9 +3,10 @@ import reactToText from "react-to-text";
 import { debounce } from "lodash";
 import { sleep } from "@/util/misc";
 
+/** css on :root */
 const rootStyles = window.getComputedStyle(document.documentElement);
 
-/** theme css variables */
+/** theme css variables https://stackoverflow.com/a/78994961/2180570 */
 export const themeVariables = Object.fromEntries(
   Array.from(document.styleSheets)
     .flatMap((styleSheet) => {
