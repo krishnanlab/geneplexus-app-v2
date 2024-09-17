@@ -16,23 +16,24 @@ export type Species =
 export type Network = "BioGRID" | "STRING" | "IMP";
 
 /** geneset context options */
-export type GenesetContext = "GO" | "Monarch" | "DisGeNet" | "Combined";
+export type GenesetContext = "GO" | "Monarch" | "Mondo" | "Combined";
 
 /** convert-ids endpoint response format */
 export type _ConvertIds = {
   input_count: number;
   convert_ids: string[];
   table_summary: {
-    Network: string;
+    Network: Network;
     NetworkGenes: number;
     PositiveGenes: number;
   }[];
   df_convert_out: {
+    "Original ID": string;
     "Entrez ID": string;
+    "Gene Name": string;
     "In BioGRID?": string;
     "In IMP?": string;
     "In STRING?": string;
-    "Original ID": string;
   }[];
 };
 
@@ -100,32 +101,38 @@ export const revertAnalysisInputs = (
 /** convert-ids endpoint response format */
 export type _AnalysisResults = {
   df_convert_out_subset: {
+    "Original ID": string;
     "Entrez ID": string;
+    "Gene Name": string;
     "In BioGRID?"?: string;
     "In IMP?"?: string;
     "In STRING?"?: string;
-    "Original ID": string;
   }[];
-  avgps: number[];
+  avgps: (number | null | undefined)[];
   positive_genes: number;
   isolated_genes: string[];
   isolated_genes_sym: string[];
-  df_edge: { Node1: string; Node2: string }[];
-  df_edge_sym: { Node1: string; Node2: string }[];
+  df_edge: { Node1: string; Node2: string; Weight: number }[];
+  df_edge_sym: { Node1: string; Node2: string; Weight: number }[];
   df_probs: {
-    Rank: number;
     Entrez: string;
     Symbol: string;
     Name: string;
-    Probability: number;
     "Known/Novel": "Known" | "Novel";
     "Class-Label": "P" | "N" | "U";
+    Probability: number;
+    "Z-score": number;
+    "P-adjusted": number;
+    Rank: number;
   }[];
   df_sim: {
-    Rank: number;
+    Task: string;
     ID: string;
     Name: string;
     Similarity: number;
+    "Z-score": number;
+    "P-adjusted": number;
+    Rank: number;
   }[];
 };
 
@@ -138,6 +145,7 @@ export const convertAnalysisResults = (backend: _AnalysisResults) => ({
       : row["Entrez ID"],
     inNetwork:
       (row["In BioGRID?"] ?? row["In IMP?"] ?? row["In STRING?"]) === "Y",
+    name: row["Gene Name"],
   })),
   crossValidation: backend.avgps,
   positiveGenes: backend.positive_genes,
@@ -169,6 +177,7 @@ export const convertAnalysisResults = (backend: _AnalysisResults) => ({
     links: backend.df_edge.map((row) => ({
       source: row.Node1,
       target: row.Node2,
+      weight: row.Weight,
     })),
   },
 });

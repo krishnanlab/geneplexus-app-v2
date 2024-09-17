@@ -15,9 +15,9 @@ const Similarities = ({ results }: Props) => {
         <Link to="https://geneontology.org/">
           Gene Ontology Biological Process
         </Link>{" "}
-        terms or <Link to="https://www.disgenet.org/">DisGeNet</Link> diseases
-        ranked by their similarity to the custom ML model trained on the input
-        genes.
+        terms or <Link to="https://mondo.monarchinitiative.org/">Mondo</Link>{" "}
+        diseases ranked by their similarity to the custom ML model trained on
+        the input genes.
       </p>
       <Table
         cols={[

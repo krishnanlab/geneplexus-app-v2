@@ -25,6 +25,10 @@ const InputGenes = ({ results }: Props) => {
           render: YesNo,
           filterType: "boolean",
         },
+        {
+          key: "name",
+          name: "Gene",
+        },
       ]}
       rows={results.inputGenes}
     />

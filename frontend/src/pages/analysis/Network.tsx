@@ -446,7 +446,9 @@ const Network = ({ inputs, results }: Props) => {
                         ? "transparent"
                         : ""
                   }
-                  strokeWidth={selected === true ? nodeRadius / 10 : ""}
+                  strokeWidth={
+                    selected === true ? (link.weight * nodeRadius) / 10 : ""
+                  }
                 />
               );
             })}
