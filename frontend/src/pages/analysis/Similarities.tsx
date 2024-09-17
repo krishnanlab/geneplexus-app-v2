@@ -1,7 +1,7 @@
 import type { AnalysisResults } from "@/api/types";
+import Exponential from "@/components/Exponential";
 import Link from "@/components/Link";
 import Table from "@/components/Table";
-import { formatNumber } from "@/util/string";
 
 type Props = {
   results: AnalysisResults;
@@ -47,7 +47,22 @@ const Similarities = ({ results }: Props) => {
             key: "similarity",
             name: "Similarity",
             filterType: "number",
-            render: formatNumber,
+          },
+          {
+            key: "task",
+            name: "Task",
+          },
+          {
+            key: "zScore",
+            name: "z-score",
+            style: { whiteSpace: "nowrap" },
+          },
+          {
+            key: "pAdjusted",
+            name: "p-adjusted",
+            style: { whiteSpace: "nowrap" },
+            render: (cell) =>
+              cell < 0.01 ? <Exponential value={cell} /> : null,
           },
         ]}
         rows={results.similarities}

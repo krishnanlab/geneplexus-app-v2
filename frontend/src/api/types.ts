@@ -56,9 +56,9 @@ export const convertConvertIds = (backend: _ConvertIds) => {
     table: backend.df_convert_out.map((row) => ({
       input: row["Original ID"],
       entrez: row["Entrez ID"],
-      biogrid: row["In BioGRID?"] === "Y",
-      imp: row["In IMP?"] === "Y",
-      string: row["In STRING?"] === "Y",
+      name: row["Gene Name"],
+      inNetwork:
+        (row["In BioGRID?"] ?? row["In IMP?"] ?? row["In STRING?"]) === "Y",
     })),
   };
 };
@@ -143,36 +143,43 @@ export const convertAnalysisResults = (backend: _AnalysisResults) => ({
     entrez: row["Entrez ID"].match(/Could Not be mapped to Entrez/i)
       ? ""
       : row["Entrez ID"],
+    name: row["Gene Name"],
     inNetwork:
       (row["In BioGRID?"] ?? row["In IMP?"] ?? row["In STRING?"]) === "Y",
-    name: row["Gene Name"],
   })),
   crossValidation: backend.avgps,
   positiveGenes: backend.positive_genes,
   predictions: backend.df_probs.map((row) => ({
-    rank: row.Rank,
     entrez: row.Entrez,
     symbol: row.Symbol,
     name: row.Name,
-    probability: row.Probability,
     knownNovel: row["Known/Novel"],
     classLabel: expandClass(row["Class-Label"]),
+    probability: row.Probability,
+    zScore: row["Z-score"],
+    pAdjusted: row["P-adjusted"],
+    rank: row.Rank,
   })),
   similarities: backend.df_sim.map((row) => ({
-    rank: row.Rank,
+    task: row.Task,
     id: row.ID,
     name: row.Name,
     similarity: row.Similarity,
+    zScore: row["Z-score"],
+    pAdjusted: row["P-adjusted"],
+    rank: row.Rank,
   })),
   network: {
     nodes: backend.df_probs.map((row) => ({
-      rank: row.Rank,
-      probability: row.Probability,
       entrez: row.Entrez,
       symbol: row.Symbol,
       name: row.Name,
       knownNovel: row["Known/Novel"],
       classLabel: expandClass(row["Class-Label"]),
+      probability: row.Probability,
+      zScore: row["Z-score"],
+      pAdjusted: row["P-adjusted"],
+      rank: row.Rank,
     })),
     edges: backend.df_edge.map((row) => ({
       source: row.Node1,

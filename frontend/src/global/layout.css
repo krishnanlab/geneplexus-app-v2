@@ -65,6 +65,11 @@
   font-weight: var(--medium);
 }
 
+.mini-table > :nth-child(even):empty::after {
+  content: "-";
+  color: var(--gray);
+}
+
 /** automatically applied to all icons (react-icons and imported custom icons) */
 
 .icon {

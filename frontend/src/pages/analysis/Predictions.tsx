@@ -1,7 +1,6 @@
 import type { AnalysisResults } from "@/api/types";
 import Exponential from "@/components/Exponential";
 import Table from "@/components/Table";
-import { formatNumber } from "@/util/string";
 
 type Props = {
   results: AnalysisResults;
@@ -21,8 +20,7 @@ const Predictions = ({ results }: Props) => {
           name: "Probability",
           tooltip: "Indicates gene's network-based similarity to input genes",
           filterType: "number",
-          render: (cell) =>
-            cell < 0.01 ? <Exponential value={cell} /> : formatNumber(cell),
+          render: (cell) => (cell < 0.01 ? <Exponential value={cell} /> : null),
         },
         {
           key: "entrez",
@@ -51,6 +49,16 @@ const Predictions = ({ results }: Props) => {
           tooltip:
             "Whether gene was considered in positive/negative class or not considered at all during training",
           filterType: "enum",
+          style: { whiteSpace: "nowrap" },
+        },
+        {
+          key: "zScore",
+          name: "z-score",
+          style: { whiteSpace: "nowrap" },
+        },
+        {
+          key: "pAdjusted",
+          name: "p-adjusted",
           style: { whiteSpace: "nowrap" },
         },
       ]}

@@ -386,20 +386,8 @@ const NewAnalysisPage = () => {
                     render: (cell) => cell || <Mark type="error">Failed</Mark>,
                   },
                   {
-                    key: "biogrid",
-                    name: "In BioGRID",
-                    render: YesNo,
-                    filterType: "boolean",
-                  },
-                  {
-                    key: "imp",
-                    name: "In IMP",
-                    render: YesNo,
-                    filterType: "boolean",
-                  },
-                  {
-                    key: "string",
-                    name: "In STRING",
+                    key: "inNetwork",
+                    name: "In Network",
                     render: YesNo,
                     filterType: "boolean",
                   },
