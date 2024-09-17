@@ -55,11 +55,13 @@ const Similarities = ({ results }: Props) => {
           {
             key: "zScore",
             name: "z-score",
+            filterType: "number",
             style: { whiteSpace: "nowrap" },
           },
           {
             key: "pAdjusted",
             name: "p-adjusted",
+            filterType: "number",
             style: { whiteSpace: "nowrap" },
             render: (cell) =>
               cell < 0.01 ? <Exponential value={cell} /> : null,
