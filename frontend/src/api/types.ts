@@ -174,7 +174,7 @@ export const convertAnalysisResults = (backend: _AnalysisResults) => ({
       knownNovel: row["Known/Novel"],
       classLabel: expandClass(row["Class-Label"]),
     })),
-    links: backend.df_edge.map((row) => ({
+    edges: backend.df_edge.map((row) => ({
       source: row.Node1,
       target: row.Node2,
       weight: row.Weight,

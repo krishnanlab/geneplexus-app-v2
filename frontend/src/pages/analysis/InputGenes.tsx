@@ -27,7 +27,7 @@ const InputGenes = ({ results }: Props) => {
         },
         {
           key: "name",
-          name: "Gene",
+          name: "Name",
         },
       ]}
       rows={results.inputGenes}

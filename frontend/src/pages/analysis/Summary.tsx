@@ -37,7 +37,7 @@ const Summary = ({ results }: Props) => {
           <span>
             {results.crossValidation
               .map((value) =>
-                typeof value === "number" ? value.toFixed(2) : "?",
+                typeof value === "number" ? value.toFixed(2) : "-",
               )
               .join(", ")}
           </span>
