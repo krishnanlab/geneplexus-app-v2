@@ -111,7 +111,7 @@ const Radios = <O extends Option>({
             {/* check mark */}
             {selectedWFallback === option.id ? (
               <FaRegCircleDot
-                className={clsx(classes.check, classes.selected)}
+                className={clsx(classes.check, classes.checked)}
               />
             ) : (
               <FaRegCircle className={classes.check} />
