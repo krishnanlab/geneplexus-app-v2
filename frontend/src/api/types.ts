@@ -16,23 +16,24 @@ export type Species =
 export type Network = "BioGRID" | "STRING" | "IMP";
 
 /** geneset context options */
-export type GenesetContext = "GO" | "Monarch" | "DisGeNet" | "Combined";
+export type GenesetContext = "GO" | "Monarch" | "Mondo" | "Combined";
 
 /** convert-ids endpoint response format */
 export type _ConvertIds = {
   input_count: number;
   convert_ids: string[];
   table_summary: {
-    Network: string;
+    Network: Network;
     NetworkGenes: number;
     PositiveGenes: number;
   }[];
   df_convert_out: {
+    "Original ID": string;
     "Entrez ID": string;
+    "Gene Name": string;
     "In BioGRID?": string;
     "In IMP?": string;
     "In STRING?": string;
-    "Original ID": string;
   }[];
 };
 
@@ -55,9 +56,9 @@ export const convertConvertIds = (backend: _ConvertIds) => {
     table: backend.df_convert_out.map((row) => ({
       input: row["Original ID"],
       entrez: row["Entrez ID"],
-      biogrid: row["In BioGRID?"] === "Y",
-      imp: row["In IMP?"] === "Y",
-      string: row["In STRING?"] === "Y",
+      name: row["Gene Name"],
+      inNetwork:
+        (row["In BioGRID?"] ?? row["In IMP?"] ?? row["In STRING?"]) === "Y",
     })),
   };
 };
@@ -100,32 +101,38 @@ export const revertAnalysisInputs = (
 /** convert-ids endpoint response format */
 export type _AnalysisResults = {
   df_convert_out_subset: {
+    "Original ID": string;
     "Entrez ID": string;
+    "Gene Name": string;
     "In BioGRID?"?: string;
     "In IMP?"?: string;
     "In STRING?"?: string;
-    "Original ID": string;
   }[];
-  avgps: number[];
+  avgps: (number | null | undefined)[];
   positive_genes: number;
   isolated_genes: string[];
   isolated_genes_sym: string[];
-  df_edge: { Node1: string; Node2: string }[];
-  df_edge_sym: { Node1: string; Node2: string }[];
+  df_edge: { Node1: string; Node2: string; Weight: number }[];
+  df_edge_sym: { Node1: string; Node2: string; Weight: number }[];
   df_probs: {
     Rank: number;
     Entrez: string;
     Symbol: string;
     Name: string;
-    Probability: number;
     "Known/Novel": "Known" | "Novel";
     "Class-Label": "P" | "N" | "U";
+    Probability: number;
+    "Z-score": number;
+    "P-adjusted": number;
   }[];
   df_sim: {
     Rank: number;
+    Task: string;
     ID: string;
     Name: string;
     Similarity: number;
+    "Z-score": number;
+    "P-adjusted": number;
   }[];
 };
 
@@ -136,39 +143,48 @@ export const convertAnalysisResults = (backend: _AnalysisResults) => ({
     entrez: row["Entrez ID"].match(/Could Not be mapped to Entrez/i)
       ? ""
       : row["Entrez ID"],
+    name: row["Gene Name"],
     inNetwork:
       (row["In BioGRID?"] ?? row["In IMP?"] ?? row["In STRING?"]) === "Y",
   })),
   crossValidation: backend.avgps,
   positiveGenes: backend.positive_genes,
   predictions: backend.df_probs.map((row) => ({
-    rank: row.Rank,
     entrez: row.Entrez,
     symbol: row.Symbol,
     name: row.Name,
-    probability: row.Probability,
     knownNovel: row["Known/Novel"],
     classLabel: expandClass(row["Class-Label"]),
+    probability: row.Probability,
+    zScore: row["Z-score"],
+    pAdjusted: row["P-adjusted"],
+    rank: row.Rank,
   })),
   similarities: backend.df_sim.map((row) => ({
-    rank: row.Rank,
+    task: row.Task,
     id: row.ID,
     name: row.Name,
     similarity: row.Similarity,
+    zScore: row["Z-score"],
+    pAdjusted: row["P-adjusted"],
+    rank: row.Rank,
   })),
   network: {
     nodes: backend.df_probs.map((row) => ({
-      rank: row.Rank,
-      probability: row.Probability,
       entrez: row.Entrez,
       symbol: row.Symbol,
       name: row.Name,
       knownNovel: row["Known/Novel"],
       classLabel: expandClass(row["Class-Label"]),
+      probability: row.Probability,
+      zScore: row["Z-score"],
+      pAdjusted: row["P-adjusted"],
+      rank: row.Rank,
     })),
-    links: backend.df_edge.map((row) => ({
+    edges: backend.df_edge.map((row) => ({
       source: row.Node1,
       target: row.Node2,
+      weight: row.Weight,
     })),
   },
 });

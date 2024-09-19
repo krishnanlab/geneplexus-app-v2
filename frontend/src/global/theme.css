@@ -1,11 +1,11 @@
 :root {
   /* accent */
-  --accent: #ba3960;
+  --accent: hsl(342, 50%, 50%);
+  --accent-light: hsl(342, 100%, 90%);
 
   /** deep */
-  --deep: #22577a;
-  --deep-mid: #5a92b7;
-  --deep-light: #ceebff;
+  --deep: hsl(204, 50%, 35%);
+  --deep-light: hsl(204, 100%, 90%);
 
   /** grays */
   --black: #000000;

@@ -78,7 +78,7 @@ hr {
 /** text */
 
 a {
-  color: var(--accent);
+  color: var(--deep);
   transition: color var(--fast);
 }
 
@@ -87,7 +87,7 @@ a:hover {
 }
 
 p a:visited {
-  color: var(--deep);
+  color: var(--accent);
 }
 
 p a:visited:hover {

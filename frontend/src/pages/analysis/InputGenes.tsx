@@ -20,6 +20,10 @@ const InputGenes = ({ results }: Props) => {
           render: (cell) => cell || <Mark type="error">Failed</Mark>,
         },
         {
+          key: "name",
+          name: "Name",
+        },
+        {
           key: "inNetwork",
           name: "In Network",
           render: YesNo,

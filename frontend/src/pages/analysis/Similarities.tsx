@@ -1,7 +1,7 @@
 import type { AnalysisResults } from "@/api/types";
+import Exponential from "@/components/Exponential";
 import Link from "@/components/Link";
 import Table from "@/components/Table";
-import { formatNumber } from "@/util/string";
 
 type Props = {
   results: AnalysisResults;
@@ -15,9 +15,9 @@ const Similarities = ({ results }: Props) => {
         <Link to="https://geneontology.org/">
           Gene Ontology Biological Process
         </Link>{" "}
-        terms or <Link to="https://www.disgenet.org/">DisGeNet</Link> diseases
-        ranked by their similarity to the custom ML model trained on the input
-        genes.
+        terms or <Link to="https://mondo.monarchinitiative.org/">Mondo</Link>{" "}
+        diseases ranked by their similarity to the custom ML model trained on
+        the input genes.
       </p>
       <Table
         cols={[
@@ -25,6 +25,10 @@ const Similarities = ({ results }: Props) => {
             key: "rank",
             name: "Rank",
             filterType: "number",
+          },
+          {
+            key: "task",
+            name: "Task",
           },
           {
             key: "id",
@@ -47,7 +51,20 @@ const Similarities = ({ results }: Props) => {
             key: "similarity",
             name: "Similarity",
             filterType: "number",
-            render: formatNumber,
+          },
+          {
+            key: "zScore",
+            name: "z-score",
+            filterType: "number",
+            style: { whiteSpace: "nowrap" },
+          },
+          {
+            key: "pAdjusted",
+            name: "p-adjusted",
+            filterType: "number",
+            style: { whiteSpace: "nowrap" },
+            render: (cell) =>
+              cell < 0.01 ? <Exponential value={cell} /> : null,
           },
         ]}
         rows={results.similarities}

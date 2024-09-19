@@ -41,7 +41,7 @@ import Slider from "@/components/Slider";
 import TextBox from "@/components/TextBox";
 import Tooltip from "@/components/Tooltip";
 import { downloadCsv } from "@/util/download";
-import { formatNumber } from "@/util/string";
+import { formatDate, formatNumber } from "@/util/string";
 import classes from "./Table.module.css";
 
 type Col<
@@ -69,7 +69,10 @@ type Col<
   show?: boolean;
   /** tooltip to show in header cell */
   tooltip?: ReactNode;
-  /** custom render function for cell */
+  /**
+   * custom render function for cell. return undefined or null to fallback to
+   * default formatting.
+   */
   render?: (cell: NoInfer<Datum[Key]>) => ReactNode;
 };
 
@@ -212,8 +215,13 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
       /** func to use for filtering individual column */
       filterFn: filterFunc,
       /** render func for cell */
-      cell: (cell) =>
-        col.render ? col.render(cell.getValue()) : cell.getValue(),
+      cell: (cell) => {
+        const raw = cell.getValue();
+        const rendered = col.render?.(raw);
+        return rendered === undefined || rendered === null
+          ? defaultFormat(raw)
+          : rendered;
+      },
     }),
   );
 
@@ -632,4 +640,18 @@ const Filter = <Datum extends object>({ column, def }: FilterProps<Datum>) => {
       icon={<FaMagnifyingGlass />}
     />
   );
+};
+
+/** default cell formatter based on detected type */
+const defaultFormat = (cell: unknown) => {
+  if (typeof cell === "number") return formatNumber(cell);
+  if (typeof cell === "boolean") return cell ? "True" : "False";
+  /** if falsey (except 0 and false) */
+  if (!cell) return "-";
+  if (Array.isArray(cell)) return cell.length.toLocaleString();
+  if (cell instanceof Date) return formatDate(cell);
+  if (typeof cell === "object")
+    return Object.keys(cell).length.toLocaleString();
+  if (typeof cell === "string") return cell;
+  return String(cell);
 };

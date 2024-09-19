@@ -98,8 +98,8 @@ const genesetContextOptions: RadioOption<GenesetContext>[] = [
     secondary: "Phenotypes",
   },
   {
-    id: "DisGeNet",
-    primary: "DisGeNet",
+    id: "Mondo",
+    primary: "Mondo",
     secondary: "Diseases",
   },
 ];
@@ -184,7 +184,7 @@ const NewAnalysisPage = () => {
 
   /** restrict species options based on other params */
   const filteredSpeciesOptions = speciesOptions.filter((option) => {
-    if (genesetContext === "DisGeNet" && option.id !== "Human") return false;
+    if (genesetContext === "Mondo" && option.id !== "Human") return false;
     if (network === "BioGRID" && option.id === "Zebrafish") return false;
     return true;
   });
@@ -196,10 +196,10 @@ const NewAnalysisPage = () => {
   )
     toast("BioGRID does not support Zebrafish.", "warning", "warn1");
   if (
-    genesetContext === "DisGeNet" &&
+    genesetContext === "Mondo" &&
     (speciesTrain !== "Human" || speciesTest !== "Human")
   )
-    toast("DisGeNet only supports Human genes.", "warning", "warn2");
+    toast("Mondo only supports Human genes.", "warning", "warn2");
 
   /** auto-select species */
   useEffect(() => {
@@ -386,20 +386,8 @@ const NewAnalysisPage = () => {
                     render: (cell) => cell || <Mark type="error">Failed</Mark>,
                   },
                   {
-                    key: "biogrid",
-                    name: "In BioGRID",
-                    render: YesNo,
-                    filterType: "boolean",
-                  },
-                  {
-                    key: "imp",
-                    name: "In IMP",
-                    render: YesNo,
-                    filterType: "boolean",
-                  },
-                  {
-                    key: "string",
-                    name: "In STRING",
+                    key: "inNetwork",
+                    name: "In Network",
                     render: YesNo,
                     filterType: "boolean",
                   },

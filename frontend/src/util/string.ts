@@ -39,7 +39,7 @@ export const formatDate = (date: string | Date | undefined) => {
       dateStyle: "medium",
       timeStyle: "short",
     });
-  return null;
+  return "";
 };
 
 /** make label (e.g. aria label) from html string */

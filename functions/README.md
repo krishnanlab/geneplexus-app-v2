@@ -71,10 +71,12 @@ type Response = {
   }[];
   // dataframe of results
   df_convert_out: {
-    // converted id of gene
-    "Entrez ID": string;
     // input id of gene
     "Original ID": string;
+    // converted id of gene
+    "Entrez ID": string;
+    // converted name of gene
+    "Gene Name": string;
     // whether gene was found in each network
     "In BioGRID?": "Y" | "N";
     "In IMP?": "Y" | "N";
@@ -100,7 +102,7 @@ type Request = {
   // network that ML features are from and which edge list is used to make final graph
   net_type: "BioGRID" | "STRING" | "IMP";
   // source used to select negative genes and which sets to compare trained model to
-  gsc: "GO" | "Monarch" | "DisGeNet" | "Combined";
+  gsc: "GO" | "Monarch" | "Mondo" | "Combined";
 };
 ```
 
@@ -115,6 +117,7 @@ type Response = {
   df_convert_out_subset: {
     "Original ID": string;
     "Entrez ID": string;
+    "Gene Name": string;
     // only one of these present, based on selected network
     "In BioGRID?"?: string;
     "In IMP?"?: string;
@@ -122,19 +125,18 @@ type Response = {
   }[];
 
   // cross validation results, performance measured using log2(auprc/prior)
-  avgps: int[];
+  avgps: (int | None)[];
 
   // number of genes considered positives in network
-  positive_genes: number;
+  positive_genes: int;
   // top predicted genes that are isolated from other top predicted genes in network (as Entrez IDs)
   isolated_genes: string[];
   // top predicted genes that are isolated from other top predicted genes in network (as gene symbols)
   isolated_genes_sym: string[];
-
   // edge list corresponding to subgraph induced by top predicted genes (as Entrez IDs)
-  df_edge: { Node1: string; Node2: string }[];
+  df_edge: { Node1: string; Node2: string; Weight: number }[];
   // edge list corresponding to subgraph induced by top predicted genes (as gene symbols)
-  df_edge_sym: { Node1: string; Node2: string }[];
+  df_edge_sym: { Node1: string; Node2: string; Weight: number }[];
 
   // table showing how associated each gene in prediction species network is to the users gene list
   df_probs: {
@@ -146,24 +148,34 @@ type Response = {
     "Symbol": string;
     // full gene name
     "Name": string;
-    // probability of gene being part of input gene list
-    "Probability": number;
     // whether gene is in input gene list
     "Known/Novel": "Known" | "Novel";
     // gene class, positive | negative | neutraul
     "Class-Label": "P" | "N" | "U";
+    // probability of gene being part of input gene list
+    "Probability": number;
+    // z-score of the probabilities
+    "Z-score": number;
+    // adjusted p-values of the z-scores
+    "P-adjusted": number;
   }[];
 
   // table showing how similar user's trained model is to models trained on known gene sets
   df_sim: {
     // rank of similarity between input model and a model trained on term gene set
-    Rank: int;
+    "Rank": int;
+    // type of term
+    "Task": string;
     // term ID
-    ID: string;
+    "ID": string;
     // term name
-    Name: string;
+    "Name": string;
     // similarity between input model and a model trained on term gene set
-    Similarity: number;
+    "Similarity": number;
+    // z-score of the similarities
+    "Z-score": number;
+    // adjusted p-values of the z-scores
+    "P-adjusted": number;
   }[];
 };
 ```

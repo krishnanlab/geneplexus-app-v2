@@ -12,3 +12,5 @@ __pycache__/
 /.keys/*
 
 data
+functions/convert_ids/convert-ids_data.tar.gz
+functions/ml/ml_data.tar.gz

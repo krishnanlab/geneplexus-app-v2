@@ -24,6 +24,7 @@ import Flex from "@/components/Flex";
 import type { Option } from "@/components/SelectSingle";
 import SelectSingle from "@/components/SelectSingle";
 import Slider from "@/components/Slider";
+import { theme } from "@/util/dom";
 import { downloadSvg } from "@/util/download";
 import { lerp } from "@/util/math";
 import { formatNumber } from "@/util/string";
@@ -49,16 +50,16 @@ const attractionStrength = 1;
 const springDistance = 40;
 /** node circle fill colors (keep light to allow dark text) */
 const nodeColors: Record<Node["classLabel"] | "Node", string> = {
-  Positive: "#b3e2ff",
-  Negative: "#ffcada",
-  Neutral: "#e8e8e8",
+  Positive: theme("--deep-light"),
+  Negative: theme("--accent-light"),
+  Neutral: theme("--light-gray"),
   /** fallback */
-  Node: "#e8e8e8",
+  Node: theme("--light-gray"),
 };
-/** link line stroke color */
-const linkColor = "#a0a0a0";
-/** selected link line stroke color */
-const selectedLinkColor = "#ba3960";
+/** edge line stroke color */
+const edgeColor = theme("--light-gray");
+/** selected edge line stroke color */
+const selectedEdgeColor = theme("--accent");
 /** legend square/text/other size */
 const legendCell = 15;
 /** legend line spacing factor */
@@ -88,7 +89,7 @@ const Network = ({ inputs, results }: Props) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const zoomRef = useRef<SVGGElement | null>(null);
   const legendRef = useRef<SVGGElement | null>(null);
-  const linkRefs = useRef<Map<number, SVGLineElement>>(new Map());
+  const edgeRefs = useRef<Map<number, SVGLineElement>>(new Map());
   const circleRefs = useRef<Map<number, SVGCircleElement>>(new Map());
   const labelRefs = useRef<Map<number, SVGTextElement>>(new Map());
 
@@ -97,13 +98,21 @@ const Network = ({ inputs, results }: Props) => {
     Math.min(Math.floor(hardMaxNodes / 10), results.network.nodes.length),
   );
 
-  /** min/max of probabilities */
-  const probabilityExtent = d3.extent(
+  /** min/max of node probabilities */
+  const [minNodeProb = 0, maxNodeProb = 1] = d3.extent(
     results.network.nodes.map((node) => node.probability),
   );
 
   /** don't display nodes below this probability */
-  const [minProbability, setMinProbability] = useState(probabilityExtent[0]!);
+  const [nodeProbThresh, setNodeProbThresh] = useState(0.0002);
+
+  /** don't display edges below this weight */
+  const [edgeWeightThresh, setEdgeWeightThresh] = useState(0);
+
+  /** min/max of edge weights */
+  const [minEdgeWeight = 0, maxEdgeWeight = 1] = d3.extent(
+    results.network.edges.map((edge) => edge.weight),
+  );
 
   /** whether to auto-fit camera to contents every frame */
   const [autoFit, setAutoFit] = useState(false);
@@ -118,9 +127,9 @@ const Network = ({ inputs, results }: Props) => {
   const nodes = useMemo(
     () =>
       results.network.nodes
-        .filter((node) => node.probability >= minProbability)
+        .filter((node) => node.probability >= nodeProbThresh)
         .slice(0, maxNodes),
-    [results.network.nodes, minProbability, maxNodes],
+    [results.network.nodes, nodeProbThresh, maxNodes],
   );
 
   /** quick node lookup */
@@ -129,19 +138,22 @@ const Network = ({ inputs, results }: Props) => {
     [nodes],
   );
 
-  /** links to display */
-  const links = useMemo(
+  /** edges to display */
+  const edges = useMemo(
     () =>
-      results.network.links
+      results.network.edges
         .filter(
-          (link) => link.source in nodeLookup && link.target in nodeLookup,
+          (edge) =>
+            edge.source in nodeLookup &&
+            edge.target in nodeLookup &&
+            edge.weight > edgeWeightThresh,
         )
-        .map((link) => ({
-          ...link,
-          sourceIndex: nodeLookup[link.source]!,
-          targetIndex: nodeLookup[link.target]!,
+        .map((edge) => ({
+          ...edge,
+          sourceIndex: nodeLookup[edge.source]!,
+          targetIndex: nodeLookup[edge.target]!,
         })),
-    [nodeLookup, results.network.links],
+    [nodeLookup, results.network.edges, edgeWeightThresh],
   );
 
   /** legend info */
@@ -160,7 +172,7 @@ const Network = ({ inputs, results }: Props) => {
   /** counts */
   legend.push([
     ["Nodes", formatNumber(nodes.length)],
-    ["Links", formatNumber(links.length)],
+    ["Edges", formatNumber(edges.length)],
   ]);
 
   /** selected node info */
@@ -254,13 +266,13 @@ const Network = ({ inputs, results }: Props) => {
             label?.setAttribute("y", String(node.y));
           });
 
-          /** position links */
+          /** position edges */
           (simulation.force("spring") as typeof spring)
             .links()
-            .forEach((link, index) => {
-              const line = linkRefs.current.get(index);
-              const source = simulation.nodes().at(link.sourceIndex);
-              const target = simulation.nodes().at(link.targetIndex);
+            .forEach((edge, index) => {
+              const line = edgeRefs.current.get(index);
+              const source = simulation.nodes().at(edge.sourceIndex);
+              const target = simulation.nodes().at(edge.targetIndex);
               if (source) {
                 line?.setAttribute("x1", String(source.x));
                 line?.setAttribute("y1", String(source.y));
@@ -290,7 +302,7 @@ const Network = ({ inputs, results }: Props) => {
           node.fx = event.x;
           node.fy = event.y;
           /** reheat */
-          simulation.alpha(1).restart();
+          simulation.alpha(0.1).restart();
         })
         .on("end", (event, d) => {
           /** get node being dragged from datum index */
@@ -303,7 +315,7 @@ const Network = ({ inputs, results }: Props) => {
     [simulation],
   );
 
-  /** update simulation to be in-sync with declarative nodes/links */
+  /** update simulation to be in-sync with declarative nodes/edges */
   useEffect(() => {
     /** update nodes */
     const d3nodeLookup = Object.fromEntries(
@@ -313,12 +325,12 @@ const Network = ({ inputs, results }: Props) => {
       nodes.map((node) => d3nodeLookup[node.entrez] ?? { id: node.entrez }),
     );
 
-    /** update links */
-    (simulation.force("spring") as typeof spring).links(cloneDeep(links));
+    /** update edges */
+    (simulation.force("spring") as typeof spring).links(cloneDeep(edges));
 
     /** reheat */
-    simulation.alpha(1).restart();
-  }, [nodes, links, simulation]);
+    simulation.alpha(0.1).restart();
+  }, [nodes, edges, simulation]);
 
   /** fit background rectangle to fit contents of legend */
   const fitLegend = useCallback(() => {
@@ -379,13 +391,22 @@ const Network = ({ inputs, results }: Props) => {
           onChange={setMaxNodes}
         />
         <Slider
-          label="Min prob."
+          label="Min node probability"
           layout="horizontal"
-          min={probabilityExtent[0]!}
-          max={probabilityExtent[1]!}
-          step={(probabilityExtent[1]! - probabilityExtent[0]!) / 100}
-          value={minProbability}
-          onChange={setMinProbability}
+          min={minNodeProb}
+          max={maxNodeProb}
+          step={(maxNodeProb - minNodeProb) / 100}
+          value={nodeProbThresh}
+          onChange={setNodeProbThresh}
+        />
+        <Slider
+          label="Min edge weight"
+          layout="horizontal"
+          min={minEdgeWeight}
+          max={maxEdgeWeight}
+          step={(maxEdgeWeight - minEdgeWeight) / 100}
+          value={edgeWeightThresh}
+          onChange={setEdgeWeightThresh}
         />
       </Flex>
 
@@ -414,11 +435,11 @@ const Network = ({ inputs, results }: Props) => {
       >
         {/* zoom camera */}
         <g ref={zoomRef}>
-          {/* links */}
+          {/* edges */}
           <g
-            stroke={linkColor}
+            stroke={edgeColor}
             strokeWidth={lerp(
-              links.length,
+              edges.length,
               500,
               0,
               nodeRadius / 50,
@@ -426,27 +447,27 @@ const Network = ({ inputs, results }: Props) => {
             )}
             pointerEvents="none"
           >
-            {links.map((link, index) => {
-              /** is link connected to selected node */
+            {edges.map((edge, index) => {
+              /** is edge connected to selected node */
               const selected = selectedNode
-                ? link.source === selectedNode.entrez ||
-                  link.target === selectedNode.entrez
+                ? edge.source === selectedNode.entrez ||
+                  edge.target === selectedNode.entrez
                 : undefined;
               return (
                 <line
                   ref={(el) => {
-                    if (el) linkRefs.current.set(index, el);
-                    else linkRefs.current.delete(index);
+                    if (el) edgeRefs.current.set(index, el);
+                    else edgeRefs.current.delete(index);
                   }}
                   key={index}
                   stroke={
                     selected === true
-                      ? selectedLinkColor
+                      ? selectedEdgeColor
                       : selected === false
                         ? "transparent"
                         : ""
                   }
-                  strokeWidth={selected === true ? nodeRadius / 10 : ""}
+                  strokeWidth={edge.weight / 2}
                 />
               );
             })}
@@ -473,7 +494,9 @@ const Network = ({ inputs, results }: Props) => {
                   nodeRadius / 2,
                 )}
                 fill={nodeColors[node.classLabel || "Node"]}
-                stroke={node.entrez === selectedNode?.entrez ? "#000000" : ""}
+                stroke={
+                  node.entrez === selectedNode?.entrez ? theme("--black") : ""
+                }
                 tabIndex={0}
                 onClick={() => setSelectedNode(node)}
                 onKeyDown={(event) => {
@@ -486,7 +509,7 @@ const Network = ({ inputs, results }: Props) => {
 
           {/* node labels */}
           <g
-            strokeWidth={nodeRadius / 5}
+            strokeWidth={nodeRadius / 20}
             strokeLinejoin="round"
             strokeLinecap="round"
             paintOrder="stroke"
@@ -518,7 +541,7 @@ const Network = ({ inputs, results }: Props) => {
         {/* legend */}
         <g ref={legendRef}>
           {/* background */}
-          <rect fill="#ffffff" stroke="#e0e0e0" />
+          <rect fill={theme("--white")} stroke={theme("--light-gray")} />
 
           {/* info */}
           {legend?.map((group) => {
@@ -530,7 +553,7 @@ const Network = ({ inputs, results }: Props) => {
               legendLine++;
 
               /** is colored icon to show */
-              const icon = key.startsWith("#");
+              const icon = key.startsWith("#") || key.startsWith("hsl");
               /** line y */
               const y = legendLine * legendCell * legendSpacing;
 
@@ -549,7 +572,7 @@ const Network = ({ inputs, results }: Props) => {
                       y={y}
                       fontSize={legendCell}
                       dominantBaseline="central"
-                      fill="#808080"
+                      fill={theme("--dark-gray")}
                     >
                       {key}
                     </text>
@@ -620,7 +643,7 @@ const attraction = d3
   .strength(attractionStrength)
   .distanceMin(nodeRadius);
 
-/** push/pull nodes together based on links */
+/** push/pull nodes together based on edges */
 const spring = d3
   .forceLink<NodeDatum, LinkDatum>()
   .distance(springDistance)
