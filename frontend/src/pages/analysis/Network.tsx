@@ -553,7 +553,7 @@ const Network = ({ inputs, results }: Props) => {
               legendLine++;
 
               /** is colored icon to show */
-              const icon = key.startsWith("#");
+              const icon = key.startsWith("#") || key.startsWith("hsl");
               /** line y */
               const y = legendLine * legendCell * legendSpacing;
 
