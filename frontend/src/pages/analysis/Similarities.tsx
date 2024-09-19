@@ -27,6 +27,10 @@ const Similarities = ({ results }: Props) => {
             filterType: "number",
           },
           {
+            key: "task",
+            name: "Task",
+          },
+          {
             key: "id",
             name: "ID",
             render: (cell) => {
@@ -47,10 +51,6 @@ const Similarities = ({ results }: Props) => {
             key: "similarity",
             name: "Similarity",
             filterType: "number",
-          },
-          {
-            key: "task",
-            name: "Task",
           },
           {
             key: "zScore",

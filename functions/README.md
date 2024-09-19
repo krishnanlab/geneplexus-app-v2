@@ -140,6 +140,8 @@ type Response = {
 
   // table showing how associated each gene in prediction species network is to the users gene list
   df_probs: {
+    // rank of relevance of gene to input gene list
+    "Rank": int;
     // Entrez ID
     "Entrez": string;
     // gene symbol
@@ -156,12 +158,12 @@ type Response = {
     "Z-score": number;
     // adjusted p-values of the z-scores
     "P-adjusted": number;
-    // rank of relevance of gene to input gene list
-    "Rank": int;
   }[];
 
   // table showing how similar user's trained model is to models trained on known gene sets
   df_sim: {
+    // rank of similarity between input model and a model trained on term gene set
+    "Rank": int;
     // type of term
     "Task": string;
     // term ID
@@ -174,8 +176,6 @@ type Response = {
     "Z-score": number;
     // adjusted p-values of the z-scores
     "P-adjusted": number;
-    // rank of similarity between input model and a model trained on term gene set
-    "Rank": int;
   }[];
 };
 ```

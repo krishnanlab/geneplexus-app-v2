@@ -16,13 +16,6 @@ const Predictions = ({ results }: Props) => {
           filterType: "number",
         },
         {
-          key: "probability",
-          name: "Probability",
-          tooltip: "Indicates gene's network-based similarity to input genes",
-          filterType: "number",
-          render: (cell) => (cell < 0.01 ? <Exponential value={cell} /> : null),
-        },
-        {
           key: "entrez",
           name: "Entrez",
         },
@@ -50,6 +43,13 @@ const Predictions = ({ results }: Props) => {
             "Whether gene was considered in positive/negative class or not considered at all during training",
           filterType: "enum",
           style: { whiteSpace: "nowrap" },
+        },
+        {
+          key: "probability",
+          name: "Probability",
+          tooltip: "Indicates gene's network-based similarity to input genes",
+          filterType: "number",
+          render: (cell) => (cell < 0.01 ? <Exponential value={cell} /> : null),
         },
         {
           key: "zScore",

@@ -115,6 +115,7 @@ export type _AnalysisResults = {
   df_edge: { Node1: string; Node2: string; Weight: number }[];
   df_edge_sym: { Node1: string; Node2: string; Weight: number }[];
   df_probs: {
+    Rank: number;
     Entrez: string;
     Symbol: string;
     Name: string;
@@ -123,16 +124,15 @@ export type _AnalysisResults = {
     Probability: number;
     "Z-score": number;
     "P-adjusted": number;
-    Rank: number;
   }[];
   df_sim: {
+    Rank: number;
     Task: string;
     ID: string;
     Name: string;
     Similarity: number;
     "Z-score": number;
     "P-adjusted": number;
-    Rank: number;
   }[];
 };
 
