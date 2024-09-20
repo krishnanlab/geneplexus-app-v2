@@ -72,8 +72,8 @@ jobs:
       # if cached files aren't present, defer caching files until end of
       # successful run. next time workflow runs, it'll retrieve cached files
       # from previous run and skip download step. hash of current datafile
-      # included as part of key, so fresh data will be fetched if datafile has # changed in GCS.
-
+      # included as part of key, so fresh data will be fetched if datafile has
+      # changed in GCS.
       - name: Cache existing data folder
         id: cache
         uses: actions/cache@v4
