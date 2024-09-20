@@ -22,7 +22,7 @@ jobs:
         uses: oven-sh/setup-bun@v1
 
       - name: Install packages
-        run: bunx msw init && bun install
+        run: bun install
 
       - if: runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
@@ -41,7 +41,7 @@ jobs:
         uses: oven-sh/setup-bun@v1
 
       - name: Install packages
-        run: bunx msw init && bun install
+        run: bun install
 
       - if: runner.debug == '1'
         uses: mxschmitt/action-tmate@v3
@@ -60,7 +60,7 @@ jobs:
         uses: oven-sh/setup-bun@v1
 
       - name: Install packages
-        run: bunx msw init && bun install
+        run: bun install
 
       - if: runner.debug == '1'
         uses: mxschmitt/action-tmate@v3

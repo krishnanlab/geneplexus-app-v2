@@ -7,7 +7,6 @@ WORKDIR /app
 COPY ./frontend/package.json ./
 COPY ./frontend/bun.lockb ./
 
-RUN bunx msw init
 RUN bun install
 
 # copy the entire frontend (other examples copy in just "src", but we need the
