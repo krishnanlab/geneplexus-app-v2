@@ -59,6 +59,7 @@ const Button = forwardRef(
     }: Props,
     ref,
   ) => {
+    console.log(flip);
     /** contents of main element */
     const children = flip ? (
       <>
@@ -67,8 +68,8 @@ const Button = forwardRef(
       </>
     ) : (
       <>
-        {icon}
         {text}
+        {icon}
       </>
     );
 

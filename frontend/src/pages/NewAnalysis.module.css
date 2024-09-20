@@ -1,3 +1,15 @@
+.gene-boxes {
+  display: flex;
+  width: 100%;
+  gap: 20px;
+}
+
+@media (max-width: 600px) {
+  .gene-boxes {
+    flex-direction: column;
+  }
+}
+
 .summary {
   display: flex;
   flex-direction: column;

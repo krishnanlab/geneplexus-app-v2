@@ -71,6 +71,7 @@ export type _AnalysisInputs = {
   sp_tst: Species;
   net_type: Network;
   gsc: GenesetContext;
+  negatives: string[];
 };
 
 /** backend format to frontend format */
@@ -81,6 +82,7 @@ export const convertAnalysisInputs = (backend: _AnalysisInputs) => ({
   speciesTest: backend.sp_tst,
   network: backend.net_type,
   genesetContext: backend.gsc,
+  negatives: backend.negatives,
 });
 
 /** ml endpoint params frontend format */
@@ -96,6 +98,7 @@ export const revertAnalysisInputs = (
   sp_tst: frontend.speciesTest,
   net_type: frontend.network,
   gsc: frontend.genesetContext,
+  negatives: frontend.negatives,
 });
 
 /** convert-ids endpoint response format */
@@ -134,6 +137,10 @@ export type _AnalysisResults = {
     "Z-score": number;
     "P-adjusted": number;
   }[];
+  neutral_gene_info: Record<
+    string,
+    string[] | { Genes: string[]; Name: string; Task: string }
+  >;
 };
 
 /** backend format to frontend format */
@@ -187,6 +194,15 @@ export const convertAnalysisResults = (backend: _AnalysisResults) => ({
       weight: row.Weight,
     })),
   },
+  neutralInfo: (() => {
+    const { "All Neutrals": all, ...sets } = backend.neutral_gene_info;
+    return {
+      all: Array.isArray(all) ? all : [],
+      sets: Object.entries(sets).flatMap(([Id, value]) =>
+        Array.isArray(value) ? [] : { Id, ...value },
+      ),
+    };
+  })(),
 });
 
 /** ml endpoint params frontend format */

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { BiCopy } from "react-icons/bi";
 import {
   FaChartBar,
+  FaCircleMinus,
   FaDna,
   FaDownload,
   FaFeatherPointed,
@@ -22,6 +23,7 @@ import Tabs, { Tab } from "@/components/Tabs";
 import InputGenes from "@/pages/analysis/InputGenes";
 import Inputs from "@/pages/analysis/Inputs";
 import Network from "@/pages/analysis/Network";
+import Neutrals from "@/pages/analysis/Neutrals";
 import Predictions from "@/pages/analysis/Predictions";
 import Similarities from "@/pages/analysis/Similarities";
 import Summary from "@/pages/analysis/Summary";
@@ -163,6 +165,14 @@ const AnalysisPage = () => {
                   tooltip="Network visualization of top predicted genes"
                 >
                   <Network inputs={inputs} results={results} />
+                </Tab>
+
+                <Tab
+                  text="Neutrals"
+                  icon={<FaCircleMinus />}
+                  tooltip="Info on how neutral genes were selected"
+                >
+                  <Neutrals results={results} />
                 </Tab>
               </Tabs>
             </>

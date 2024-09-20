@@ -2,6 +2,7 @@ import { FaArrowRight, FaFlaskVial, FaPlus } from "react-icons/fa6";
 import Button from "@/components/Button";
 import Flex from "@/components/Flex";
 import Heading from "@/components/Heading";
+import Link from "@/components/Link";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
 import classes from "./Home.module.css";
@@ -17,6 +18,7 @@ const HomePage = () => {
         </Heading>
 
         <p className={classes.hero}>{import.meta.env.VITE_DESCRIPTION}</p>
+
         <Flex>
           <Button to="/new-analysis" text="New Analysis" icon={<FaPlus />} />
           <Button
@@ -26,6 +28,12 @@ const HomePage = () => {
           />
           <Button to="/testbed" text="Testbed" icon={<FaFlaskVial />} />
         </Flex>
+
+        <p className="center">
+          <Link to={import.meta.env.VITE_OLD_URL}>
+            Looking for the old GenePlexus?
+          </Link>
+        </p>
       </Section>
 
       <Section>

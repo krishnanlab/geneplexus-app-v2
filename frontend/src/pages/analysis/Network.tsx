@@ -78,10 +78,10 @@ type LinkDatum = d3.SimulationLinkDatum<NodeDatum> & {
 };
 
 const labelKeyOptions: Option<keyof Node>[] = [
-  { id: "symbol", text: "Symbol", icon: <FaAt /> },
-  { id: "entrez", text: "Entrez", icon: <FaBarcode /> },
-  { id: "rank", text: "Rank", icon: <FaRankingStar /> },
-  { id: "probability", text: "Probability", icon: <FaPercent /> },
+  { id: "symbol", primary: "Symbol", icon: <FaAt /> },
+  { id: "entrez", primary: "Entrez", icon: <FaBarcode /> },
+  { id: "rank", primary: "Rank", icon: <FaRankingStar /> },
+  { id: "probability", primary: "Probability", icon: <FaPercent /> },
 ] as const;
 
 const Network = ({ inputs, results }: Props) => {

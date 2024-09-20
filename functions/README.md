@@ -150,7 +150,7 @@ type Response = {
     "Name": string;
     // whether gene is in input gene list
     "Known/Novel": "Known" | "Novel";
-    // gene class, positive | negative | neutraul
+    // gene class, positive | negative | neutral
     "Class-Label": "P" | "N" | "U";
     // probability of gene being part of input gene list
     "Probability": number;
