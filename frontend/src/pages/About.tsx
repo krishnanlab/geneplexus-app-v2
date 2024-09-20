@@ -20,13 +20,22 @@ const AboutPage = () => {
         </Heading>
 
         <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-          eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-          minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-          aliquip ex ea commodo consequat. Duis aute irure dolor in
-          reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-          pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-          culpa qui officia deserunt mollit anim id est laborum.
+          For the user's convenience, this web application saves certain
+          information locally, such as recent analysis inputs. This data only
+          exists locally on the user's device, and is not sent to the developers
+          of GenePlexus or any other party.
+        </p>
+        <p>
+          This web application may also track user behavior, such as navigation
+          and clicks, using Google Analytics. These analytics services take
+          significant steps to remove identifying information from the data they
+          collect to ensure anonymity.
+        </p>
+        <p>
+          The developers of GenePlexus pledge to use any information collected
+          solely for the purposes of improving GenePlexus, and to never disclose
+          any private, identifying information. By using this web application,
+          you consent to these terms.
         </p>
       </Section>
     </>
