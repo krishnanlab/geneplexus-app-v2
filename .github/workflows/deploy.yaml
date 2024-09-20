@@ -25,7 +25,7 @@ jobs:
   deploy-convert-ids:
     needs: path-changes
     if: ${{ needs.path-changes.outputs.convert_ids == 'true' }}
-    uses: ./.github/workflows/helper-deploy-func.yaml
+    uses: ./.github/workflows/deploy-func.yaml
     with:
       func-name: "gpz-convert-ids"
       func-src-dir: "functions/convert_ids/convert_ids_deploy"
