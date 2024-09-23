@@ -120,11 +120,13 @@ const NewAnalysisPage = () => {
       ?.split(/,|\t|\n/)
       .map((id) => id.trim())
       .filter(Boolean) ?? [];
-  const splitNegatives =
-    negatives
-      ?.split(/,|\t|\n/)
-      .map((id) => id.trim())
-      .filter(Boolean) ?? [];
+  const splitNegatives = showNegatives
+    ? (negatives
+        ?.split(/,|\t|\n/)
+        .map((id) => id.trim())
+        .filter(Boolean) ?? [])
+    : /** force negatives to empty if not shown */
+      [];
 
   /** filename when file uploaded */
   const [filename, setFilename] = useState("");
@@ -356,7 +358,7 @@ const NewAnalysisPage = () => {
             label="Negatives"
             value={showNegatives ?? false}
             onChange={setShowNegatives}
-            tooltip="Whether to specify negative genes manually. If omitted, negatives are determined automatically."
+            tooltip="Genes to consider as negatives, in addition to those automatically selected by our algorithm."
           />
         </Flex>
       </Section>
