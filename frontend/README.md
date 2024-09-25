@@ -9,7 +9,8 @@ This project was scaffolded using Vite, and has the following key features:
 
 ## Requirements
 
-- [Bun](https://bun.sh/)
+- [Node](https://nodejs.org/) v22+
+- [Bun](https://bun.sh/) v1.1+
 
 ## Commands
 
