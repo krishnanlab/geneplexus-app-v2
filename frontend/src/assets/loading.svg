@@ -4,7 +4,7 @@
       animation:
         loading-draw 2s linear infinite,
         loading-spin 4s linear infinite;
-      stroke-dasharray: 1
+      stroke-dasharray: 1;
     }
 
     @keyframes loading-draw {
@@ -14,12 +14,8 @@
     }
 
     @keyframes loading-spin {
-      from {
-        transform: rotate(0);
-      }
-
       to {
-        transform: rotate(360deg);
+        rotate: 360deg;
       }
     }
   </style>
