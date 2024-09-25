@@ -17,7 +17,12 @@ import {
 import { MdFilterAltOff } from "react-icons/md";
 import { clamp, isEqual, pick, sortBy, sum } from "lodash";
 import { useLocalStorage } from "@reactuses/core";
-import type { Column, FilterFn, NoInfer } from "@tanstack/react-table";
+import type {
+  Column,
+  FilterFn,
+  NoInfer,
+  SortingState,
+} from "@tanstack/react-table";
 import {
   createColumnHelper,
   flexRender,
@@ -87,6 +92,7 @@ type _Col<Datum extends object> = {
 type Props<Datum extends object> = {
   cols: _Col<Datum>[];
   rows: Datum[];
+  sort?: SortingState;
 };
 
 /** map column definition to multi-select option */
@@ -104,7 +110,7 @@ const colToOption = <Datum extends object>(
  * reference:
  * https://codesandbox.io/p/devbox/tanstack-table-example-kitchen-sink-vv4871
  */
-const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
+const Table = <Datum extends object>({ cols, rows, sort }: Props<Datum>) => {
   /** expanded state */
   const [expanded, setExpanded] = useLocalStorage("table-expanded", false);
 
@@ -242,7 +248,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
     columnResizeMode: "onChange",
     /** initial sort, page, etc. state */
     initialState: {
-      sorting: [{ id: "0", desc: false }],
+      sorting: sort ?? [{ id: "0", desc: false }],
       pagination: {
         pageIndex: 0,
         pageSize: Number(defaultPerPage),
@@ -452,7 +458,7 @@ const Table = <Datum extends object>({ cols, rows }: Props<Datum>) => {
         </Flex>
 
         {/* filters */}
-        <Flex gap="sm">
+        <Flex gap="md">
           {/* per page */}
           <SelectSingle
             label="Rows"

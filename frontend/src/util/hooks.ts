@@ -7,7 +7,9 @@ import { sleep } from "@/util/misc";
  * https://github.com/monarch-initiative/monarch-app/blob/main/frontend/src/composables/use-query.ts
  */
 export const useQuery = <Data>(
+  /** async func that returns data */
   func: () => Promise<Data>,
+  /** when these dependencies change, data is reset to empty (invalidated) */
   dependencies: unknown,
 ) => {
   /** unique key based on dependencies */

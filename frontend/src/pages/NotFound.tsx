@@ -9,7 +9,6 @@ import Section from "@/components/Section";
 
 const NotFoundPage = () => {
   const { pathname, search, hash } = useLocation();
-  console.log(location);
 
   return (
     <>

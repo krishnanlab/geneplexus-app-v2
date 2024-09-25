@@ -168,12 +168,16 @@ const NewAnalysisPage = () => {
     const results = await checkGenes(allGenes, speciesTrain);
     return {
       ...results,
-      table: results.table.map((result) => ({
-        ...result,
+      table: results.table.map((result) => {
         /** remember whether gene was in regular and/or negatives inputs */
-        inGenes: splitGenes.includes(result.input),
-        inNegatives: splitNegatives.includes(result.input),
-      })),
+        const inGenes = splitGenes.includes(result.input);
+        const inNegatives = splitNegatives.includes(result.input);
+        let inputType = "";
+        if (inGenes && inNegatives) inputType = "Genes & Negatives";
+        else if (inGenes) inputType = "Genes";
+        else if (inNegatives) inputType = "Negatives";
+        return { ...result, inputType };
+      }),
     };
   }, [splitGenes, splitNegatives, speciesTrain]);
 
@@ -431,12 +435,16 @@ const NewAnalysisPage = () => {
                   {
                     key: "input",
                     name: "Input ID",
-                    render: (cell, row) => (
-                      <>
-                        {cell} {row.inNegatives && "(neg.)"}
-                      </>
-                    ),
                   },
+                  ...(showNegatives
+                    ? ([
+                        {
+                          key: "inputType",
+                          name: "Input Type",
+                          filterType: "enum",
+                        },
+                      ] as const)
+                    : []),
                   {
                     key: "entrez",
                     name: "Entrez ID",
@@ -450,6 +458,7 @@ const NewAnalysisPage = () => {
                   },
                 ]}
                 rows={checkGenesData.table}
+                sort={showNegatives ? [{ id: "1", desc: true }] : undefined}
               />
             </Tab>
           </Tabs>

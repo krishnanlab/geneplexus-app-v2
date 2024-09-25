@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { FaArrowRightToBracket } from "react-icons/fa6";
 import type { AnalysisInputs } from "@/api/types";
 import Heading from "@/components/Heading";
@@ -10,13 +9,7 @@ type Props = {
   inputs: AnalysisInputs;
 };
 
-/** max input genes to show by default */
-const limit = 50;
-
 const Inputs = ({ inputs }: Props) => {
-  /** show all genes */
-  const [showAllGenes, setShowAllGenes] = useState(false);
-
   return (
     <Section>
       <Heading level={2} icon={<FaArrowRightToBracket />}>
@@ -37,22 +30,21 @@ const Inputs = ({ inputs }: Props) => {
           <span>{inputs.genesetContext}</span>
         </div>
 
-        <div className="mini-table">
+        <div className="mini-table cols-1">
           <span>Genes ({formatNumber(inputs.genes.length)})</span>
           <span className={classes["genes-list"]}>
-            {inputs.genes
-              .slice(0, showAllGenes ? Infinity : limit)
-              .map((gene, index) => (
-                <span key={index}>{gene}</span>
-              ))}
-            {inputs.genes.length > limit && (
-              <button
-                type="button"
-                onClick={() => setShowAllGenes(!showAllGenes)}
-              >
-                {showAllGenes ? "< show less" : "... show all"}
-              </button>
-            )}
+            {inputs.genes.map((gene, index) => (
+              <span key={index}>{gene}</span>
+            ))}
+          </span>
+        </div>
+
+        <div className="mini-table cols-1">
+          <span>Negatives ({formatNumber(inputs.negatives.length)})</span>
+          <span className={classes["genes-list"]}>
+            {inputs.negatives.map((gene, index) => (
+              <span key={index}>{gene}</span>
+            ))}
           </span>
         </div>
       </div>

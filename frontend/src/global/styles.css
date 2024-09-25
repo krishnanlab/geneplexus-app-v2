@@ -220,15 +220,15 @@ textarea {
 /** scrollbar */
 
 :not(html) ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
   border-radius: 999px;
   background-color: var(--off-white);
 }
 
 :not(html) ::-webkit-scrollbar-thumb {
   border-radius: 999px;
-  background-color: var(--light-gray);
+  background-color: var(--gray);
 }
 
 /** focus */
