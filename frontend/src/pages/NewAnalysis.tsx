@@ -13,23 +13,20 @@ import {
   FaWorm,
 } from "react-icons/fa6";
 import { GiFly, GiRat } from "react-icons/gi";
+import { PiDotOutline, PiLineSegmentFill } from "react-icons/pi";
 import { useNavigate } from "react-router";
+import { uniq } from "lodash";
 import { useEventListener, useLocalStorage } from "@reactuses/core";
 import { checkGenes } from "@/api/api";
-import type {
-  AnalysisInputs,
-  GenesetContext,
-  Network,
-  Species,
-} from "@/api/types";
+import type { AnalysisInputs } from "@/api/convert";
+import type { GenesetContext, Network, Species } from "@/api/types";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
+import CheckBox from "@/components/CheckBox";
 import Flex from "@/components/Flex";
 import Heading from "@/components/Heading";
 import Mark, { YesNo } from "@/components/Mark";
 import Meta from "@/components/Meta";
-import Radios from "@/components/Radios";
-import type { Option as RadioOption } from "@/components/Radios";
 import Section from "@/components/Section";
 import SelectSingle from "@/components/SelectSingle";
 import type { Option as SelectOption } from "@/components/SelectSingle";
@@ -55,33 +52,33 @@ const example: Record<Species, string> = {
 };
 
 const speciesOptions: SelectOption<Species>[] = [
-  { id: "Human", text: "Human", icon: <FaPerson /> },
-  { id: "Mouse", text: "Mouse", icon: <GiRat /> },
-  { id: "Fly", text: "Fly", icon: <GiFly /> },
-  { id: "Zebrafish", text: "Zebrafish", icon: <FaFish /> },
-  { id: "Worm", text: "Worm", icon: <FaWorm /> },
-  { id: "Yeast", text: "Yeast", icon: <FaBeerMugEmpty /> },
+  { id: "Human", primary: "Human", icon: <FaPerson /> },
+  { id: "Mouse", primary: "Mouse", icon: <GiRat /> },
+  { id: "Fly", primary: "Fly", icon: <GiFly /> },
+  { id: "Zebrafish", primary: "Zebrafish", icon: <FaFish /> },
+  { id: "Worm", primary: "Worm", icon: <FaWorm /> },
+  { id: "Yeast", primary: "Yeast", icon: <FaBeerMugEmpty /> },
 ] as const;
 
-const networkOptions: RadioOption<Network>[] = [
+const networkOptions: SelectOption<Network>[] = [
   {
     id: "STRING",
     primary: "STRING",
-    secondary: "Derived from a variety of sources",
+    // secondary: "Derived from a variety of sources",
   },
   {
     id: "IMP",
     primary: "IMP",
-    secondary: "Expression-derived interactions",
+    // secondary: "Expression-derived interactions",
   },
   {
     id: "BioGRID",
     primary: "BioGRID",
-    secondary: "Physical interactions",
+    // secondary: "Physical interactions",
   },
 ] as const;
 
-const genesetContextOptions: RadioOption<GenesetContext>[] = [
+const genesetContextOptions: SelectOption<GenesetContext>[] = [
   {
     id: "Combined",
     primary: "Combined",
@@ -90,7 +87,7 @@ const genesetContextOptions: RadioOption<GenesetContext>[] = [
   {
     id: "GO",
     primary: "GO",
-    secondary: "Biological Processes",
+    secondary: "Bio. Proc.",
   },
   {
     id: "Monarch",
@@ -106,14 +103,26 @@ const genesetContextOptions: RadioOption<GenesetContext>[] = [
 
 const NewAnalysisPage = () => {
   /** raw text list of input gene ids */
-  const [inputGenes, setInputGenes] = useLocalStorage("input-genes", "");
+  const [genes, setGenes] = useLocalStorage("input-genes", "");
+  const [negatives, setNegatives] = useLocalStorage("negative-genes", "");
+  const [showNegatives, setShowNegatives] = useLocalStorage(
+    "show-negative-genes",
+    false,
+  );
 
   /** array of input gene ids */
-  const splitInputGenes =
-    inputGenes
+  const splitGenes =
+    genes
       ?.split(/,|\t|\n/)
       .map((id) => id.trim())
       .filter(Boolean) ?? [];
+  const splitNegatives = showNegatives
+    ? (negatives
+        ?.split(/,|\t|\n/)
+        .map((id) => id.trim())
+        .filter(Boolean) ?? [])
+    : /** force negatives to empty if not shown */
+      [];
 
   /** filename when file uploaded */
   const [filename, setFilename] = useState("");
@@ -133,7 +142,13 @@ const NewAnalysisPage = () => {
   /** update meta counts */
   networkOptions.forEach((option) => {
     const { nodes, edges } = meta[speciesTest][option.id];
-    option.tertiary = `${formatNumber(nodes, true)} nodes – ${formatNumber(edges, true)} edges`;
+    option.secondary = (
+      <>
+        {formatNumber(nodes, true)}
+        <PiDotOutline /> {formatNumber(edges, true)}
+        <PiLineSegmentFill />
+      </>
+    );
   });
 
   /** gene id conversion data */
@@ -141,13 +156,29 @@ const NewAnalysisPage = () => {
     data: checkGenesData,
     status: checkGenesStatus,
     query: runCheckGenes,
-  } = useQuery(
-    async () =>
-      splitInputGenes.length
-        ? await checkGenes(splitInputGenes, speciesTrain)
-        : undefined,
-    [splitInputGenes, speciesTrain],
-  );
+  } = useQuery(async () => {
+    /** combine and de-dupe regular input genes and negative input genes */
+    const allGenes = uniq(splitGenes.concat(splitNegatives));
+    if (!allGenes.length) return undefined;
+    /** check all */
+    const results = await checkGenes({
+      genes: allGenes,
+      species: speciesTrain,
+    });
+    return {
+      ...results,
+      table: results.table.map((result) => {
+        /** remember whether gene was in regular and/or negatives inputs */
+        const inGenes = splitGenes.includes(result.input);
+        const inNegatives = splitNegatives.includes(result.input);
+        let inputType = "";
+        if (inGenes && inNegatives) inputType = "Genes & Negatives";
+        else if (inGenes) inputType = "Genes";
+        else if (inNegatives) inputType = "Negatives";
+        return { ...result, inputType };
+      }),
+    };
+  }, [splitGenes, splitNegatives, speciesTrain]);
 
   /** scroll down to check section after entering genes */
   useEffect(() => {
@@ -161,7 +192,7 @@ const NewAnalysisPage = () => {
   const navigate = useNavigate();
   const submitAnalysis = () => {
     /** check for sufficient inputs */
-    if (!splitInputGenes.length) {
+    if (!splitGenes.length) {
       window.alert("Please enter some genes first!");
       scrollTo("#enter-genes");
       return;
@@ -172,7 +203,8 @@ const NewAnalysisPage = () => {
       state: {
         inputs: {
           name,
-          genes: splitInputGenes,
+          genes: splitGenes,
+          negatives: splitNegatives,
           speciesTrain,
           speciesTest,
           network,
@@ -184,8 +216,8 @@ const NewAnalysisPage = () => {
 
   /** restrict species options based on other params */
   const filteredSpeciesOptions = speciesOptions.filter((option) => {
-    if (genesetContext === "Mondo" && option.id !== "Human") return false;
     if (network === "BioGRID" && option.id === "Zebrafish") return false;
+    if (genesetContext === "Mondo" && option.id !== "Human") return false;
     return true;
   });
 
@@ -216,6 +248,7 @@ const NewAnalysisPage = () => {
     const {
       name,
       genes,
+      negatives,
       speciesTrain,
       speciesTest,
       network,
@@ -230,7 +263,8 @@ const NewAnalysisPage = () => {
     allInputsUsed(rest);
 
     /** set inputs */
-    setInputGenes(genes.join(", "));
+    setGenes(genes.join(", "));
+    setNegatives(negatives.join(", "));
     setName(name);
     setSpeciesTrain(speciesTrain);
     setSpeciesTest(speciesTest);
@@ -253,16 +287,32 @@ const NewAnalysisPage = () => {
           Enter Genes
         </Heading>
 
-        <TextBox
-          className="full"
-          value={inputGenes ?? ""}
-          onChange={(value) => {
-            setInputGenes(value);
-            setFilename("");
-          }}
-          multi
-          placeholder="Comma, tab, or line-separated list of entrez IDs, symbols, or ensembl gene/protein/transcript IDs"
-        />
+        <div className={classes["gene-boxes"]}>
+          <TextBox
+            className="full"
+            label="Genes"
+            value={genes ?? ""}
+            onChange={(value) => {
+              setGenes(value);
+              setFilename("");
+            }}
+            multi
+            placeholder="Comma, tab, or line-separated list of entrez IDs, symbols, or ensembl gene/protein/transcript IDs"
+            tooltip="Genes to be used as positive training examples"
+          />
+
+          {showNegatives && (
+            <TextBox
+              className="full"
+              label="Negatives"
+              value={negatives ?? ""}
+              onChange={setNegatives}
+              multi
+              placeholder="Comma, tab, or line-separated list of entrez IDs, symbols, or ensembl gene/protein/transcript IDs"
+              tooltip="Genes to be used as negative training examples"
+            />
+          )}
+        </div>
 
         <Flex>
           <SelectSingle
@@ -281,7 +331,7 @@ const NewAnalysisPage = () => {
             text="Example"
             icon={<FaLightbulb />}
             design="hollow"
-            onClick={() => setInputGenes(example[speciesTrain])}
+            onClick={() => setGenes(example[speciesTrain])}
             tooltip="Try some example genes for this species"
           />
 
@@ -300,12 +350,19 @@ const NewAnalysisPage = () => {
               design="hollow"
               onUpload={async (file, filename) => {
                 const text = await file.text();
-                setInputGenes(text);
+                setGenes(text);
                 setFilename(filename);
               }}
             />
             {filename}
           </Flex>
+
+          <CheckBox
+            label="Negatives"
+            value={showNegatives ?? false}
+            onChange={setShowNegatives}
+            tooltip="Genes to consider as negatives, in addition to those automatically selected by our algorithm."
+          />
         </Flex>
       </Section>
 
@@ -325,9 +382,7 @@ const NewAnalysisPage = () => {
               text="Check Genes"
               icon={<FaPaperPlane />}
               onClick={() =>
-                splitInputGenes.length
-                  ? runCheckGenes()
-                  : toast("Enter some genes")
+                splitGenes.length ? runCheckGenes() : toast("Enter some genes")
               }
             />
           </>
@@ -335,7 +390,7 @@ const NewAnalysisPage = () => {
 
         {checkGenesStatus === "loading" && (
           <Alert type="loading">
-            Checking {formatNumber(splitInputGenes.length)} genes
+            Checking {formatNumber(splitGenes.length)} genes
           </Alert>
         )}
         {checkGenesStatus === "error" && (
@@ -380,6 +435,15 @@ const NewAnalysisPage = () => {
                     key: "input",
                     name: "Input ID",
                   },
+                  ...(showNegatives
+                    ? ([
+                        {
+                          key: "inputType",
+                          name: "Input Type",
+                          filterType: "enum",
+                        },
+                      ] as const)
+                    : []),
                   {
                     key: "entrez",
                     name: "Entrez ID",
@@ -393,6 +457,7 @@ const NewAnalysisPage = () => {
                   },
                 ]}
                 rows={checkGenesData.table}
+                sort={showNegatives ? [{ id: "1", desc: true }] : undefined}
               />
             </Tab>
           </Tabs>
@@ -404,29 +469,29 @@ const NewAnalysisPage = () => {
           Choose Parameters
         </Heading>
 
-        <SelectSingle
-          label="Species"
-          options={filteredSpeciesOptions.map((option) => ({
-            ...option,
-            ...(option.id === speciesTrain && {
-              text: `Same as above`,
-              info: option.text,
-            }),
-          }))}
-          value={speciesTest}
-          onChange={setSpeciesTest}
-          tooltip="Species for which model predictions will be made. If different from species selected above, model results will be translated into this species."
-        />
-
         <div className={classes.parameters}>
-          <Radios
+          <SelectSingle
+            label="Species"
+            options={filteredSpeciesOptions.map((option) => ({
+              ...option,
+              ...(option.id === speciesTrain && {
+                primary: `Same as above`,
+                secondary: option.secondary,
+              }),
+            }))}
+            value={speciesTest}
+            onChange={setSpeciesTest}
+            tooltip="Species for which model predictions will be made. If different from species selected above, model results will be translated into this species."
+          />
+
+          <SelectSingle
             value={network}
             onChange={setNetwork}
             label="Network"
             options={networkOptions}
             tooltip="Network that machine learning features are from and which edge list is used to make final graph."
           />
-          <Radios
+          <SelectSingle
             value={genesetContext}
             onChange={setGenesetContext}
             label="Geneset Context"

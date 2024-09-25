@@ -30,6 +30,7 @@ def ml(request):
         # parse request body params
         request_json = request.get_json()
         genes = request_json["genes"]
+        negatives = request_json.get("negatives", None)
         gsc = request_json["gsc"]
         net_type = request_json["net_type"]
         sp_trn = request_json["sp_trn"]
@@ -52,6 +53,8 @@ def ml(request):
 
         # load and convert genes
         gp.load_genes(genes)
+        if isinstance(negatives, list) and len(negatives):
+            gp.load_negatives(negatives)
 
         # run full analysis
         gp.fit_and_predict()
@@ -72,6 +75,7 @@ def ml(request):
             orient="records"
         )
         response["positive_genes"] = gp.positive_genes
+        response["neutral_gene_info"] = gp.neutral_gene_info
 
         return (response, 200, headers)
     except Exception as error:

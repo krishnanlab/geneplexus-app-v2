@@ -17,7 +17,7 @@ import clsx from "clsx";
 import * as d3 from "d3";
 import { clamp, cloneDeep, truncate } from "lodash";
 import { useElementSize } from "@reactuses/core";
-import type { AnalysisInputs, AnalysisResults } from "@/api/types";
+import type { AnalysisInputs, AnalysisResults } from "@/api/convert";
 import Button from "@/components/Button";
 import CheckBox from "@/components/CheckBox";
 import Flex from "@/components/Flex";
@@ -78,10 +78,10 @@ type LinkDatum = d3.SimulationLinkDatum<NodeDatum> & {
 };
 
 const labelKeyOptions: Option<keyof Node>[] = [
-  { id: "symbol", text: "Symbol", icon: <FaAt /> },
-  { id: "entrez", text: "Entrez", icon: <FaBarcode /> },
-  { id: "rank", text: "Rank", icon: <FaRankingStar /> },
-  { id: "probability", text: "Probability", icon: <FaPercent /> },
+  { id: "symbol", primary: "Symbol", icon: <FaAt /> },
+  { id: "entrez", primary: "Entrez", icon: <FaBarcode /> },
+  { id: "rank", primary: "Rank", icon: <FaRankingStar /> },
+  { id: "probability", primary: "Probability", icon: <FaPercent /> },
 ] as const;
 
 const Network = ({ inputs, results }: Props) => {

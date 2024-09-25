@@ -278,9 +278,9 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
             tooltip="Tooltip"
             options={
               [
-                { id: "1", text: "Lorem" },
-                { id: "2", text: "Ipsum" },
-                { id: "3", text: "Dolor" },
+                { id: "1", primary: "Lorem" },
+                { id: "2", primary: "Ipsum" },
+                { id: "3", primary: "Dolor" },
               ] as const
             }
             onChange={logChange}
@@ -291,9 +291,14 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
             tooltip="Tooltip"
             options={
               [
-                { id: "a", text: "Lorem" },
-                { id: "b", text: "Ipsum", info: "123" },
-                { id: "c", text: "Dolor", info: "123", icon: <FaHorse /> },
+                { id: "a", primary: "Lorem" },
+                { id: "b", primary: "Ipsum", secondary: "123" },
+                {
+                  id: "c",
+                  primary: "Dolor",
+                  secondary: "123",
+                  icon: <FaHorse />,
+                },
               ] as const
             }
             onChange={logChange}
@@ -617,9 +622,9 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
                   label="Select"
                   options={
                     [
-                      { id: "csv", text: "CSV" },
-                      { id: "tsv", text: "TSV" },
-                      { id: "pdf", text: "PDF" },
+                      { id: "csv", primary: "CSV" },
+                      { id: "tsv", primary: "TSV" },
+                      { id: "pdf", primary: "PDF" },
                     ] as const
                   }
                   onChange={logChange}
@@ -665,9 +670,14 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
               label="Select"
               options={
                 [
-                  { id: "a", text: "Lorem" },
-                  { id: "b", text: "Ipsum", info: "123" },
-                  { id: "c", text: "Dolor", info: "123", icon: <FaHorse /> },
+                  { id: "a", primary: "Lorem" },
+                  { id: "b", primary: "Ipsum", secondary: "123" },
+                  {
+                    id: "c",
+                    primary: "Dolor",
+                    secondary: "123",
+                    icon: <FaHorse />,
+                  },
                 ] as const
               }
               name="select-single"
@@ -676,9 +686,14 @@ popup.innerText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed 
               label="Select"
               options={
                 [
-                  { id: "a", text: "Lorem" },
-                  { id: "b", text: "Ipsum", info: "123" },
-                  { id: "c", text: "Dolor", info: "123", icon: <FaHorse /> },
+                  { id: "a", primary: "Lorem" },
+                  { id: "b", primary: "Ipsum", secondary: "123" },
+                  {
+                    id: "c",
+                    primary: "Dolor",
+                    secondary: "123",
+                    icon: <FaHorse />,
+                  },
                 ] as const
               }
               name="select-multi"

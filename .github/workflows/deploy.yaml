@@ -1,0 +1,96 @@
+name: Deploy backend functions and frontend app
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  path-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            convert_ids:
+              - "functions/convert_ids/convert_ids_deploy/**"
+            ml:
+              - "functions/ml/ml_deploy/**"
+    outputs:
+      convert_ids: ${{ steps.changes.outputs.convert_uds }}
+      ml: ${{ steps.changes.outputs.ml }}
+
+  deploy-convert-ids:
+    needs: path-changes
+    if: ${{ needs.path-changes.outputs.convert_ids == 'true' }}
+    uses: ./.github/workflows/deploy-func.yaml
+    with:
+      func-name: "gpz-convert-ids"
+      func-src-dir: "functions/convert_ids/convert_ids_deploy"
+      func-entrypoint: "convert_ids"
+      func-memory-mb: 1024
+      func-data-gcs-url: "gs://geneplexus-func-data/convert-ids/convert-ids_data.tar.gz"
+    secrets: inherit
+
+  deploy-ml:
+    needs: path-changes
+    if: ${{ needs.path-changes.outputs.ml == 'true' }}
+    uses: ./.github/workflows/deploy-func.yaml
+    with:
+      func-name: "gpz-ml"
+      func-src-dir: "functions/ml/ml_deploy"
+      func-entrypoint: "ml"
+      func-memory-mb: 8192
+      func-data-gcs-url: "gs://geneplexus-func-data/ml/ml_data.tar.gz"
+    secrets: inherit
+
+  deploy-frontend:
+    needs:
+      - deploy-convert-ids
+      - deploy-ml
+    # https://github.com/actions/runner/issues/491#issuecomment-850884422
+    if: |
+      always() &&
+      (needs.deploy-convert-ids.result == 'success' || needs.deploy-convert-ids.result == 'skipped') &&
+      (needs.deploy-ml.result == 'success' || needs.deploy-ml.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v1
+
+      - name: Install packages
+        run: bun install
+        working-directory: frontend
+
+      - if: runner.debug == '1'
+        uses: mxschmitt/action-tmate@v3
+
+      - name: Build
+        run: bun run build
+        working-directory: frontend
+
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v3.0
+        with:
+          publish-dir: .frontend/dist
+          production-branch: main
+          production-deploy: true
+          deploy-message: Deploy from GitHub Actions
+          enable-pull-request-comment: false
+          enable-commit-comment: false
+          enable-commit-status: true
+          overwrites-pull-request-comment: false
+          enable-github-deployment: false
+          fails-without-credentials: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 1

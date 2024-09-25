@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { BiCopy } from "react-icons/bi";
 import {
   FaChartBar,
+  FaCircleDot,
   FaDna,
   FaDownload,
   FaFeatherPointed,
@@ -11,7 +12,7 @@ import { LuLightbulb } from "react-icons/lu";
 import { PiGraphBold } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router";
 import { submitAnalysis } from "@/api/api";
-import type { AnalysisInputs, AnalysisResults } from "@/api/types";
+import type { AnalysisInputs, AnalysisResults } from "@/api/convert";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Flex from "@/components/Flex";
@@ -22,6 +23,7 @@ import Tabs, { Tab } from "@/components/Tabs";
 import InputGenes from "@/pages/analysis/InputGenes";
 import Inputs from "@/pages/analysis/Inputs";
 import Network from "@/pages/analysis/Network";
+import Neutrals from "@/pages/analysis/Neutrals";
 import Predictions from "@/pages/analysis/Predictions";
 import Similarities from "@/pages/analysis/Similarities";
 import Summary from "@/pages/analysis/Summary";
@@ -163,6 +165,14 @@ const AnalysisPage = () => {
                   tooltip="Network visualization of top predicted genes"
                 >
                   <Network inputs={inputs} results={results} />
+                </Tab>
+
+                <Tab
+                  text="Neutrals"
+                  icon={<FaCircleDot />}
+                  tooltip="Info on how neutral genes were selected"
+                >
+                  <Neutrals results={results} />
                 </Tab>
               </Tabs>
             </>
