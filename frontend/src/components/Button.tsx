@@ -32,7 +32,6 @@ type _Button = Pick<
   ComponentProps<"button">,
   | "type"
   | "onClick"
-  | "onClickCapture"
   | "onDrag"
   | "onDragEnter"
   | "onDragLeave"
