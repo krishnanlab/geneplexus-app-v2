@@ -1,8 +1,3 @@
-/**
- * handle data schemas/formats and conversion between them between
- * frontend/backend
- */
-
 /** species options */
 export type Species =
   | "Human"
@@ -18,203 +13,159 @@ export type Network = "BioGRID" | "STRING" | "IMP";
 /** geneset context options */
 export type GenesetContext = "GO" | "Monarch" | "Mondo" | "Combined";
 
-/** convert-ids endpoint response format */
-export type _ConvertIds = {
+/** convert-ids endpoint inputs format */
+export type _ConvertIdsInputs = {
+  /** list of gene symbols/names/ids */
+  genes: string[];
+  /** species to lookup genes against */
+  species: Species;
+};
+
+/** convert-ids endpoint results format */
+export type _ConvertIdsResults = {
+  /** number of genes inputted (integer) */
   input_count: number;
+  /** list of successfully converted Entrez IDs */
   convert_ids: string[];
+  /** high level summary of conversion results, per network */
   table_summary: {
+    /** network */
     Network: Network;
+    /** total number of genes in network (integer) */
     NetworkGenes: number;
+    /** number of input genes in network (integer) */
     PositiveGenes: number;
   }[];
+  /** dataframe of results */
   df_convert_out: {
+    /** input id of gene */
     "Original ID": string;
+    /** converted id of gene */
     "Entrez ID": string;
+    /** converted name of gene */
     "Gene Name": string;
-    "In BioGRID?": string;
-    "In IMP?": string;
-    "In STRING?": string;
+    /** whether gene was found in each network */
+    "In BioGRID?": "Y" | "N";
+    "In IMP?": "Y" | "N";
+    "In STRING?": "Y" | "N";
   }[];
 };
 
-/** backend format to frontend format */
-export const convertConvertIds = (backend: _ConvertIds) => {
-  /** map "couldn't convert" status to easier-to-work-with value */
-  for (const row of backend.df_convert_out)
-    if (row["Entrez ID"].match(/Could Not be mapped to Entrez/i))
-      row["Entrez ID"] = "";
-
-  return {
-    count: backend.input_count,
-    success: backend.df_convert_out.filter((row) => row["Entrez ID"]).length,
-    error: backend.df_convert_out.filter((row) => !row["Entrez ID"]).length,
-    summary: backend.table_summary.map((row) => ({
-      network: row.Network,
-      positiveGenes: row.PositiveGenes,
-      totalGenes: row.NetworkGenes,
-    })),
-    table: backend.df_convert_out.map((row) => ({
-      input: row["Original ID"],
-      entrez: row["Entrez ID"],
-      name: row["Gene Name"],
-      inNetwork:
-        (row["In BioGRID?"] ?? row["In IMP?"] ?? row["In STRING?"]) === "Y",
-    })),
-  };
-};
-
-/** ml endpoint params backend format */
+/** ml endpoint inputs format */
 export type _AnalysisInputs = {
+  /** human-readable name to remember the analysis by */
   name: string;
+  /** list of gene symbols/names/ids */
   genes: string[];
+  /** species to lookup genes against */
   sp_trn: Species;
+  /** species for which model predictions will be made */
   sp_tst: Species;
+  /**
+   * network that ML features are from and which edge list is used to make final
+   * graph
+   */
   net_type: Network;
+  /**
+   * source used to select negative genes and which sets to compare trained
+   * model to
+   */
   gsc: GenesetContext;
+  /** genes to force as negative training examples */
   negatives: string[];
 };
 
-/** backend format to frontend format */
-export const convertAnalysisInputs = (backend: _AnalysisInputs) => ({
-  name: backend.name,
-  genes: backend.genes,
-  speciesTrain: backend.sp_trn,
-  speciesTest: backend.sp_tst,
-  network: backend.net_type,
-  genesetContext: backend.gsc,
-  negatives: backend.negatives,
-});
-
-/** ml endpoint params frontend format */
-export type AnalysisInputs = ReturnType<typeof convertAnalysisInputs>;
-
-/** frontend format to backend format */
-export const revertAnalysisInputs = (
-  frontend: AnalysisInputs,
-): _AnalysisInputs => ({
-  name: frontend.name,
-  genes: frontend.genes,
-  sp_trn: frontend.speciesTrain,
-  sp_tst: frontend.speciesTest,
-  net_type: frontend.network,
-  gsc: frontend.genesetContext,
-  negatives: frontend.negatives,
-});
-
-/** convert-ids endpoint response format */
+/** ml endpoint results format */
 export type _AnalysisResults = {
-  df_convert_out_subset: {
-    "Original ID": string;
-    "Entrez ID": string;
-    "Gene Name": string;
-    "In BioGRID?"?: string;
-    "In IMP?"?: string;
-    "In STRING?"?: string;
-  }[];
+  /** copy of inputs for re-uploading convenience */
+  input: _AnalysisInputs;
+
+  /** see `convert-ids` `df_convert_out` schema */
+  df_convert_out_subset: _ConvertIdsResults["df_convert_out"];
+  /** cross validation results, performance measured using log2(auprc/prior) */
   avgps: (number | null | undefined)[];
+  /** number of genes considered positives in network (integer) */
   positive_genes: number;
+  /**
+   * top predicted genes that are isolated from other top predicted genes in
+   * network (as Entrez IDs)
+   */
   isolated_genes: string[];
+  /**
+   * top predicted genes that are isolated from other top predicted genes in
+   * network (as gene symbols)
+   */
   isolated_genes_sym: string[];
+  /**
+   * edge list corresponding to subgraph induced by top predicted genes (as
+   * Entrez IDs)
+   */
   df_edge: { Node1: string; Node2: string; Weight: number }[];
+  /**
+   * edge list corresponding to subgraph induced by top predicted genes (as gene
+   * symbols)
+   */
   df_edge_sym: { Node1: string; Node2: string; Weight: number }[];
+  /**
+   * table showing how associated each gene in prediction species network is to
+   * the users gene list
+   */
   df_probs: {
+    /** rank of relevance of gene to input gene list (integer) */
     Rank: number;
+    /** Entrez ID */
     Entrez: string;
+    /** gene symbol */
     Symbol: string;
+    /** full gene name */
     Name: string;
+    /** whether gene is in input gene list */
     "Known/Novel": "Known" | "Novel";
+    /** gene class, positive | negative | neutral */
     "Class-Label": "P" | "N" | "U";
+    /** probability of gene being part of input gene list */
     Probability: number;
+    /** z-score of the probabilities */
     "Z-score": number;
+    /** adjusted p-values of the z-scores */
     "P-adjusted": number;
   }[];
+  /**
+   * table showing how similar user's trained model is to models trained on
+   * known gene sets
+   */
   df_sim: {
+    /**
+     * rank of similarity between input model and a model trained on term gene
+     * set (integer)
+     */
     Rank: number;
+    /** type of term */
     Task: string;
+    /** term ID */
     ID: string;
+    /** term name */
     Name: string;
+    /** similarity between input model and a model trained on term gene set */
     Similarity: number;
+    /** z-score of the similarities */
     "Z-score": number;
+    /** adjusted p-values of the z-scores */
     "P-adjusted": number;
   }[];
+  /** extra info about genes marked as neutral */
   neutral_gene_info: Record<
+    /** set that genes are from */
     string,
-    string[] | { Genes: string[]; Name: string; Task: string }
+    /** list of gene IDs */
+    | string[]
+    | {
+        /** list of gene IDs */
+        Genes: string[];
+        /** term name */
+        Name: string;
+        /** type of term */
+        Task: string;
+      }
   >;
-};
-
-/** backend format to frontend format */
-export const convertAnalysisResults = (backend: _AnalysisResults) => ({
-  inputGenes: backend.df_convert_out_subset.map((row) => ({
-    input: row["Original ID"],
-    entrez: row["Entrez ID"].match(/Could Not be mapped to Entrez/i)
-      ? ""
-      : row["Entrez ID"],
-    name: row["Gene Name"],
-    inNetwork:
-      (row["In BioGRID?"] ?? row["In IMP?"] ?? row["In STRING?"]) === "Y",
-  })),
-  crossValidation: backend.avgps,
-  positiveGenes: backend.positive_genes,
-  predictions: backend.df_probs.map((row) => ({
-    entrez: row.Entrez,
-    symbol: row.Symbol,
-    name: row.Name,
-    knownNovel: row["Known/Novel"],
-    classLabel: expandClass(row["Class-Label"]),
-    probability: row.Probability,
-    zScore: row["Z-score"],
-    pAdjusted: row["P-adjusted"],
-    rank: row.Rank,
-  })),
-  similarities: backend.df_sim.map((row) => ({
-    task: row.Task,
-    id: row.ID,
-    name: row.Name,
-    similarity: row.Similarity,
-    zScore: row["Z-score"],
-    pAdjusted: row["P-adjusted"],
-    rank: row.Rank,
-  })),
-  network: {
-    nodes: backend.df_probs.map((row) => ({
-      entrez: row.Entrez,
-      symbol: row.Symbol,
-      name: row.Name,
-      knownNovel: row["Known/Novel"],
-      classLabel: expandClass(row["Class-Label"]),
-      probability: row.Probability,
-      zScore: row["Z-score"],
-      pAdjusted: row["P-adjusted"],
-      rank: row.Rank,
-    })),
-    edges: backend.df_edge.map((row) => ({
-      source: row.Node1,
-      target: row.Node2,
-      weight: row.Weight,
-    })),
-  },
-  neutralInfo: (() => {
-    const { "All Neutrals": all, ...sets } = backend.neutral_gene_info;
-    return {
-      all: Array.isArray(all) ? all : [],
-      sets: Object.entries(sets).flatMap(([Id, value]) =>
-        Array.isArray(value) ? [] : { Id, ...value },
-      ),
-    };
-  })(),
-});
-
-/** ml endpoint params frontend format */
-export type AnalysisResults = ReturnType<typeof convertAnalysisResults>;
-
-/** convert class label abbreviation to full text */
-const expandClass = (
-  abbrev: _AnalysisResults["df_probs"][number]["Class-Label"],
-) => (({ P: "Positive", N: "Negative", U: "Neutral" }) as const)[abbrev];
-
-/** full analysis */
-export type Analysis = {
-  inputs: AnalysisInputs;
-  results: AnalysisResults;
 };

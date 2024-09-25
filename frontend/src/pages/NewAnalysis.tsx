@@ -18,12 +18,8 @@ import { useNavigate } from "react-router";
 import { uniq } from "lodash";
 import { useEventListener, useLocalStorage } from "@reactuses/core";
 import { checkGenes } from "@/api/api";
-import type {
-  AnalysisInputs,
-  GenesetContext,
-  Network,
-  Species,
-} from "@/api/types";
+import type { AnalysisInputs } from "@/api/convert";
+import type { GenesetContext, Network, Species } from "@/api/types";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import CheckBox from "@/components/CheckBox";
@@ -165,7 +161,10 @@ const NewAnalysisPage = () => {
     const allGenes = uniq(splitGenes.concat(splitNegatives));
     if (!allGenes.length) return undefined;
     /** check all */
-    const results = await checkGenes(allGenes, speciesTrain);
+    const results = await checkGenes({
+      genes: allGenes,
+      species: speciesTrain,
+    });
     return {
       ...results,
       table: results.table.map((result) => {
@@ -217,8 +216,8 @@ const NewAnalysisPage = () => {
 
   /** restrict species options based on other params */
   const filteredSpeciesOptions = speciesOptions.filter((option) => {
-    if (genesetContext === "Mondo" && option.id !== "Human") return false;
     if (network === "BioGRID" && option.id === "Zebrafish") return false;
+    if (genesetContext === "Mondo" && option.id !== "Human") return false;
     return true;
   });
 

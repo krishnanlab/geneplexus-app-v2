@@ -8,7 +8,7 @@ import { useNavigate } from "react-router";
 import { getDefaultStore, useAtomValue } from "jotai";
 import { atomWithStorage } from "jotai/utils";
 import { isEqual } from "lodash";
-import type { Analysis, AnalysisInputs } from "@/api/types";
+import type { Analysis, AnalysisInputs } from "@/api/convert";
 import Alert from "@/components/Alert";
 import AnalysisCard from "@/components/AnalysisCard";
 import Button from "@/components/Button";

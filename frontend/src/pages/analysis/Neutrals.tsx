@@ -1,4 +1,4 @@
-import type { AnalysisResults } from "@/api/types";
+import type { AnalysisResults } from "@/api/convert";
 import Table from "@/components/Table";
 import { formatNumber } from "@/util/string";
 

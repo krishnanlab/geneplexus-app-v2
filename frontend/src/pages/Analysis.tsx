@@ -12,7 +12,7 @@ import { LuLightbulb } from "react-icons/lu";
 import { PiGraphBold } from "react-icons/pi";
 import { useLocation, useNavigate } from "react-router";
 import { submitAnalysis } from "@/api/api";
-import type { AnalysisInputs, AnalysisResults } from "@/api/types";
+import type { AnalysisInputs, AnalysisResults } from "@/api/convert";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Flex from "@/components/Flex";

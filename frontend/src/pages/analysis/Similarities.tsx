@@ -1,4 +1,4 @@
-import type { AnalysisResults } from "@/api/types";
+import type { AnalysisResults } from "@/api/convert";
 import Exponential from "@/components/Exponential";
 import Link from "@/components/Link";
 import Table from "@/components/Table";

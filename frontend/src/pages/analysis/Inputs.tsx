@@ -1,5 +1,5 @@
 import { FaArrowRightToBracket } from "react-icons/fa6";
-import type { AnalysisInputs } from "@/api/types";
+import type { AnalysisInputs } from "@/api/convert";
 import Heading from "@/components/Heading";
 import Section from "@/components/Section";
 import { formatNumber } from "@/util/string";

@@ -68,8 +68,8 @@
 }
 
 .mini-table > :nth-child(even) {
-  overflow-y: auto;
   max-height: 300px;
+  overflow-y: auto;
 }
 
 .mini-table > :nth-child(even):empty::after {

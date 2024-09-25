@@ -1,4 +1,4 @@
-import type { AnalysisResults } from "@/api/types";
+import type { AnalysisResults } from "@/api/convert";
 import Mark, { YesNo } from "@/components/Mark";
 import Table from "@/components/Table";
 

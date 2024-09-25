@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import clsx from "clsx";
-import type { AnalysisInputs } from "@/api/types";
+import type { AnalysisInputs } from "@/api/convert";
 import Link from "@/components/Link";
 import { carve } from "@/util/array";
 import { formatNumber } from "@/util/string";
