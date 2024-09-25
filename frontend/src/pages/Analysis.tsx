@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { BiCopy } from "react-icons/bi";
 import {
   FaChartBar,
-  FaCircleMinus,
+  FaCircleDot,
   FaDna,
   FaDownload,
   FaFeatherPointed,
@@ -169,7 +169,7 @@ const AnalysisPage = () => {
 
                 <Tab
                   text="Neutrals"
-                  icon={<FaCircleMinus />}
+                  icon={<FaCircleDot />}
                   tooltip="Info on how neutral genes were selected"
                 >
                   <Neutrals results={results} />
