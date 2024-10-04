@@ -6,7 +6,6 @@ on:
       forceDeploy:
           description: "Redeploy GCP functions even if they haven't changed"
           required: false
-          default: false
           type: boolean
   push:
     branches:
@@ -33,7 +32,7 @@ jobs:
 
   deploy-convert-ids:
     needs: path-changes
-    if: ${{ needs.path-changes.outputs.convert_ids == 'true' || inputs.forceDeploy == 'true' }}
+    if: ${{ always() && (needs.path-changes.outputs.convert_ids == 'true' || inputs.forceDeploy == 'true') }}
     uses: ./.github/workflows/deploy-func.yaml
     with:
       func-name: "gpz-convert-ids"
@@ -45,7 +44,7 @@ jobs:
 
   deploy-ml:
     needs: path-changes
-    if: ${{ needs.path-changes.outputs.ml == 'true' || inputs.forceDeploy == 'true' }}
+    if: ${{ always() && (needs.path-changes.outputs.ml == 'true' || inputs.forceDeploy == 'true') }}
     uses: ./.github/workflows/deploy-func.yaml
     with:
       func-name: "gpz-ml"
