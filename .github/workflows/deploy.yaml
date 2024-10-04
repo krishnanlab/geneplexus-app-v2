@@ -2,6 +2,12 @@ name: Deploy backend functions and frontend app
 
 on:
   workflow_dispatch:
+    inputs:
+      forceDeploy:
+          description: "Redeploy GCP functions even if they haven't changed"
+          required: false
+          default: false
+          type: boolean
   push:
     branches:
       - main
@@ -27,7 +33,7 @@ jobs:
 
   deploy-convert-ids:
     needs: path-changes
-    if: ${{ needs.path-changes.outputs.convert_ids == 'true' }}
+    if: ${{ needs.path-changes.outputs.convert_ids == 'true' || inputs.forceDeploy == 'true' }}
     uses: ./.github/workflows/deploy-func.yaml
     with:
       func-name: "gpz-convert-ids"
@@ -39,7 +45,7 @@ jobs:
 
   deploy-ml:
     needs: path-changes
-    if: ${{ needs.path-changes.outputs.ml == 'true' }}
+    if: ${{ needs.path-changes.outputs.ml == 'true' || inputs.forceDeploy == 'true' }}
     uses: ./.github/workflows/deploy-func.yaml
     with:
       func-name: "gpz-ml"
