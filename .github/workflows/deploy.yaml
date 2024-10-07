@@ -27,7 +27,7 @@ jobs:
             ml:
               - "functions/ml/ml_deploy/**"
     outputs:
-      convert_ids: ${{ steps.changes.outputs.convert_uds }}
+      convert_ids: ${{ steps.changes.outputs.convert_ids }}
       ml: ${{ steps.changes.outputs.ml }}
 
   deploy-convert-ids:
