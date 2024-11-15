@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import {
+  FaArrowRightLong,
   FaBeerMugEmpty,
   FaDna,
   FaEye,
   FaFish,
   FaLightbulb,
+  FaListCheck,
   FaPaperPlane,
   FaPerson,
   FaPlus,
@@ -22,9 +24,10 @@ import type { AnalysisInputs } from "@/api/convert";
 import type { GenesetContext, Network, Species } from "@/api/types";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
-import CheckBox from "@/components/CheckBox";
+import Collapsible from "@/components/Collapsible";
 import Flex from "@/components/Flex";
 import Heading from "@/components/Heading";
+import Help from "@/components/Help";
 import Mark, { YesNo } from "@/components/Mark";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
@@ -105,10 +108,6 @@ const NewAnalysisPage = () => {
   /** raw text list of input gene ids */
   const [genes, setGenes] = useLocalStorage("input-genes", "");
   const [negatives, setNegatives] = useLocalStorage("negative-genes", "");
-  const [showNegatives, setShowNegatives] = useLocalStorage(
-    "show-negative-genes",
-    false,
-  );
 
   /** array of input gene ids */
   const splitGenes =
@@ -116,13 +115,11 @@ const NewAnalysisPage = () => {
       ?.split(/,|\t|\n/)
       .map((id) => id.trim())
       .filter(Boolean) ?? [];
-  const splitNegatives = showNegatives
-    ? (negatives
-        ?.split(/,|\t|\n/)
-        .map((id) => id.trim())
-        .filter(Boolean) ?? [])
-    : /** force negatives to empty if not shown */
-      [];
+  const splitNegatives =
+    negatives
+      ?.split(/,|\t|\n/)
+      .map((id) => id.trim())
+      .filter(Boolean) ?? [];
 
   /** filename when file uploaded */
   const [filename, setFilename] = useState("");
@@ -169,12 +166,17 @@ const NewAnalysisPage = () => {
       ...results,
       table: results.table.map((result) => {
         /** remember whether gene was in regular and/or negatives inputs */
-        const inGenes = splitGenes.includes(result.input);
-        const inNegatives = splitNegatives.includes(result.input);
+        const inGenes = splitGenes.some(
+          (gene) => gene.toUpperCase() === result.input.toUpperCase(),
+        );
+        const inNegatives = splitNegatives.some(
+          (gene) => gene.toUpperCase() === result.input.toUpperCase(),
+        );
+        console.log(inGenes, inNegatives, result);
         let inputType = "";
-        if (inGenes && inNegatives) inputType = "Genes & Negatives";
-        else if (inGenes) inputType = "Genes";
-        else if (inNegatives) inputType = "Negatives";
+        if (inGenes && inNegatives) inputType = "+ & -";
+        else if (inGenes) inputType = "+";
+        else if (inNegatives) inputType = "-";
         return { ...result, inputType };
       }),
     };
@@ -284,39 +286,11 @@ const NewAnalysisPage = () => {
 
       <Section>
         <Heading level={2} icon="1">
-          Enter Genes
+          Choose Species
         </Heading>
-
-        <div className={classes["gene-boxes"]}>
-          <TextBox
-            className="full"
-            label="Genes"
-            value={genes ?? ""}
-            onChange={(value) => {
-              setGenes(value);
-              setFilename("");
-            }}
-            multi
-            placeholder="Comma, tab, or line-separated list of entrez IDs, symbols, or ensembl gene/protein/transcript IDs"
-            tooltip="Genes to be used as positive training examples"
-          />
-
-          {showNegatives && (
-            <TextBox
-              className="full"
-              label="Negatives"
-              value={negatives ?? ""}
-              onChange={setNegatives}
-              multi
-              placeholder="Comma, tab, or line-separated list of entrez IDs, symbols, or ensembl gene/protein/transcript IDs"
-              tooltip="Genes to be used as negative training examples"
-            />
-          )}
-        </div>
-
-        <Flex>
+        <Flex gap="lg">
           <SelectSingle
-            label="Species"
+            label="Input Species"
             tooltip="Species to lookup genes against and train model with."
             layout="horizontal"
             options={filteredSpeciesOptions}
@@ -327,6 +301,40 @@ const NewAnalysisPage = () => {
             }}
           />
 
+          <FaArrowRightLong opacity="0.25" />
+
+          <SelectSingle
+            label="Results Species"
+            tooltip="Species for which model predictions will be made. If different from input species, model results will be translated into this species."
+            layout="horizontal"
+            options={filteredSpeciesOptions}
+            value={speciesTest}
+            onChange={setSpeciesTest}
+          />
+        </Flex>
+      </Section>
+
+      <Section>
+        <Heading level={2} icon="2">
+          Enter Genes
+        </Heading>
+
+        <div className={classes["gene-boxes"]}>
+          <TextBox
+            className="full"
+            label={`${speciesTrain} Genes`}
+            value={genes ?? ""}
+            onChange={(value) => {
+              setGenes(value);
+              setFilename("");
+            }}
+            multi
+            placeholder="Comma, tab, or line-separated list of entrez IDs, symbols, or ensembl gene/protein/transcript IDs"
+            tooltip="Genes to be used as positive training examples"
+          />
+        </div>
+
+        <Flex>
           <Button
             text="Example"
             icon={<FaLightbulb />}
@@ -356,36 +364,65 @@ const NewAnalysisPage = () => {
             />
             {filename}
           </Flex>
-
-          <CheckBox
-            label="Negatives"
-            value={showNegatives ?? false}
-            onChange={setShowNegatives}
-            tooltip="Genes to consider as negatives, in addition to those automatically selected by our algorithm."
-          />
         </Flex>
       </Section>
 
       <Section>
-        <Heading level={2} icon="2">
-          Check Genes
+        <Heading level={2} icon="3">
+          Options
+        </Heading>
+
+        <Collapsible text="Customize">
+          <Flex>
+            <SelectSingle
+              value={network}
+              onChange={setNetwork}
+              label="Network"
+              options={networkOptions}
+              tooltip="Network that machine learning features are from and which edge list is used to make final graph."
+            />
+            <SelectSingle
+              value={genesetContext}
+              onChange={setGenesetContext}
+              label="Geneset Context"
+              options={genesetContextOptions}
+              tooltip="Source used to select negative genes and which sets to compare trained model to"
+            />
+          </Flex>
+
+          <TextBox
+            className="full"
+            label="Negative Genes"
+            value={negatives ?? ""}
+            onChange={setNegatives}
+            multi
+            placeholder="Comma, tab, or line-separated list of entrez IDs, symbols, or ensembl gene/protein/transcript IDs"
+            tooltip="Genes to be used as negative training examples, in addition to those automatically selected by our algorithm."
+          />
+        </Collapsible>
+      </Section>
+
+      <Section>
+        <Heading level={2} icon="4">
+          Pre-check Genes
         </Heading>
 
         {checkGenesStatus === "empty" && (
-          <>
-            <p className="narrow">
-              Check that your genes are valid and in our networks before
-              submitting a full analysis. Optional but recommended, since
-              analyses can take some time.
-            </p>
+          <Flex>
             <Button
-              text="Check Genes"
-              icon={<FaPaperPlane />}
+              text="Check"
+              icon={<FaListCheck />}
               onClick={() =>
                 splitGenes.length ? runCheckGenes() : toast("Enter some genes")
               }
             />
-          </>
+            (Optional)
+            <Help
+              tooltip="Check that your genes are valid and in our networks before
+              submitting a full analysis. Optional but recommended, since
+              analyses can take some time."
+            />
+          </Flex>
         )}
 
         {checkGenesStatus === "loading" && (
@@ -435,11 +472,11 @@ const NewAnalysisPage = () => {
                     key: "input",
                     name: "Input ID",
                   },
-                  ...(showNegatives
+                  ...(splitNegatives.length
                     ? ([
                         {
                           key: "inputType",
-                          name: "Input Type",
+                          name: "Type",
                           filterType: "enum",
                         },
                       ] as const)
@@ -457,7 +494,6 @@ const NewAnalysisPage = () => {
                   },
                 ]}
                 rows={checkGenesData.table}
-                sort={showNegatives ? [{ id: "1", desc: true }] : undefined}
               />
             </Tab>
           </Tabs>
@@ -465,44 +501,7 @@ const NewAnalysisPage = () => {
       </Section>
 
       <Section>
-        <Heading level={2} icon="3">
-          Choose Parameters
-        </Heading>
-
-        <div className={classes.parameters}>
-          <SelectSingle
-            label="Species"
-            options={filteredSpeciesOptions.map((option) => ({
-              ...option,
-              ...(option.id === speciesTrain && {
-                primary: `Same as above`,
-                secondary: option.secondary,
-              }),
-            }))}
-            value={speciesTest}
-            onChange={setSpeciesTest}
-            tooltip="Species for which model predictions will be made. If different from species selected above, model results will be translated into this species."
-          />
-
-          <SelectSingle
-            value={network}
-            onChange={setNetwork}
-            label="Network"
-            options={networkOptions}
-            tooltip="Network that machine learning features are from and which edge list is used to make final graph."
-          />
-          <SelectSingle
-            value={genesetContext}
-            onChange={setGenesetContext}
-            label="Geneset Context"
-            options={genesetContextOptions}
-            tooltip="Source used to select negative genes and which sets to compare  trained model to"
-          />
-        </div>
-      </Section>
-
-      <Section>
-        <Heading level={2} icon="4">
+        <Heading level={2} icon="5">
           Submit Analysis
         </Heading>
 
@@ -516,7 +515,7 @@ const NewAnalysisPage = () => {
         />
 
         <Button
-          text="Submit Analysis"
+          text="Submit"
           icon={<FaPaperPlane />}
           onClick={submitAnalysis}
         />

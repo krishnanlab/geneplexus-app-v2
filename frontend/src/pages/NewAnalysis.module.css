@@ -21,10 +21,3 @@
 .divider {
   grid-column: 1 / -1;
 }
-
-.parameters {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 40px;
-}
