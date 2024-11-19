@@ -60,7 +60,7 @@ export type _AnalysisInputs = {
   /** species to lookup genes against */
   sp_trn: Species;
   /** species for which model predictions will be made */
-  sp_tst: Species;
+  sp_res: Species;
   /**
    * network that ML features are from and which edge list is used to make final
    * graph
