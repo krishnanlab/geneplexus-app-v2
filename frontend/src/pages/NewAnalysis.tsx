@@ -160,7 +160,7 @@ const NewAnalysisPage = () => {
     /** check all */
     const results = await checkGenes({
       genes: allGenes,
-      species: speciesTrain,
+      sp_trn: speciesTrain,
     });
     return {
       ...results,
@@ -172,7 +172,6 @@ const NewAnalysisPage = () => {
         const inNegatives = splitNegatives.some(
           (gene) => gene.toUpperCase() === result.input.toUpperCase(),
         );
-        console.log(inGenes, inNegatives, result);
         let inputType = "";
         if (inGenes && inNegatives) inputType = "+ & -";
         else if (inGenes) inputType = "+";

@@ -27,7 +27,7 @@ def convert_ids(request):
         # parse request body params
         body = request.get_json()
         genes = body["genes"]
-        species = body["species"]
+        sp_trn = body["sp_trn"]
     except:
         message = "Problem with input headers, body, or params."
         return ({"message": message}, 400, headers)
@@ -35,7 +35,7 @@ def convert_ids(request):
     try:
         # set up geneplexus
         # other params (e.g. network, features, gsc) not needed for gene conversion
-        gp = geneplexus.GenePlexus(file_loc="data", sp_trn=species)
+        gp = geneplexus.GenePlexus(file_loc="data", sp_trn=sp_trn)
 
         # load and convert genes
         gp.load_genes(genes)

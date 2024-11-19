@@ -34,7 +34,7 @@ def ml(request):
         gsc = request_json["gsc"]
         net_type = request_json["net_type"]
         sp_trn = request_json["sp_trn"]
-        sp_tst = request_json["sp_tst"]
+        sp_res = request_json["sp_res"]
     except:
         message = "Problem with input headers, body, or params."
         return ({"message": message}, 400, headers)
@@ -44,11 +44,11 @@ def ml(request):
         gp = geneplexus.GenePlexus(
             file_loc="data",
             gsc_trn=gsc,
-            gsc_tst=gsc,
+            gsc_res=gsc,
             features="SixSpeciesN2V",
             net_type=net_type,
             sp_trn=sp_trn,
-            sp_tst=sp_tst,
+            sp_res=sp_res,
         )
 
         # load and convert genes

@@ -18,7 +18,7 @@ export type _ConvertIdsInputs = {
   /** list of gene symbols/names/ids */
   genes: string[];
   /** species to lookup genes against */
-  species: Species;
+  sp_trn: Species;
 };
 
 /** convert-ids endpoint results format */
@@ -60,7 +60,7 @@ export type _AnalysisInputs = {
   /** species to lookup genes against */
   sp_trn: Species;
   /** species for which model predictions will be made */
-  sp_tst: Species;
+  sp_res: Species;
   /**
    * network that ML features are from and which edge list is used to make final
    * graph

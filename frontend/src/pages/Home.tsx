@@ -1,4 +1,4 @@
-import { FaArrowRight, FaFlaskVial, FaPlus } from "react-icons/fa6";
+import { FaArrowRight, FaPlus } from "react-icons/fa6";
 import Button from "@/components/Button";
 import Flex from "@/components/Flex";
 import Heading from "@/components/Heading";
@@ -26,7 +26,6 @@ const HomePage = () => {
             text="Load Analysis"
             icon={<FaArrowRight />}
           />
-          <Button to="/testbed" text="Testbed" icon={<FaFlaskVial />} />
         </Flex>
 
         <p className="center">
