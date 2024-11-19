@@ -1,4 +1,4 @@
-import { FaEnvelope, FaGithub, FaTwitter } from "react-icons/fa6";
+import { FaEnvelope, FaGithub } from "react-icons/fa6";
 import Flex from "@/components/Flex";
 import Link from "@/components/Link";
 import classes from "./Footer.module.css";
@@ -7,24 +7,38 @@ import classes from "./Footer.module.css";
 const Footer = () => (
   <Flex tag="footer" direction="column" gap="sm" className={classes.footer}>
     <Flex gap="sm" className={classes.icons}>
-      <Link to="" tooltip="Email us">
+      <Link
+        to="mailto:arjun.krishnan@cuanschutz.edu"
+        showArrow={false}
+        tooltip="Email us"
+      >
         <FaEnvelope />
       </Link>
-      <Link to="" tooltip="GitHub">
+      <Link
+        to="https://github.com/krishnanlab"
+        showArrow={false}
+        tooltip="GitHub"
+      >
         <FaGithub />
       </Link>
-      <Link to="" tooltip="Twitter">
-        <FaTwitter />
+      <Link to="/about#terms-of-use">Terms of Use</Link>
+      <Link
+        to="https://github.com/krishnanlab/geneplexus-app-v2/blob/main/LICENSE.md"
+        showArrow={false}
+      >
+        License
       </Link>
     </Flex>
 
-    <div>
-      A project of the{" "}
-      <Link to="https://www.thekrishnanlab.org" showArrow={false}>
-        Krishnan Lab
-      </Link>{" "}
-      &copy; 2023
-    </div>
+    <Flex gap="sm" className={classes.icons}>
+      <div>
+        A project of the{" "}
+        <Link to="https://www.thekrishnanlab.org" showArrow={false}>
+          Krishnan Lab
+        </Link>{" "}
+        &copy; 2024
+      </div>
+    </Flex>
   </Flex>
 );
 

@@ -17,6 +17,7 @@ import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Flex from "@/components/Flex";
 import Heading from "@/components/Heading";
+import Link from "@/components/Link";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
 import Tabs, { Tab } from "@/components/Tabs";
@@ -134,6 +135,11 @@ const AnalysisPage = () => {
           {inputs && results && (
             <>
               <Summary results={results} />
+
+              <Link to="https://pygeneplexus.readthedocs.io/en/main/supp/example.html">
+                Learn more
+              </Link>
+
               <Tabs defaultValue="predictions" syncWithUrl="results">
                 <Tab
                   text="Input Genes"

@@ -1,4 +1,7 @@
 import { FaArrowRight, FaPlus } from "react-icons/fa6";
+import screenshotData from "@/assets/screenshot-data.png";
+import screenshotNetwork from "@/assets/screenshot-network.png";
+import screenshotSpecies from "@/assets/screenshot-species.png";
 import Button from "@/components/Button";
 import Flex from "@/components/Flex";
 import Heading from "@/components/Heading";
@@ -36,11 +39,63 @@ const HomePage = () => {
       </Section>
 
       <Section>
-        <p>
-          GenePlexus trains a custom model on your gene set to predict new
-          genes, compare to known processes and phenotypes, and view network
-          connections.
-        </p>
+        <Flex
+          className={classes.feature}
+          gap="lg"
+          wrap={false}
+          breakpoint={800}
+          full
+        >
+          <div className={classes["feature-image"]}>
+            <img src={screenshotData} alt="" />
+          </div>
+          <Flex direction="column">
+            <strong>Detailed Data</strong>
+            <p>
+              A <b>custom model</b> trained on your genes lets you see
+              predictions, comparisons to known processes and phenotypes, and
+              other detailed information.
+            </p>
+          </Flex>
+        </Flex>
+
+        <Flex
+          className={classes.feature}
+          gap="lg"
+          wrap={false}
+          breakpoint={800}
+          full
+        >
+          <div className={classes["feature-image"]}>
+            <img src={screenshotSpecies} alt="" />
+          </div>
+          <Flex direction="column">
+            <strong>Cross-species</strong>
+            <p>
+              Compare genes across species, with appropriate translations
+              handled automatically.
+            </p>
+          </Flex>
+        </Flex>
+
+        <Flex
+          className={classes.feature}
+          gap="lg"
+          wrap={false}
+          breakpoint={800}
+          full
+        >
+          <div className={classes["feature-image"]}>
+            <img src={screenshotNetwork} alt="" />
+          </div>
+          <Flex direction="column">
+            <strong>Interactive Network</strong>
+            <p>
+              View connections between your genes of different types and weights
+              as an interactive network.
+            </p>
+          </Flex>
+        </Flex>
       </Section>
     </>
   );

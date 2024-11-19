@@ -28,6 +28,7 @@ import Collapsible from "@/components/Collapsible";
 import Flex from "@/components/Flex";
 import Heading from "@/components/Heading";
 import Help from "@/components/Help";
+import Link from "@/components/Link";
 import Mark, { YesNo } from "@/components/Mark";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
@@ -399,6 +400,10 @@ const NewAnalysisPage = () => {
             tooltip="Genes to be used as negative training examples, in addition to those automatically selected by our algorithm."
           />
         </Collapsible>
+
+        <Link to="https://pygeneplexus.readthedocs.io/en/main/supp/guidelines.html">
+          Learn more
+        </Link>
       </Section>
 
       <Section>

@@ -33,7 +33,7 @@ const Link = forwardRef(
     const { state } = useLocation();
 
     /** whether link is external (some other site) or internal (within router) */
-    const external = typeof to === "string" && to.startsWith("http");
+    const external = typeof to === "string" && to.match(/^(http|mailto)/);
 
     /** whether to open link in new tab */
     const target = (newTab ?? external) ? "_blank" : "";

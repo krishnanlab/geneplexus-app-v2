@@ -8,6 +8,7 @@
   --deep-light: hsl(204, 100%, 90%);
 
   /** grays */
+  --shadow: #00000020;
   --black: #000000;
   --off-black: #303030;
   --dark-gray: #606060;
@@ -34,7 +35,7 @@
   --rounded: 5px;
   --fast: 0.15s ease;
   --slow: 0.35s ease;
-  --shadow: 0 0 2px #00000020, 2px 2px 5px #00000020;
+  --box-shadow: 0 0 2px var(--shadow), 2px 2px 5px var(--shadow);
   --focus: 0 0 5px var(--accent);
   --spacing: 2;
   --compact: 1.5;
