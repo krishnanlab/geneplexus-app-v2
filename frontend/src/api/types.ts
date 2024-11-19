@@ -18,7 +18,7 @@ export type _ConvertIdsInputs = {
   /** list of gene symbols/names/ids */
   genes: string[];
   /** species to lookup genes against */
-  species: Species;
+  sp_trn: Species;
 };
 
 /** convert-ids endpoint results format */

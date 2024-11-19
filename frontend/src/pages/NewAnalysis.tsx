@@ -160,7 +160,7 @@ const NewAnalysisPage = () => {
     /** check all */
     const results = await checkGenes({
       genes: allGenes,
-      species: speciesTrain,
+      sp_trn: speciesTrain,
     });
     return {
       ...results,
