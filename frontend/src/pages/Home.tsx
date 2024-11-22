@@ -1,7 +1,8 @@
 import { FaArrowRight, FaPlus, FaScroll } from "react-icons/fa6";
-import screenshotData from "@/assets/screenshot-data.png";
+import screenshotPreds from "@/assets/preds.png";
+import screenshotSims from "@/assets/sims.png";
 import screenshotNetwork from "@/assets/screenshot-network.png";
-import screenshotSpecies from "@/assets/screenshot-species.png";
+import screenshotSpecies from "@/assets/species.png";
 import Button from "@/components/Button";
 import Flex from "@/components/Flex";
 import Heading from "@/components/Heading";
@@ -49,14 +50,13 @@ const HomePage = () => {
           full
         >
           <div className={classes["feature-image"]}>
-            <img src={screenshotData} alt="" />
+            <img src={screenshotPreds} alt="" />
           </div>
           <Flex direction="column">
-            <strong>Detailed Data</strong>
+            <strong>Genome-wide Predictions</strong>
             <p>
-              A <b>custom model</b> trained on your genes lets you see
-              predictions, comparisons to known processes and phenotypes, and
-              other detailed information.
+              A <b>custom model</b> trained on your genes lets you prioritize
+              the gene list and predict gene assocaited with your gene list.
             </p>
           </Flex>
         </Flex>
@@ -69,13 +69,12 @@ const HomePage = () => {
           full
         >
           <div className={classes["feature-image"]}>
-            <img src={screenshotSpecies} alt="" />
+            <img src={screenshotSims} alt="" />
           </div>
           <Flex direction="column">
-            <strong>Cross-species</strong>
+            <strong>Model Interpretability</strong>
             <p>
-              Compare genes across species, with appropriate translations
-              handled automatically.
+              Compare the user trained model to known biology.
             </p>
           </Flex>
         </Flex>
@@ -98,13 +97,32 @@ const HomePage = () => {
             </p>
           </Flex>
         </Flex>
+		
+        <Flex
+          className={classes.feature}
+          gap="lg"
+          wrap={false}
+          breakpoint={800}
+          full
+        >
+          <div className={classes["feature-image"]}>
+            <img src={screenshotSpecies} alt="" />
+          </div>
+          <Flex direction="column">
+            <strong>Cross-species</strong>
+            <p>
+              View results in the same speices for which the model
+			  is trained or seamlessly translate to another species.
+            </p>
+          </Flex>
+        </Flex>
       </Section>
 
       <Section>
         <Heading level={2}>How it works</Heading>
         <p className="center">
-          Under the hood, GenePlexus uses sophisticated methods to make
-          predictions.
+          Under the hood, GenePlexus uses node emebddings from a six-species
+		  network to build features for a machine learning model.
         </p>
 
         <Link
