@@ -1,4 +1,4 @@
-import { FaArrowRight, FaPlus } from "react-icons/fa6";
+import { FaArrowRight, FaPlus, FaScroll } from "react-icons/fa6";
 import screenshotData from "@/assets/screenshot-data.png";
 import screenshotNetwork from "@/assets/screenshot-network.png";
 import screenshotSpecies from "@/assets/screenshot-species.png";
@@ -39,6 +39,8 @@ const HomePage = () => {
       </Section>
 
       <Section>
+        <Heading level={2}>Features</Heading>
+
         <Flex
           className={classes.feature}
           gap="lg"
@@ -96,6 +98,25 @@ const HomePage = () => {
             </p>
           </Flex>
         </Flex>
+      </Section>
+
+      <Section>
+        <Heading level={2}>How it works</Heading>
+        <p className="center">
+          Behind-the-scenes, GenePlexus uses sophisticated methods to make
+          predictions.
+        </p>
+
+        <Link
+          to="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011773"
+          showArrow={false}
+        >
+          <img
+            src="https://journals.plos.org/ploscompbiol/article/figure/image?size=large&id=10.1371/journal.pcbi.1011773.g001"
+            alt="Infographic figure from manuscript summarizing key points about GenePlexus: Six species network with over 100k genes. Within-species gene interactions + cross-species homology links. Project multi-species network into a joint feature space. Improves within-species prediction accuracy. Enables cross-species prediction."
+          />
+        </Link>
+        <Button icon={<FaScroll />} text="Read the manuscript" flip />
       </Section>
     </>
   );
