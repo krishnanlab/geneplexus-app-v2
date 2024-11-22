@@ -146,7 +146,7 @@ const AnalysisPage = () => {
                   icon={<FaDna />}
                   tooltip="More details about input genes"
                 >
-                  <InputGenes results={results} />
+                  <InputGenes inputs={inputs} results={results} />
                 </Tab>
 
                 <Tab
@@ -154,7 +154,7 @@ const AnalysisPage = () => {
                   icon={<LuLightbulb />}
                   tooltip="Predication probability of genes"
                 >
-                  <Predictions results={results} />
+                  <Predictions inputs={inputs} results={results} />
                 </Tab>
 
                 <Tab
@@ -162,7 +162,7 @@ const AnalysisPage = () => {
                   icon={<BiCopy />}
                   tooltip="Similarity of input genes with biological processes and diseases"
                 >
-                  <Similarities results={results} />
+                  <Similarities inputs={inputs} results={results} />
                 </Tab>
 
                 <Tab
@@ -178,7 +178,7 @@ const AnalysisPage = () => {
                   icon={<FaCircleDot />}
                   tooltip="Info on how neutral genes were selected"
                 >
-                  <Neutrals results={results} />
+                  <Neutrals inputs={inputs} results={results} />
                 </Tab>
               </Tabs>
             </>

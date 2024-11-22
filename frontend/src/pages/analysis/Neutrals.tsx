@@ -1,12 +1,13 @@
-import type { AnalysisResults } from "@/api/convert";
+import type { AnalysisInputs, AnalysisResults } from "@/api/convert";
 import Table from "@/components/Table";
 import { formatNumber } from "@/util/string";
 
 type Props = {
+  inputs: AnalysisInputs;
   results: AnalysisResults;
 };
 
-const Neutrals = ({ results }: Props) => {
+const Neutrals = ({ inputs, results }: Props) => {
   return (
     <>
       <div>Total: {formatNumber(results.neutralInfo.all.length)}</div>
@@ -30,6 +31,7 @@ const Neutrals = ({ results }: Props) => {
           },
         ]}
         rows={results.neutralInfo.sets}
+        filename={[inputs.name, "neutrals"]}
       />
     </>
   );

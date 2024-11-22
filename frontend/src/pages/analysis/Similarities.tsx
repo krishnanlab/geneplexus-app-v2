@@ -1,13 +1,14 @@
-import type { AnalysisResults } from "@/api/convert";
+import type { AnalysisInputs, AnalysisResults } from "@/api/convert";
 import Exponential from "@/components/Exponential";
 import Link from "@/components/Link";
 import Table from "@/components/Table";
 
 type Props = {
+  inputs: AnalysisInputs;
   results: AnalysisResults;
 };
 
-const Similarities = ({ results }: Props) => {
+const Similarities = ({ inputs, results }: Props) => {
   return (
     <>
       <p>
@@ -68,7 +69,8 @@ const Similarities = ({ results }: Props) => {
           },
         ]}
         rows={results.similarities}
-      />{" "}
+        filename={[inputs.name, "similarities"]}
+      />
     </>
   );
 };

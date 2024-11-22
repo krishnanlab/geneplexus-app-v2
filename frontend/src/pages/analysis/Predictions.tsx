@@ -1,12 +1,13 @@
-import type { AnalysisResults } from "@/api/convert";
+import type { AnalysisInputs, AnalysisResults } from "@/api/convert";
 import Exponential from "@/components/Exponential";
 import Table from "@/components/Table";
 
 type Props = {
+  inputs: AnalysisInputs;
   results: AnalysisResults;
 };
 
-const Predictions = ({ results }: Props) => {
+const Predictions = ({ inputs, results }: Props) => {
   return (
     <Table
       cols={[
@@ -65,6 +66,7 @@ const Predictions = ({ results }: Props) => {
         },
       ]}
       rows={results.predictions}
+      filename={[inputs.name, "predictions"]}
     />
   );
 };

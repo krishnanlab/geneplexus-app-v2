@@ -1,12 +1,13 @@
-import type { AnalysisResults } from "@/api/convert";
+import type { AnalysisInputs, AnalysisResults } from "@/api/convert";
 import Mark, { YesNo } from "@/components/Mark";
 import Table from "@/components/Table";
 
 type Props = {
+  inputs: AnalysisInputs;
   results: AnalysisResults;
 };
 
-const InputGenes = ({ results }: Props) => {
+const InputGenes = ({ inputs, results }: Props) => {
   return (
     <Table
       cols={[
@@ -31,6 +32,7 @@ const InputGenes = ({ results }: Props) => {
         },
       ]}
       rows={results.inputGenes}
+      filename={[inputs.name, "input genes"]}
     />
   );
 };

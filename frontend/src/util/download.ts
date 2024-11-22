@@ -1,6 +1,6 @@
 import { stringify } from "csv-stringify/browser/esm/sync";
 
-type Filename = string | string[];
+export type Filename = string | string[];
 
 /** download url as file */
 const download = (
