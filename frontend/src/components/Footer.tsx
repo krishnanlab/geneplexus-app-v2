@@ -23,7 +23,7 @@ const Footer = () => (
       </Link>
       <Link to="/about#terms-of-use">Terms of Use</Link>
       <Link
-        to="https://github.com/krishnanlab/geneplexus-app-v2/blob/main/LICENSE.md"
+        to="https://pygeneplexus.readthedocs.io/en/latest/appendix/license.html"
         showArrow={false}
       >
         License

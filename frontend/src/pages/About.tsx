@@ -66,21 +66,21 @@ const AboutPage = () => {
               flip
             />
             <Button
-              to="https://pygeneplexus.readthedocs.io/en/main/"
+              to="https://pygeneplexus.readthedocs.io/en/latest/"
               text="Docs"
               icon={<FaBook />}
               tooltip="Detailed information on how to use the package and how to interpret results"
               flip
             />
             <Button
-              to="https://academic.oup.com/bioinformatics/article/36/11/3457/5780279"
+              to="https://doi.org/10.1371/journal.pcbi.1011773"
               text="Paper"
               icon={<FaScroll />}
               tooltip="Detailed discussion of methods and background information"
               flip
             />
             <Button
-              to="https://zenodo.org/records/6383205"
+              to="https://doi.org/10.5281/zenodo.14149956"
               text="Data"
               icon={<FaChartBar />}
               tooltip="Raw data behind the package and analyses"
