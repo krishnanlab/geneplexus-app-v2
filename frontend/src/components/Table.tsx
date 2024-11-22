@@ -522,7 +522,7 @@ const Table = <Datum extends object>({ cols, rows, sort }: Props<Datum>) => {
                 .rows.map((row) => Object.values(pick(row.original, keys)));
 
               /** download */
-              downloadCsv([names, ...data], ["geneplexus", "table"]);
+              downloadCsv([names, ...data], "table");
             }}
           />
           {/* expand/collapse */}

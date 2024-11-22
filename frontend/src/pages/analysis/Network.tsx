@@ -620,7 +620,7 @@ const Network = ({ inputs, results }: Props) => {
             const element = svgRef.current;
             if (!element) return;
             const { width, height } = element.getBoundingClientRect();
-            downloadSvg(element, inputs.name, {
+            downloadSvg(element, [inputs.name, "network"], {
               /** fit viewbox to client-dimensions */
               viewBox: [0, 0, width, height].join(" "),
               style: "font-family: sans-serif;",

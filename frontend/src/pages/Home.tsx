@@ -1,7 +1,7 @@
-import { FaArrowRight, FaPlus, FaScroll } from "react-icons/fa6";
+import { FaArrowRight, FaPlus } from "react-icons/fa6";
 import screenshotPreds from "@/assets/preds.png";
-import screenshotSims from "@/assets/sims.png";
 import screenshotNetwork from "@/assets/screenshot-network.png";
+import screenshotSims from "@/assets/sims.png";
 import screenshotSpecies from "@/assets/species.png";
 import Button from "@/components/Button";
 import Flex from "@/components/Flex";
@@ -55,8 +55,8 @@ const HomePage = () => {
           <Flex direction="column">
             <strong>Genome-wide Predictions</strong>
             <p>
-              A <b>custom model</b> trained on your genes lets you prioritize
-              the gene list and predict gene assocaited with your gene list.
+              A <b>custom model</b> trained on your gene list lets you
+              prioritize it and predict other genes associated with it.
             </p>
           </Flex>
         </Flex>
@@ -74,7 +74,8 @@ const HomePage = () => {
           <Flex direction="column">
             <strong>Model Interpretability</strong>
             <p>
-              Compare the user trained model to known biology.
+              Compare the custom trained model to known biological processes and
+              phenotypes.
             </p>
           </Flex>
         </Flex>
@@ -97,7 +98,7 @@ const HomePage = () => {
             </p>
           </Flex>
         </Flex>
-		
+
         <Flex
           className={classes.feature}
           gap="lg"
@@ -111,8 +112,8 @@ const HomePage = () => {
           <Flex direction="column">
             <strong>Cross-species</strong>
             <p>
-              View results in the same speices for which the model
-			  is trained or seamlessly translate to another species.
+              View results in the same species the model is trained for or
+              seamlessly translate to another species.
             </p>
           </Flex>
         </Flex>
@@ -121,8 +122,13 @@ const HomePage = () => {
       <Section>
         <Heading level={2}>How it works</Heading>
         <p className="center">
-          Under the hood, GenePlexus uses node emebddings from a six-species
-		  network to build features for a machine learning model.
+          Under the hood, GenePlexus uses sophisticated methods to analyze
+          users' input genes. Node embeddings from a six-species network are
+          used to build features for a custom machine learning model.{" "}
+          <Link to="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011773">
+            Learn more in the manuscript
+          </Link>
+          .
         </p>
 
         <Link
@@ -134,13 +140,6 @@ const HomePage = () => {
             alt="Infographic figure from manuscript summarizing key points about GenePlexus: Six species network with over 100k genes. Within-species gene interactions + cross-species homology links. Project multi-species network into a joint feature space. Improves within-species prediction accuracy. Enables cross-species prediction."
           />
         </Link>
-
-        <Button
-          to="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011773"
-          icon={<FaScroll />}
-          text="Read the manuscript"
-          flip
-        />
       </Section>
     </>
   );
