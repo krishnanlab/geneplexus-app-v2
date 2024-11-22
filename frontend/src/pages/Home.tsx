@@ -103,7 +103,7 @@ const HomePage = () => {
       <Section>
         <Heading level={2}>How it works</Heading>
         <p className="center">
-          Behind-the-scenes, GenePlexus uses sophisticated methods to make
+          Under the hood, GenePlexus uses sophisticated methods to make
           predictions.
         </p>
 
@@ -116,7 +116,13 @@ const HomePage = () => {
             alt="Infographic figure from manuscript summarizing key points about GenePlexus: Six species network with over 100k genes. Within-species gene interactions + cross-species homology links. Project multi-species network into a joint feature space. Improves within-species prediction accuracy. Enables cross-species prediction."
           />
         </Link>
-        <Button icon={<FaScroll />} text="Read the manuscript" flip />
+
+        <Button
+          to="https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1011773"
+          icon={<FaScroll />}
+          text="Read the manuscript"
+          flip
+        />
       </Section>
     </>
   );
