@@ -19,14 +19,7 @@ const InputGenes = ({ inputs, results }: Props) => {
         {
           key: "entrez",
           name: "Entrez ID",
-          render: (cell) =>
-            cell ? (
-              <Link to={`https://www.ncbi.nlm.nih.gov/gene/${cell}`}>
-                {cell}
-              </Link>
-            ) : (
-              <Mark type="error">Failed</Mark>
-            ),
+          render: RenderEntrez,
         },
         {
           key: "name",
@@ -46,3 +39,22 @@ const InputGenes = ({ inputs, results }: Props) => {
 };
 
 export default InputGenes;
+
+/** render entrez id with link-out */
+export const RenderEntrez = (id: string) =>
+  id ? (
+    <Link to={`https://www.ncbi.nlm.nih.gov/gene/${id}`}>{id}</Link>
+  ) : (
+    <Mark type="error">Failed</Mark>
+  );
+
+/** render other id with link-out */
+export const RenderID = (id: string) => {
+  let link = "";
+  if (id.startsWith("GO:"))
+    link = `https://amigo.geneontology.org/amigo/term/${id}`;
+  if (id.startsWith("DOID:")) link = `https://disease-ontology.org/?id=${id}`;
+  if (["MONDO:", "HP:", "MP:"].some((prefix) => id.startsWith(prefix)))
+    link = `https://monarchinitiative.org/${id}`;
+  return <Link to={link}>{id}</Link>;
+};

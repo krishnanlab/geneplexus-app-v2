@@ -28,7 +28,6 @@ import Collapsible from "@/components/Collapsible";
 import Flex from "@/components/Flex";
 import Heading from "@/components/Heading";
 import Help from "@/components/Help";
-import Link from "@/components/Link";
 import Mark, { YesNo } from "@/components/Mark";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
@@ -39,6 +38,7 @@ import Tabs, { Tab } from "@/components/Tabs";
 import TextBox from "@/components/TextBox";
 import { toast } from "@/components/Toasts";
 import UploadButton from "@/components/UploadButton";
+import { RenderID } from "@/pages/analysis/InputGenes";
 import { scrollTo } from "@/util/dom";
 import { useQuery } from "@/util/hooks";
 import { formatNumber } from "@/util/string";
@@ -501,14 +501,7 @@ const NewAnalysisPage = () => {
                   {
                     key: "entrez",
                     name: "Entrez ID",
-                    render: (cell) =>
-                      cell ? (
-                        <Link to={`https://www.ncbi.nlm.nih.gov/gene/${cell}`}>
-                          {cell}
-                        </Link>
-                      ) : (
-                        <Mark type="error">Failed</Mark>
-                      ),
+                    render: RenderID,
                   },
                   {
                     key: "inNetwork",

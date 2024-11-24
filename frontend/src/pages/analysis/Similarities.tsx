@@ -2,6 +2,7 @@ import type { AnalysisInputs, AnalysisResults } from "@/api/convert";
 import Exponential from "@/components/Exponential";
 import Link from "@/components/Link";
 import Table from "@/components/Table";
+import { RenderID } from "@/pages/analysis/InputGenes";
 
 type Props = {
   inputs: AnalysisInputs;
@@ -34,7 +35,7 @@ const Similarities = ({ inputs, results }: Props) => {
           {
             key: "id",
             name: "ID",
-            render: ExternalID,
+            render: RenderID,
           },
           {
             key: "name",
@@ -69,13 +70,3 @@ const Similarities = ({ inputs, results }: Props) => {
 };
 
 export default Similarities;
-
-export const ExternalID = (id: string) => {
-  let link = "";
-  if (id.startsWith("GO:"))
-    link = `https://amigo.geneontology.org/amigo/term/${id}`;
-  if (id.startsWith("DOID:")) link = `https://disease-ontology.org/?id=${id}`;
-  if (["MONDO:", "HP:", "MP:"].some((prefix) => id.startsWith(prefix)))
-    link = `https://monarchinitiative.org/${id}`;
-  return <Link to={link}>{id}</Link>;
-};
