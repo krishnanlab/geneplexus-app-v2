@@ -1,4 +1,5 @@
 import type { AnalysisInputs, AnalysisResults } from "@/api/convert";
+import Link from "@/components/Link";
 import Mark, { YesNo } from "@/components/Mark";
 import Table from "@/components/Table";
 
@@ -18,7 +19,14 @@ const InputGenes = ({ inputs, results }: Props) => {
         {
           key: "entrez",
           name: "Entrez ID",
-          render: (cell) => cell || <Mark type="error">Failed</Mark>,
+          render: (cell) =>
+            cell ? (
+              <Link to={`https://www.ncbi.nlm.nih.gov/gene/${cell}`}>
+                {cell}
+              </Link>
+            ) : (
+              <Mark type="error">Failed</Mark>
+            ),
         },
         {
           key: "name",

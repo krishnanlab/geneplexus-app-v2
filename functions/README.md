@@ -45,8 +45,3 @@ folders as mentioned above.
 - `/gpz-ml`
 
 See types and comments of what inputs these endpoints accept and what results/outputs they return in [`/frontend/src/api/types.ts`](../frontend/src/api/types.ts).
-
-Notes:
-
-- BioGRID does not support Zebrafish.
-- Mondo only supports Human genes.

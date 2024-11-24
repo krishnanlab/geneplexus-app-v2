@@ -1,8 +1,9 @@
 import { FaArrowRight, FaPlus } from "react-icons/fa6";
-import screenshotPreds from "@/assets/preds.png";
-import screenshotNetwork from "@/assets/screenshot-network.png";
-import screenshotSims from "@/assets/sims.png";
-import screenshotSpecies from "@/assets/species.png";
+import highlightNetwork from "@/assets/highlight-network.png";
+import highlightPredictions from "@/assets/highlight-predictions.png";
+import highlightSimilarities from "@/assets/highlight-similarities.png";
+import highlightSpecies from "@/assets/highlight-species.png";
+import overview from "@/assets/overview.png";
 import Button from "@/components/Button";
 import Flex from "@/components/Flex";
 import Heading from "@/components/Heading";
@@ -50,7 +51,7 @@ const HomePage = () => {
           full
         >
           <div className={classes["feature-image"]}>
-            <img src={screenshotPreds} alt="" />
+            <img src={highlightPredictions} alt="" />
           </div>
           <Flex direction="column">
             <strong>Genome-wide Predictions</strong>
@@ -69,7 +70,7 @@ const HomePage = () => {
           full
         >
           <div className={classes["feature-image"]}>
-            <img src={screenshotSims} alt="" />
+            <img src={highlightSimilarities} alt="" />
           </div>
           <Flex direction="column">
             <strong>Model Interpretability</strong>
@@ -88,7 +89,7 @@ const HomePage = () => {
           full
         >
           <div className={classes["feature-image"]}>
-            <img src={screenshotNetwork} alt="" />
+            <img src={highlightNetwork} alt="" />
           </div>
           <Flex direction="column">
             <strong>Interactive Network</strong>
@@ -107,7 +108,7 @@ const HomePage = () => {
           full
         >
           <div className={classes["feature-image"]}>
-            <img src={screenshotSpecies} alt="" />
+            <img src={highlightSpecies} alt="" />
           </div>
           <Flex direction="column">
             <strong>Cross-species</strong>
@@ -136,7 +137,7 @@ const HomePage = () => {
           showArrow={false}
         >
           <img
-            src="https://journals.plos.org/ploscompbiol/article/figure/image?size=large&id=10.1371/journal.pcbi.1011773.g001"
+            src={overview}
             alt="Infographic figure from manuscript summarizing key points about GenePlexus: Six species network with over 100k genes. Within-species gene interactions + cross-species homology links. Project multi-species network into a joint feature space. Improves within-species prediction accuracy. Enables cross-species prediction."
           />
         </Link>

@@ -127,7 +127,7 @@ const NewAnalysisPage = () => {
 
   /** selected species */
   const [speciesTrain, setSpeciesTrain] = useState(speciesOptions[0]!.id);
-  const [speciesTest, setSpeciesTest] = useState(speciesOptions[0]!.id);
+  const [speciesResult, setSpeciesResult] = useState(speciesOptions[0]!.id);
 
   /** selected network type */
   const [network, setNetwork] = useState(networkOptions[0]!.id);
@@ -139,7 +139,7 @@ const NewAnalysisPage = () => {
 
   /** update meta counts */
   networkOptions.forEach((option) => {
-    const { nodes, edges } = meta[speciesTest][option.id];
+    const { nodes, edges } = meta[speciesResult][option.id];
     option.secondary = (
       <>
         {formatNumber(nodes, true)}
@@ -208,7 +208,7 @@ const NewAnalysisPage = () => {
           genes: splitGenes,
           negatives: splitNegatives,
           speciesTrain,
-          speciesTest,
+          speciesResult,
           network,
           genesetContext,
         } satisfies AnalysisInputs,
@@ -216,28 +216,45 @@ const NewAnalysisPage = () => {
     });
   };
 
-  /** restrict species options based on other params */
-  const filteredSpeciesOptions = speciesOptions.filter((option) => {
-    if (network === "BioGRID" && option.id === "Zebrafish") return false;
-    if (genesetContext === "Mondo" && option.id !== "Human") return false;
+  /** restrict options based on species */
+  const filteredNetworkOptions = networkOptions.filter((option) => {
+    if (
+      option.id === "BioGRID" &&
+      (speciesTrain === "Zebrafish" || speciesResult === "Zebrafish")
+    )
+      return false;
     return true;
   });
+  const filteredGenesetContextOptions = genesetContextOptions.filter(
+    (option) => {
+      if (
+        (option.id === "Combined" || option.id === "Monarch") &&
+        (speciesTrain === "Fly" || speciesResult === "Fly")
+      )
+        return false;
+      if (
+        option.id === "Mondo" &&
+        (speciesTrain !== "Human" || speciesResult !== "Human")
+      )
+        return false;
+      return true;
+    },
+  );
 
-  /** warn about param restrictions */
+  /** warn about option restrictions */
   if (
-    network === "BioGRID" &&
-    (speciesTrain === "Zebrafish" || speciesTest === "Zebrafish")
+    filteredNetworkOptions.length < networkOptions.length ||
+    filteredGenesetContextOptions.length < genesetContextOptions.length
   )
-    toast("BioGRID does not support Zebrafish.", "warning", "warn1");
-  if (
-    genesetContext === "Mondo" &&
-    (speciesTrain !== "Human" || speciesTest !== "Human")
-  )
-    toast("Mondo only supports Human genes.", "warning", "warn2");
+    toast(
+      "Selected options changed to be compatible with selected species",
+      "warning",
+      "warn",
+    );
 
   /** auto-select species */
   useEffect(() => {
-    setSpeciesTest(speciesTrain);
+    setSpeciesResult(speciesTrain);
   }, [speciesTrain]);
 
   /**
@@ -252,7 +269,7 @@ const NewAnalysisPage = () => {
       genes,
       negatives,
       speciesTrain,
-      speciesTest,
+      speciesResult,
       network,
       genesetContext,
       ...rest
@@ -269,7 +286,7 @@ const NewAnalysisPage = () => {
     setNegatives(negatives.join(", "));
     setName(name);
     setSpeciesTrain(speciesTrain);
-    setSpeciesTest(speciesTest);
+    setSpeciesResult(speciesResult);
     setNetwork(network);
     setGenesetContext(genesetContext);
   });
@@ -293,11 +310,11 @@ const NewAnalysisPage = () => {
             label="Input Species"
             tooltip="Species to lookup genes against and train model with."
             layout="horizontal"
-            options={filteredSpeciesOptions}
+            options={speciesOptions}
             value={speciesTrain}
             onChange={(value) => {
               setSpeciesTrain(value);
-              setSpeciesTest(value);
+              setSpeciesResult(value);
             }}
           />
 
@@ -307,9 +324,9 @@ const NewAnalysisPage = () => {
             label="Results Species"
             tooltip="Species for which model predictions will be made. If different from input species, model results will be translated into this species."
             layout="horizontal"
-            options={filteredSpeciesOptions}
-            value={speciesTest}
-            onChange={setSpeciesTest}
+            options={speciesOptions}
+            value={speciesResult}
+            onChange={setSpeciesResult}
           />
         </Flex>
       </Section>
@@ -378,14 +395,14 @@ const NewAnalysisPage = () => {
               value={network}
               onChange={setNetwork}
               label="Network"
-              options={networkOptions}
+              options={filteredNetworkOptions}
               tooltip="Network that machine learning features are from and which edge list is used to make final graph."
             />
             <SelectSingle
               value={genesetContext}
               onChange={setGenesetContext}
               label="Geneset Context"
-              options={genesetContextOptions}
+              options={filteredGenesetContextOptions}
               tooltip="Source used to select negative genes and which sets to compare trained model to"
             />
           </Flex>
@@ -400,10 +417,6 @@ const NewAnalysisPage = () => {
             tooltip="Genes to be used as negative training examples, in addition to those automatically selected by our algorithm."
           />
         </Collapsible>
-
-        <Link to="https://pygeneplexus.readthedocs.io/en/main/supp/guidelines.html">
-          Learn more
-        </Link>
       </Section>
 
       <Section>
@@ -488,7 +501,14 @@ const NewAnalysisPage = () => {
                   {
                     key: "entrez",
                     name: "Entrez ID",
-                    render: (cell) => cell || <Mark type="error">Failed</Mark>,
+                    render: (cell) =>
+                      cell ? (
+                        <Link to={`https://www.ncbi.nlm.nih.gov/gene/${cell}`}>
+                          {cell}
+                        </Link>
+                      ) : (
+                        <Mark type="error">Failed</Mark>
+                      ),
                   },
                   {
                     key: "inNetwork",

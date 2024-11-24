@@ -45,7 +45,8 @@ import SelectSingle from "@/components/SelectSingle";
 import Slider from "@/components/Slider";
 import TextBox from "@/components/TextBox";
 import Tooltip from "@/components/Tooltip";
-import { downloadCsv, type Filename } from "@/util/download";
+import { downloadCsv } from "@/util/download";
+import type { Filename } from "@/util/download";
 import { formatDate, formatNumber } from "@/util/string";
 import classes from "./Table.module.css";
 

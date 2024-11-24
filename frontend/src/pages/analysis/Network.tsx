@@ -15,8 +15,9 @@ import {
 } from "react-icons/fa6";
 import clsx from "clsx";
 import * as d3 from "d3";
+import domtoimage from "dom-to-image";
 import { clamp, cloneDeep, truncate } from "lodash";
-import { useElementSize } from "@reactuses/core";
+import { useElementSize, useMeasure } from "@reactuses/core";
 import type { AnalysisInputs, AnalysisResults } from "@/api/convert";
 import Button from "@/components/Button";
 import CheckBox from "@/components/CheckBox";
@@ -25,7 +26,7 @@ import type { Option } from "@/components/SelectSingle";
 import SelectSingle from "@/components/SelectSingle";
 import Slider from "@/components/Slider";
 import { theme } from "@/util/dom";
-import { downloadSvg } from "@/util/download";
+import { downloadPng, downloadSvg } from "@/util/download";
 import { lerp } from "@/util/math";
 import { formatNumber } from "@/util/string";
 import classes from "./Network.module.css";
@@ -377,6 +378,9 @@ const Network = ({ inputs, results }: Props) => {
     setAutoFit(true);
   }, [svgSizeDeep, fitZoom]);
 
+  /** client dimensions of svg */
+  const [{ width, height }] = useMeasure(svgRef);
+
   return (
     <>
       {/* filters */}
@@ -410,189 +414,195 @@ const Network = ({ inputs, results }: Props) => {
         />
       </Flex>
 
-      {/* svg viz */}
-      <svg
-        ref={(el) => {
-          svgRef.current = el;
-          if (el) {
-            const svg = d3.select(el);
-            /** attach zoom behavior */
-            zoom(d3.select(el));
-            svg
-              /** auto-fit on dbl click */
-              .on("dblclick.zoom", () => {
-                fitZoom();
-                setAutoFit(true);
-              });
-          }
-        }}
-        className={clsx("expanded", classes.svg)}
-        onClick={(event) => {
-          /** clear selected if svg was direct click target */
-          if ((event.target as Element).matches("svg"))
-            setSelectedNode(undefined);
-        }}
-      >
-        {/* zoom camera */}
-        <g ref={zoomRef}>
-          {/* edges */}
-          <g
-            stroke={edgeColor}
-            strokeWidth={lerp(
-              edges.length,
-              500,
-              0,
-              nodeRadius / 50,
-              nodeRadius / 10,
-            )}
-            pointerEvents="none"
-          >
-            {edges.map((edge, index) => {
-              /** is edge connected to selected node */
-              const selected = selectedNode
-                ? edge.source === selectedNode.entrez ||
-                  edge.target === selectedNode.entrez
-                : undefined;
-              return (
-                <line
-                  ref={(el) => {
-                    if (el) edgeRefs.current.set(index, el);
-                    else edgeRefs.current.delete(index);
-                  }}
+      {/* https://github.com/1904labs/dom-to-image-more/issues/201 */}
+      <div>
+        {/* svg viz */}
+        <svg
+          ref={(el) => {
+            svgRef.current = el;
+            if (el) {
+              const svg = d3.select(el);
+              /** attach zoom behavior */
+              zoom(d3.select(el));
+              svg
+                /** auto-fit on dbl click */
+                .on("dblclick.zoom", () => {
+                  fitZoom();
+                  setAutoFit(true);
+                });
+            }
+          }}
+          viewBox={[0, 0, width, height].join(" ")}
+          className={clsx("expanded", classes.svg)}
+          onClick={(event) => {
+            /** clear selected if svg was direct click target */
+            if ((event.target as Element).matches("svg"))
+              setSelectedNode(undefined);
+          }}
+        >
+          {/* zoom camera */}
+          <g ref={zoomRef}>
+            {/* edges */}
+            <g
+              stroke={edgeColor}
+              strokeWidth={lerp(
+                edges.length,
+                500,
+                0,
+                nodeRadius / 50,
+                nodeRadius / 10,
+              )}
+              pointerEvents="none"
+            >
+              {edges.map((edge, index) => {
+                /** is edge connected to selected node */
+                const selected = selectedNode
+                  ? edge.source === selectedNode.entrez ||
+                    edge.target === selectedNode.entrez
+                  : undefined;
+                return (
+                  <line
+                    ref={(el) => {
+                      if (el) edgeRefs.current.set(index, el);
+                      else edgeRefs.current.delete(index);
+                    }}
+                    key={index}
+                    stroke={
+                      selected === true
+                        ? selectedEdgeColor
+                        : selected === false
+                          ? "transparent"
+                          : ""
+                    }
+                    strokeWidth={edge.weight / 2}
+                  />
+                );
+              })}
+            </g>
+
+            {/* node circles */}
+            <g cursor="pointer">
+              {nodes.map((node, index) => (
+                <circle
                   key={index}
+                  ref={(el) => {
+                    if (el) {
+                      circleRefs.current.set(index, el);
+                      /** attach drag behavior */
+                      drag(d3.select(el).data([index]));
+                    } else circleRefs.current.delete(index);
+                  }}
+                  className={classes.node}
+                  r={lerp(
+                    node.rank,
+                    1,
+                    nodes.length + 1,
+                    nodeRadius,
+                    nodeRadius / 2,
+                  )}
+                  fill={nodeColors[node.classLabel || "Node"]}
                   stroke={
-                    selected === true
-                      ? selectedEdgeColor
-                      : selected === false
-                        ? "transparent"
-                        : ""
+                    node.entrez === selectedNode?.entrez ? theme("--black") : ""
                   }
-                  strokeWidth={edge.weight / 2}
+                  tabIndex={0}
+                  onClick={() => setSelectedNode(node)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") setSelectedNode(node);
+                  }}
+                  aria-label={`Node rank ${node.rank}, ${node.symbol} ${node.name}, probability ${formatNumber(node.probability)}`}
                 />
-              );
-            })}
+              ))}
+            </g>
+
+            {/* node labels */}
+            <g
+              strokeWidth={nodeRadius / 20}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              paintOrder="stroke"
+              fontSize={nodeRadius / 1.5}
+              textAnchor="middle"
+              dominantBaseline="central"
+              pointerEvents="none"
+            >
+              {nodes.map((node, index) => (
+                <text
+                  key={index}
+                  ref={(el) => {
+                    if (el) labelRefs.current.set(index, el);
+                    else labelRefs.current.delete(index);
+                  }}
+                  stroke={nodeColors[node.classLabel]}
+                >
+                  {(() => {
+                    const label = node[labelKey];
+                    return typeof label === "number"
+                      ? formatNumber(label)
+                      : label;
+                  })()}
+                </text>
+              ))}
+            </g>
           </g>
 
-          {/* node circles */}
-          <g cursor="pointer">
-            {nodes.map((node, index) => (
-              <circle
-                key={index}
-                ref={(el) => {
-                  if (el) {
-                    circleRefs.current.set(index, el);
-                    /** attach drag behavior */
-                    drag(d3.select(el).data([index]));
-                  } else circleRefs.current.delete(index);
-                }}
-                className={classes.node}
-                r={lerp(
-                  node.rank,
-                  1,
-                  nodes.length + 1,
-                  nodeRadius,
-                  nodeRadius / 2,
-                )}
-                fill={nodeColors[node.classLabel || "Node"]}
-                stroke={
-                  node.entrez === selectedNode?.entrez ? theme("--black") : ""
-                }
-                tabIndex={0}
-                onClick={() => setSelectedNode(node)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") setSelectedNode(node);
-                }}
-                aria-label={`Node rank ${node.rank}, ${node.symbol} ${node.name}, probability ${formatNumber(node.probability)}`}
-              />
-            ))}
-          </g>
+          {/* legend */}
+          <g ref={legendRef}>
+            {/* background */}
+            <rect fill={theme("--white")} stroke={theme("--light-gray")} />
 
-          {/* node labels */}
-          <g
-            strokeWidth={nodeRadius / 20}
-            strokeLinejoin="round"
-            strokeLinecap="round"
-            paintOrder="stroke"
-            fontSize={nodeRadius / 1.5}
-            textAnchor="middle"
-            dominantBaseline="central"
-            pointerEvents="none"
-          >
-            {nodes.map((node, index) => (
-              <text
-                key={index}
-                ref={(el) => {
-                  if (el) labelRefs.current.set(index, el);
-                  else labelRefs.current.delete(index);
-                }}
-                stroke={nodeColors[node.classLabel]}
-              >
-                {(() => {
-                  const label = node[labelKey];
-                  return typeof label === "number"
-                    ? formatNumber(label)
-                    : label;
-                })()}
-              </text>
-            ))}
-          </g>
-        </g>
+            {/* info */}
+            {legend?.map((group) => {
+              /** small gap between groups */
+              legendLine += 0.5;
 
-        {/* legend */}
-        <g ref={legendRef}>
-          {/* background */}
-          <rect fill={theme("--white")} stroke={theme("--light-gray")} />
+              return group.map(([key, value]) => {
+                /** new line */
+                legendLine++;
 
-          {/* info */}
-          {legend?.map((group) => {
-            /** small gap between groups */
-            legendLine += 0.5;
+                /** is colored icon to show */
+                const icon = key.startsWith("#") || key.startsWith("hsl");
+                /** line y */
+                const y = legendLine * legendCell * legendSpacing;
 
-            return group.map(([key, value]) => {
-              /** new line */
-              legendLine++;
-
-              /** is colored icon to show */
-              const icon = key.startsWith("#") || key.startsWith("hsl");
-              /** line y */
-              const y = legendLine * legendCell * legendSpacing;
-
-              return (
-                <Fragment key={y}>
-                  {icon ? (
-                    <circle
-                      cx={legendCell * legendSpacing}
-                      cy={y}
-                      r={legendCell / 1.2}
-                      fill={key}
-                    />
-                  ) : (
+                return (
+                  <Fragment key={y}>
+                    {icon ? (
+                      <circle
+                        cx={legendCell * legendSpacing}
+                        cy={y}
+                        r={legendCell / 1.2}
+                        fill={key}
+                      />
+                    ) : (
+                      <text
+                        x={legendCell}
+                        y={y}
+                        fontSize={legendCell}
+                        dominantBaseline="central"
+                        fill={theme("--dark-gray")}
+                      >
+                        {key}
+                      </text>
+                    )}
                     <text
-                      x={legendCell}
+                      x={
+                        icon
+                          ? legendCell * legendSpacing * 1.75
+                          : legendCell * 5
+                      }
                       y={y}
                       fontSize={legendCell}
                       dominantBaseline="central"
-                      fill={theme("--dark-gray")}
                     >
-                      {key}
+                      {truncate(value, { length: 20 })}
                     </text>
-                  )}
-                  <text
-                    x={
-                      icon ? legendCell * legendSpacing * 1.75 : legendCell * 5
-                    }
-                    y={y}
-                    fontSize={legendCell}
-                    dominantBaseline="central"
-                  >
-                    {truncate(value, { length: 20 })}
-                  </text>
-                </Fragment>
-              );
-            });
-          })}
-        </g>
-      </svg>
+                  </Fragment>
+                );
+              });
+            })}
+          </g>
+        </svg>
+      </div>
 
       {/* controls */}
       <Flex>
@@ -619,12 +629,26 @@ const Network = ({ inputs, results }: Props) => {
           onClick={() => {
             const element = svgRef.current;
             if (!element) return;
-            const { width, height } = element.getBoundingClientRect();
             downloadSvg(element, [inputs.name, "network"], {
-              /** fit viewbox to client-dimensions */
-              viewBox: [0, 0, width, height].join(" "),
               style: "font-family: sans-serif;",
             });
+          }}
+        />
+
+        <Button
+          icon={<FaDownload />}
+          text="PNG"
+          tooltip="Download visualization as PNG"
+          onClick={async () => {
+            const element = svgRef.current;
+            if (!element) return;
+            await downloadPng(
+              await domtoimage.toPng(element.closest("div")!, {
+                // @ts-expect-error "more" type defs missing
+                scale: 2,
+              }),
+              "network",
+            );
           }}
         />
       </Flex>

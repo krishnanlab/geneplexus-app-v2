@@ -34,14 +34,7 @@ const Similarities = ({ inputs, results }: Props) => {
           {
             key: "id",
             name: "ID",
-            render: (cell) => {
-              let link = "";
-              if (cell.startsWith("GO:"))
-                link = `https://amigo.geneontology.org/amigo/term/GO%3A${cell}`;
-              if (cell.startsWith("DOID:"))
-                link = `https://disease-ontology.org/?id=DOID%3A${cell}`;
-              return <Link to={link}>{cell}</Link>;
-            },
+            render: ExternalID,
           },
           {
             key: "name",
@@ -76,3 +69,13 @@ const Similarities = ({ inputs, results }: Props) => {
 };
 
 export default Similarities;
+
+export const ExternalID = (id: string) => {
+  let link = "";
+  if (id.startsWith("GO:"))
+    link = `https://amigo.geneontology.org/amigo/term/${id}`;
+  if (id.startsWith("DOID:")) link = `https://disease-ontology.org/?id=${id}`;
+  if (["MONDO:", "HP:", "MP:"].some((prefix) => id.startsWith(prefix)))
+    link = `https://monarchinitiative.org/${id}`;
+  return <Link to={link}>{id}</Link>;
+};

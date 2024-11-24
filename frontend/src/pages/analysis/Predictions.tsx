@@ -1,5 +1,6 @@
 import type { AnalysisInputs, AnalysisResults } from "@/api/convert";
 import Exponential from "@/components/Exponential";
+import Link from "@/components/Link";
 import Table from "@/components/Table";
 
 type Props = {
@@ -19,6 +20,9 @@ const Predictions = ({ inputs, results }: Props) => {
         {
           key: "entrez",
           name: "Entrez",
+          render: (cell) => (
+            <Link to={`https://www.ncbi.nlm.nih.gov/gene/${cell}`}>{cell}</Link>
+          ),
         },
         {
           key: "symbol",

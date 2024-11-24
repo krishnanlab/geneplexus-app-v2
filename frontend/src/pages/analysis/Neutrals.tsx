@@ -1,5 +1,6 @@
 import type { AnalysisInputs, AnalysisResults } from "@/api/convert";
 import Table from "@/components/Table";
+import { ExternalID } from "@/pages/analysis/Similarities";
 import { formatNumber } from "@/util/string";
 
 type Props = {
@@ -16,6 +17,7 @@ const Neutrals = ({ inputs, results }: Props) => {
           {
             key: "Id",
             name: "ID",
+            render: ExternalID,
           },
           {
             key: "Name",

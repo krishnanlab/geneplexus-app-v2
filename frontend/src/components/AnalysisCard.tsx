@@ -27,8 +27,8 @@ const AnalysisCard = ({ inputs, children }: Props) => {
         <span>{carve(inputs.genes, 6).join(" ")}</span>
         <span>Train Species</span>
         <span>{inputs.speciesTrain}</span>
-        <span>Test Species</span>
-        <span>{inputs.speciesTest}</span>
+        <span>Result Species</span>
+        <span>{inputs.speciesResult}</span>
         <span>Network</span>
         <span>{inputs.network}</span>
         <span>Geneset Ctx.</span>
