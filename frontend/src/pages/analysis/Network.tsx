@@ -15,7 +15,7 @@ import {
 } from "react-icons/fa6";
 import clsx from "clsx";
 import * as d3 from "d3";
-import domtoimage from "dom-to-image";
+import domtoimage from "dom-to-image-more";
 import { clamp, cloneDeep, truncate } from "lodash";
 import { useElementSize, useMeasure } from "@reactuses/core";
 import type { AnalysisInputs, AnalysisResults } from "@/api/convert";
