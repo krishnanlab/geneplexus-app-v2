@@ -28,6 +28,7 @@ import Collapsible from "@/components/Collapsible";
 import Flex from "@/components/Flex";
 import Heading from "@/components/Heading";
 import Help from "@/components/Help";
+import Link from "@/components/Link";
 import Mark, { YesNo } from "@/components/Mark";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
@@ -86,7 +87,7 @@ const genesetContextOptions: SelectOption<GenesetContext>[] = [
   {
     id: "Combined",
     primary: "Combined",
-    secondary: "All sets",
+    secondary: "All avail. sets",
   },
   {
     id: "GO",
@@ -216,7 +217,8 @@ const NewAnalysisPage = () => {
     });
   };
 
-  /** restrict options based on species */
+  /** limit options based on species */
+  /** https://pygeneplexus.readthedocs.io/en/latest/notes/data.html#preprocessed-data */
   const filteredNetworkOptions = networkOptions.filter((option) => {
     if (
       option.id === "BioGRID" &&
@@ -228,8 +230,8 @@ const NewAnalysisPage = () => {
   const filteredGenesetContextOptions = genesetContextOptions.filter(
     (option) => {
       if (
-        (option.id === "Combined" || option.id === "Monarch") &&
-        (speciesTrain === "Fly" || speciesResult === "Fly")
+        (speciesTrain === "Fly" || speciesResult === "Fly") &&
+        (option.id === "Monarch" || option.id === "Mondo")
       )
         return false;
       if (
@@ -241,13 +243,25 @@ const NewAnalysisPage = () => {
     },
   );
 
-  /** warn about option restrictions */
+  /**
+   * when selected option is removed, select component will auto-select first
+   * available option
+   */
   if (
-    filteredNetworkOptions.length < networkOptions.length ||
-    filteredGenesetContextOptions.length < genesetContextOptions.length
+    !filteredNetworkOptions.find((option) => option.id === network) ||
+    !filteredGenesetContextOptions.find(
+      (option) => option.id === genesetContext,
+    )
   )
+    /** warn about incompatible option */
     toast(
-      "Selected options changed to be compatible with selected species",
+      <>
+        Selected options changed to be compatible with selected species.{" "}
+        <Link to="https://pygeneplexus.readthedocs.io/en/latest/notes/data.html">
+          Learn more
+        </Link>
+        .
+      </>,
       "warning",
       "warn",
     );
