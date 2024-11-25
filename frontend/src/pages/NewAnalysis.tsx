@@ -417,9 +417,29 @@ const NewAnalysisPage = () => {
               onChange={setGenesetContext}
               label="Geneset Context"
               options={filteredGenesetContextOptions}
-              tooltip="Source used to select negative genes and which sets to compare trained model to"
+              tooltip={
+                <>
+                  <div>
+                    Source used to select negative genes and which sets to
+                    compare trained model to.
+                  </div>
+                  <div>
+                    <i>Combined</i> = union of all{" "}
+                    {filteredGenesetContextOptions.length - 1} geneset(s)
+                    available for selected species:{" "}
+                    {filteredGenesetContextOptions
+                      .slice(1)
+                      .map((option) => option.primary)
+                      .join(", ")}
+                  </div>
+                </>
+              }
             />
           </Flex>
+
+          <Link to="https://pygeneplexus.readthedocs.io/en/latest/notes/data.html">
+            Learn more
+          </Link>
 
           <TextBox
             className="full"
