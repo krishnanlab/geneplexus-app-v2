@@ -266,11 +266,6 @@ const NewAnalysisPage = () => {
       "warn",
     );
 
-  /** auto-select species */
-  useEffect(() => {
-    setSpeciesResult(speciesTrain);
-  }, [speciesTrain]);
-
   /**
    * allow setting inputs from outside component. history.state is persisted on
    * refresh/back/forward, which interferes with localStorage-synced state, so
@@ -327,6 +322,9 @@ const NewAnalysisPage = () => {
             options={speciesOptions}
             value={speciesTrain}
             onChange={(value) => {
+              /** clear genes if they exactly match an example set */
+              if (Object.values(example).includes(genes ?? "")) setGenes("");
+
               setSpeciesTrain(value);
               setSpeciesResult(value);
             }}
