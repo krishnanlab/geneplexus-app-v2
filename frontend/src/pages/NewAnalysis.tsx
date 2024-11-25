@@ -435,11 +435,10 @@ const NewAnalysisPage = () => {
                 </>
               }
             />
+            <Link to="https://pygeneplexus.readthedocs.io/en/latest/notes/data.html">
+              Learn more
+            </Link>
           </Flex>
-
-          <Link to="https://pygeneplexus.readthedocs.io/en/latest/notes/data.html">
-            Learn more
-          </Link>
 
           <TextBox
             className="full"
