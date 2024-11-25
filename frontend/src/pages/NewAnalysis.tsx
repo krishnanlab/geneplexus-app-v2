@@ -87,7 +87,7 @@ const genesetContextOptions: SelectOption<GenesetContext>[] = [
   {
     id: "Combined",
     primary: "Combined",
-    secondary: "All avail. sets",
+    secondary: "Combo. of below",
   },
   {
     id: "GO",
