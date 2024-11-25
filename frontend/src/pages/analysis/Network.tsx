@@ -646,6 +646,8 @@ const Network = ({ inputs, results }: Props) => {
               await domtoimage.toPng(element.closest("div")!, {
                 // @ts-expect-error "more" type defs missing
                 scale: 2,
+                width,
+                height,
               }),
               "network",
             );
