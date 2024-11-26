@@ -17,6 +17,7 @@ import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Flex from "@/components/Flex";
 import Heading from "@/components/Heading";
+import Link from "@/components/Link";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
 import Tabs, { Tab } from "@/components/Tabs";
@@ -134,13 +135,18 @@ const AnalysisPage = () => {
           {inputs && results && (
             <>
               <Summary results={results} />
+
+              <Link to="https://pygeneplexus.readthedocs.io/en/latest/">
+                Learn more
+              </Link>
+
               <Tabs defaultValue="predictions" syncWithUrl="results">
                 <Tab
                   text="Input Genes"
                   icon={<FaDna />}
                   tooltip="More details about input genes"
                 >
-                  <InputGenes results={results} />
+                  <InputGenes inputs={inputs} results={results} />
                 </Tab>
 
                 <Tab
@@ -148,7 +154,7 @@ const AnalysisPage = () => {
                   icon={<LuLightbulb />}
                   tooltip="Predication probability of genes"
                 >
-                  <Predictions results={results} />
+                  <Predictions inputs={inputs} results={results} />
                 </Tab>
 
                 <Tab
@@ -156,7 +162,7 @@ const AnalysisPage = () => {
                   icon={<BiCopy />}
                   tooltip="Similarity of input genes with biological processes and diseases"
                 >
-                  <Similarities results={results} />
+                  <Similarities inputs={inputs} results={results} />
                 </Tab>
 
                 <Tab
@@ -172,7 +178,7 @@ const AnalysisPage = () => {
                   icon={<FaCircleDot />}
                   tooltip="Info on how neutral genes were selected"
                 >
-                  <Neutrals results={results} />
+                  <Neutrals inputs={inputs} results={results} />
                 </Tab>
               </Tabs>
             </>

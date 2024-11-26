@@ -1,13 +1,15 @@
-import type { AnalysisResults } from "@/api/convert";
+import type { AnalysisInputs, AnalysisResults } from "@/api/convert";
 import Exponential from "@/components/Exponential";
 import Link from "@/components/Link";
 import Table from "@/components/Table";
+import { RenderID } from "@/pages/analysis/InputGenes";
 
 type Props = {
+  inputs: AnalysisInputs;
   results: AnalysisResults;
 };
 
-const Similarities = ({ results }: Props) => {
+const Similarities = ({ inputs, results }: Props) => {
   return (
     <>
       <p>
@@ -33,14 +35,7 @@ const Similarities = ({ results }: Props) => {
           {
             key: "id",
             name: "ID",
-            render: (cell) => {
-              let link = "";
-              if (cell.startsWith("GO:"))
-                link = `https://amigo.geneontology.org/amigo/term/GO%3A${cell}`;
-              if (cell.startsWith("DOID:"))
-                link = `https://disease-ontology.org/?id=DOID%3A${cell}`;
-              return <Link to={link}>{cell}</Link>;
-            },
+            render: RenderID,
           },
           {
             key: "name",
@@ -68,7 +63,8 @@ const Similarities = ({ results }: Props) => {
           },
         ]}
         rows={results.similarities}
-      />{" "}
+        filename={[inputs.name, "similarities"]}
+      />
     </>
   );
 };

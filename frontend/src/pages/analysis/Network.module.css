@@ -1,7 +1,7 @@
 .svg {
   height: min(800px, 75vh);
   background: var(--white);
-  box-shadow: var(--shadow);
+  box-shadow: var(--box-shadow);
 }
 
 .node:focus {

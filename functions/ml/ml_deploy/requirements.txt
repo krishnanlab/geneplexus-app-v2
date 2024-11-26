@@ -1,5 +1,5 @@
 # An example requirements file. If your function has other dependencies,
 # add them below
 functions-framework==3.*
-geneplexus @ git+https://github.com/krishnanlab/PyGenePlexus@f306e17
+geneplexus @ git+https://github.com/krishnanlab/PyGenePlexus@122aa2c
 flask-compress==1.*

@@ -22,8 +22,8 @@ const Inputs = ({ inputs }: Props) => {
           <span>{inputs.name}</span>
           <span>Train Species</span>
           <span>{inputs.speciesTrain}</span>
-          <span>Test Species</span>
-          <span>{inputs.speciesTest}</span>
+          <span>Result Species</span>
+          <span>{inputs.speciesResult}</span>
           <span>Network</span>
           <span>{inputs.network}</span>
           <span>Geneset Ctx.</span>

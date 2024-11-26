@@ -1,12 +1,14 @@
-import type { AnalysisResults } from "@/api/convert";
+import type { AnalysisInputs, AnalysisResults } from "@/api/convert";
 import Table from "@/components/Table";
+import { RenderID } from "@/pages/analysis/InputGenes";
 import { formatNumber } from "@/util/string";
 
 type Props = {
+  inputs: AnalysisInputs;
   results: AnalysisResults;
 };
 
-const Neutrals = ({ results }: Props) => {
+const Neutrals = ({ inputs, results }: Props) => {
   return (
     <>
       <div>Total: {formatNumber(results.neutralInfo.all.length)}</div>
@@ -15,6 +17,7 @@ const Neutrals = ({ results }: Props) => {
           {
             key: "Id",
             name: "ID",
+            render: RenderID,
           },
           {
             key: "Name",
@@ -30,6 +33,7 @@ const Neutrals = ({ results }: Props) => {
           },
         ]}
         rows={results.neutralInfo.sets}
+        filename={[inputs.name, "neutrals"]}
       />
     </>
   );

@@ -28,6 +28,7 @@ import Collapsible from "@/components/Collapsible";
 import Flex from "@/components/Flex";
 import Heading from "@/components/Heading";
 import Help from "@/components/Help";
+import Link from "@/components/Link";
 import Mark, { YesNo } from "@/components/Mark";
 import Meta from "@/components/Meta";
 import Section from "@/components/Section";
@@ -38,6 +39,7 @@ import Tabs, { Tab } from "@/components/Tabs";
 import TextBox from "@/components/TextBox";
 import { toast } from "@/components/Toasts";
 import UploadButton from "@/components/UploadButton";
+import { RenderID } from "@/pages/analysis/InputGenes";
 import { scrollTo } from "@/util/dom";
 import { useQuery } from "@/util/hooks";
 import { formatNumber } from "@/util/string";
@@ -85,7 +87,7 @@ const genesetContextOptions: SelectOption<GenesetContext>[] = [
   {
     id: "Combined",
     primary: "Combined",
-    secondary: "All sets",
+    secondary: "Combo. of below",
   },
   {
     id: "GO",
@@ -126,7 +128,7 @@ const NewAnalysisPage = () => {
 
   /** selected species */
   const [speciesTrain, setSpeciesTrain] = useState(speciesOptions[0]!.id);
-  const [speciesTest, setSpeciesTest] = useState(speciesOptions[0]!.id);
+  const [speciesResult, setSpeciesResult] = useState(speciesOptions[0]!.id);
 
   /** selected network type */
   const [network, setNetwork] = useState(networkOptions[0]!.id);
@@ -138,7 +140,7 @@ const NewAnalysisPage = () => {
 
   /** update meta counts */
   networkOptions.forEach((option) => {
-    const { nodes, edges } = meta[speciesTest][option.id];
+    const { nodes, edges } = meta[speciesResult][option.id];
     option.secondary = (
       <>
         {formatNumber(nodes, true)}
@@ -207,7 +209,7 @@ const NewAnalysisPage = () => {
           genes: splitGenes,
           negatives: splitNegatives,
           speciesTrain,
-          speciesTest,
+          speciesResult,
           network,
           genesetContext,
         } satisfies AnalysisInputs,
@@ -215,29 +217,54 @@ const NewAnalysisPage = () => {
     });
   };
 
-  /** restrict species options based on other params */
-  const filteredSpeciesOptions = speciesOptions.filter((option) => {
-    if (network === "BioGRID" && option.id === "Zebrafish") return false;
-    if (genesetContext === "Mondo" && option.id !== "Human") return false;
+  /** limit options based on species */
+  /** https://pygeneplexus.readthedocs.io/en/latest/notes/data.html#preprocessed-data */
+  const filteredNetworkOptions = networkOptions.filter((option) => {
+    if (
+      option.id === "BioGRID" &&
+      (speciesTrain === "Zebrafish" || speciesResult === "Zebrafish")
+    )
+      return false;
     return true;
   });
+  const filteredGenesetContextOptions = genesetContextOptions.filter(
+    (option) => {
+      if (
+        (speciesTrain === "Fly" || speciesResult === "Fly") &&
+        (option.id === "Monarch" || option.id === "Mondo")
+      )
+        return false;
+      if (
+        option.id === "Mondo" &&
+        (speciesTrain !== "Human" || speciesResult !== "Human")
+      )
+        return false;
+      return true;
+    },
+  );
 
-  /** warn about param restrictions */
+  /**
+   * when selected option is removed, select component will auto-select first
+   * available option
+   */
   if (
-    network === "BioGRID" &&
-    (speciesTrain === "Zebrafish" || speciesTest === "Zebrafish")
+    !filteredNetworkOptions.find((option) => option.id === network) ||
+    !filteredGenesetContextOptions.find(
+      (option) => option.id === genesetContext,
+    )
   )
-    toast("BioGRID does not support Zebrafish.", "warning", "warn1");
-  if (
-    genesetContext === "Mondo" &&
-    (speciesTrain !== "Human" || speciesTest !== "Human")
-  )
-    toast("Mondo only supports Human genes.", "warning", "warn2");
-
-  /** auto-select species */
-  useEffect(() => {
-    setSpeciesTest(speciesTrain);
-  }, [speciesTrain]);
+    /** warn about incompatible option */
+    toast(
+      <>
+        Selected options changed to be compatible with selected species.{" "}
+        <Link to="https://pygeneplexus.readthedocs.io/en/latest/notes/data.html">
+          Learn more
+        </Link>
+        .
+      </>,
+      "warning",
+      "warn",
+    );
 
   /**
    * allow setting inputs from outside component. history.state is persisted on
@@ -251,7 +278,7 @@ const NewAnalysisPage = () => {
       genes,
       negatives,
       speciesTrain,
-      speciesTest,
+      speciesResult,
       network,
       genesetContext,
       ...rest
@@ -268,7 +295,7 @@ const NewAnalysisPage = () => {
     setNegatives(negatives.join(", "));
     setName(name);
     setSpeciesTrain(speciesTrain);
-    setSpeciesTest(speciesTest);
+    setSpeciesResult(speciesResult);
     setNetwork(network);
     setGenesetContext(genesetContext);
   });
@@ -292,11 +319,14 @@ const NewAnalysisPage = () => {
             label="Input Species"
             tooltip="Species to lookup genes against and train model with."
             layout="horizontal"
-            options={filteredSpeciesOptions}
+            options={speciesOptions}
             value={speciesTrain}
             onChange={(value) => {
+              /** clear genes if they exactly match an example set */
+              if (Object.values(example).includes(genes ?? "")) setGenes("");
+
               setSpeciesTrain(value);
-              setSpeciesTest(value);
+              setSpeciesResult(value);
             }}
           />
 
@@ -306,9 +336,9 @@ const NewAnalysisPage = () => {
             label="Results Species"
             tooltip="Species for which model predictions will be made. If different from input species, model results will be translated into this species."
             layout="horizontal"
-            options={filteredSpeciesOptions}
-            value={speciesTest}
-            onChange={setSpeciesTest}
+            options={speciesOptions}
+            value={speciesResult}
+            onChange={setSpeciesResult}
           />
         </Flex>
       </Section>
@@ -377,16 +407,35 @@ const NewAnalysisPage = () => {
               value={network}
               onChange={setNetwork}
               label="Network"
-              options={networkOptions}
+              options={filteredNetworkOptions}
               tooltip="Network that machine learning features are from and which edge list is used to make final graph."
             />
             <SelectSingle
               value={genesetContext}
               onChange={setGenesetContext}
               label="Geneset Context"
-              options={genesetContextOptions}
-              tooltip="Source used to select negative genes and which sets to compare trained model to"
+              options={filteredGenesetContextOptions}
+              tooltip={
+                <>
+                  <div>
+                    Source used to select negative genes and which sets to
+                    compare trained model to.
+                  </div>
+                  <div>
+                    <i>Combined</i> = union of all{" "}
+                    {filteredGenesetContextOptions.length - 1} geneset(s)
+                    available for selected species:{" "}
+                    {filteredGenesetContextOptions
+                      .slice(1)
+                      .map((option) => option.primary)
+                      .join(", ")}
+                  </div>
+                </>
+              }
             />
+            <Link to="https://pygeneplexus.readthedocs.io/en/latest/notes/data.html">
+              Learn more
+            </Link>
           </Flex>
 
           <TextBox
@@ -483,7 +532,7 @@ const NewAnalysisPage = () => {
                   {
                     key: "entrez",
                     name: "Entrez ID",
-                    render: (cell) => cell || <Mark type="error">Failed</Mark>,
+                    render: RenderID,
                   },
                   {
                     key: "inNetwork",
