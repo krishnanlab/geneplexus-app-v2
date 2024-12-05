@@ -586,7 +586,7 @@ const NewAnalysisPage = () => {
         <TextBox
           className="narrow"
           label="Name"
-          tooltip="(Optional) A name to help you distinguish this analysis from others. Shown anywhere an analysis summary/details is shown, and used as a filename when downloading files."
+          tooltip="(Optional) A name to help you distinguish this analysis from others. Shown anywhere an analysis summary or details is shown, and used in downloaded file names."
           placeholder="analysis"
           value={name}
           onChange={(value) => setName(value.replaceAll(/[^\w\d-_ ]*/g, ""))}
