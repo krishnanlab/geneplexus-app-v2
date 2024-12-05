@@ -556,7 +556,7 @@ const NewAnalysisPage = () => {
         <TextBox
           className="narrow"
           label="Name"
-          tooltip="(Optional) Give your analysis a name to remember it by"
+          tooltip="(Optional) Name is used when saving results or viewing in Load Analysis tab."
           placeholder="analysis"
           value={name}
           onChange={(value) => setName(value.replaceAll(/[^\w\d-_ ]*/g, ""))}
