@@ -3,6 +3,7 @@ import {
   FaBook,
   FaBoxOpen,
   FaChartBar,
+  FaQuestion,
   FaEye,
   FaHourglass,
   FaLightbulb,
@@ -84,6 +85,13 @@ const AboutPage = () => {
               text="Data"
               icon={<FaChartBar />}
               tooltip="Raw data behind the package and analyses"
+              flip
+            />
+            <Button
+              to="https://pygeneplexus.readthedocs.io/en/latest/notes/faqs.html"
+              text="FAQs"
+              icon={<FaQuestion />}
+              tooltip="Detailed help on some frequently asked questions"
               flip
             />
           </Flex>
