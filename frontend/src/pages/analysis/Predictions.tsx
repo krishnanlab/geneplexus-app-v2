@@ -36,14 +36,14 @@ const Predictions = ({ inputs, results }: Props) => {
           key: "knownNovel",
           name: "Known/Novel",
           tooltip:
-            "Indicates whether gene was part of input gene list (therefore Known) or not (therefore Novel). If cross-species information is based on one-to-one ortholog",
+            "Indicates whether gene was part of input gene list (therefore Known) or not (therefore Novel). If cross-species, information is based on one-to-one ortholog.",
           filterType: "enum",
         },
         {
           key: "classLabel",
           name: "Class Label",
           tooltip:
-            "Whether gene was considered in positive/negative class or not considered at all during training. If cross-species information is based on one-to-one ortholog",
+            "Whether gene was considered in positive/negative class or not considered at all during training. If cross-species, information is based on one-to-one ortholog.",
           filterType: "enum",
           style: { whiteSpace: "nowrap" },
         },
