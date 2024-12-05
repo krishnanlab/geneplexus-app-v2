@@ -57,12 +57,42 @@ const example: Record<Species, string> = {
 };
 
 const speciesOptions: SelectOption<Species>[] = [
-  { id: "Human", primary: "Human", icon: <FaPerson /> },
-  { id: "Mouse", primary: "Mouse", icon: <GiRat /> },
-  { id: "Fly", primary: "Fly", icon: <GiFly /> },
-  { id: "Zebrafish", primary: "Zebrafish", icon: <FaFish /> },
-  { id: "Worm", primary: "Worm", icon: <FaWorm /> },
-  { id: "Yeast", primary: "Yeast", icon: <FaBeerMugEmpty /> },
+  {
+    id: "Human",
+    primary: "Human",
+    secondary: "Homo sapiens",
+    icon: <FaPerson />,
+  },
+  {
+    id: "Mouse",
+    primary: "Mouse",
+    secondary: "Mus musculus",
+    icon: <GiRat />,
+  },
+  {
+    id: "Fly",
+    primary: "Fly",
+    secondary: "Drosophila melanogaster",
+    icon: <GiFly />,
+  },
+  {
+    id: "Zebrafish",
+    primary: "Zebrafish",
+    secondary: "Danio rerio",
+    icon: <FaFish />,
+  },
+  {
+    id: "Worm",
+    primary: "Worm",
+    secondary: "Caenorhabditis elegans",
+    icon: <FaWorm />,
+  },
+  {
+    id: "Yeast",
+    primary: "Yeast",
+    secondary: "Saccharomyces cerevisiae",
+    icon: <FaBeerMugEmpty />,
+  },
 ] as const;
 
 const networkOptions: SelectOption<Network>[] = [
