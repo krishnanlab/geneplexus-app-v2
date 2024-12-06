@@ -57,12 +57,42 @@ const example: Record<Species, string> = {
 };
 
 const speciesOptions: SelectOption<Species>[] = [
-  { id: "Human", primary: "Human", icon: <FaPerson /> },
-  { id: "Mouse", primary: "Mouse", icon: <GiRat /> },
-  { id: "Fly", primary: "Fly", icon: <GiFly /> },
-  { id: "Zebrafish", primary: "Zebrafish", icon: <FaFish /> },
-  { id: "Worm", primary: "Worm", icon: <FaWorm /> },
-  { id: "Yeast", primary: "Yeast", icon: <FaBeerMugEmpty /> },
+  {
+    id: "Human",
+    primary: "Human",
+    secondary: "Homo sapiens",
+    icon: <FaPerson />,
+  },
+  {
+    id: "Mouse",
+    primary: "Mouse",
+    secondary: "Mus musculus",
+    icon: <GiRat />,
+  },
+  {
+    id: "Fly",
+    primary: "Fly",
+    secondary: "Drosophila melanogaster",
+    icon: <GiFly />,
+  },
+  {
+    id: "Zebrafish",
+    primary: "Zebrafish",
+    secondary: "Danio rerio",
+    icon: <FaFish />,
+  },
+  {
+    id: "Worm",
+    primary: "Worm",
+    secondary: "Caenorhabditis elegans",
+    icon: <FaWorm />,
+  },
+  {
+    id: "Yeast",
+    primary: "Yeast",
+    secondary: "Saccharomyces cerevisiae",
+    icon: <FaBeerMugEmpty />,
+  },
 ] as const;
 
 const networkOptions: SelectOption<Network>[] = [
@@ -105,6 +135,9 @@ const genesetContextOptions: SelectOption<GenesetContext>[] = [
     secondary: "Diseases",
   },
 ];
+
+const geneMin = 5;
+const geneMinMessage = `GenePlexus needs at least ${geneMin} valid genes to work properly`;
 
 const NewAnalysisPage = () => {
   /** raw text list of input gene ids */
@@ -196,8 +229,20 @@ const NewAnalysisPage = () => {
   const submitAnalysis = () => {
     /** check for sufficient inputs */
     if (!splitGenes.length) {
-      window.alert("Please enter some genes first!");
+      window.alert("Please enter some genes");
       scrollTo("#enter-genes");
+      return;
+    }
+
+    if (splitGenes.length < geneMin) {
+      window.alert(geneMinMessage);
+      scrollTo("#enter-genes");
+      return;
+    }
+
+    if ((checkGenesData?.success || Infinity) < geneMin) {
+      window.alert(geneMinMessage);
+      scrollTo("#pre-check-genes");
       return;
     }
 
@@ -364,6 +409,8 @@ const NewAnalysisPage = () => {
         </div>
 
         <Flex>
+          <span>{formatNumber(splitGenes.length)} genes</span>
+
           <Button
             text="Example"
             icon={<FaLightbulb />}
@@ -371,7 +418,6 @@ const NewAnalysisPage = () => {
             onClick={() => setGenes(example[speciesTrain])}
             tooltip="Try some example genes for this species"
           />
-
           <Flex>
             <UploadButton
               text="Upload"
@@ -394,6 +440,10 @@ const NewAnalysisPage = () => {
             {filename}
           </Flex>
         </Flex>
+
+        {splitGenes.length > 0 && splitGenes.length < geneMin && (
+          <Alert type="error">{geneMinMessage}</Alert>
+        )}
       </Section>
 
       <Section>
@@ -447,6 +497,8 @@ const NewAnalysisPage = () => {
             placeholder="Comma, tab, or line-separated list of entrez IDs, symbols, or ensembl gene/protein/transcript IDs"
             tooltip="Genes to be used as negative training examples, in addition to those automatically selected by our algorithm."
           />
+
+          <span>{formatNumber(splitNegatives.length)} negative genes</span>
         </Collapsible>
       </Section>
 
@@ -475,7 +527,8 @@ const NewAnalysisPage = () => {
 
         {checkGenesStatus === "loading" && (
           <Alert type="loading">
-            Checking {formatNumber(splitGenes.length)} genes
+            Checking {formatNumber(splitGenes.length + splitNegatives.length)}{" "}
+            genes
           </Alert>
         )}
         {checkGenesStatus === "error" && (
@@ -483,68 +536,74 @@ const NewAnalysisPage = () => {
         )}
 
         {checkGenesData && (
-          <Tabs>
-            <Tab text="Summary" icon={<FaEye />}>
-              <div className={classes.summary}>
-                <Mark type="success">
-                  <strong className={classes.success}>
-                    {formatNumber(checkGenesData.success)} genes
-                  </strong>{" "}
-                  converted to Entrez
-                </Mark>
-
-                {!!checkGenesData.error && (
-                  <Mark type="error">
-                    <strong className={classes.error}>
-                      {formatNumber(checkGenesData.error)} genes
+          <>
+            <Tabs>
+              <Tab text="Summary" icon={<FaEye />}>
+                <div className={classes.summary}>
+                  <Mark type="success">
+                    <strong className={classes.success}>
+                      {formatNumber(checkGenesData.success)} genes
                     </strong>{" "}
-                    couldn't be converted
+                    converted to Entrez
                   </Mark>
-                )}
 
-                <span className={classes.divider} />
+                  {!!checkGenesData.error && (
+                    <Mark type="error">
+                      <strong className={classes.error}>
+                        {formatNumber(checkGenesData.error)} genes
+                      </strong>{" "}
+                      couldn't be converted
+                    </Mark>
+                  )}
 
-                {checkGenesData.summary.map((row, index) => (
-                  <Mark key={index} icon={<FaDna />}>
-                    <strong>{formatNumber(row.positiveGenes)} genes</strong> in{" "}
-                    {row.network} ({formatNumber(row.totalGenes, true)})
-                  </Mark>
-                ))}
-              </div>
-            </Tab>
+                  <span className={classes.divider} />
 
-            <Tab text="Detailed" icon={<FaTable />}>
-              <Table
-                cols={[
-                  {
-                    key: "input",
-                    name: "Input ID",
-                  },
-                  ...(splitNegatives.length
-                    ? ([
-                        {
-                          key: "inputType",
-                          name: "Type",
-                          filterType: "enum",
-                        },
-                      ] as const)
-                    : []),
-                  {
-                    key: "entrez",
-                    name: "Entrez ID",
-                    render: RenderID,
-                  },
-                  {
-                    key: "inNetwork",
-                    name: "In Network",
-                    render: YesNo,
-                    filterType: "boolean",
-                  },
-                ]}
-                rows={checkGenesData.table}
-              />
-            </Tab>
-          </Tabs>
+                  {checkGenesData.summary.map((row, index) => (
+                    <Mark key={index} icon={<FaDna />}>
+                      <strong>{formatNumber(row.positiveGenes)} genes</strong>{" "}
+                      in {row.network} ({formatNumber(row.totalGenes, true)})
+                    </Mark>
+                  ))}
+                </div>
+              </Tab>
+
+              <Tab text="Detailed" icon={<FaTable />}>
+                <Table
+                  cols={[
+                    {
+                      key: "input",
+                      name: "Input ID",
+                    },
+                    ...(splitNegatives.length
+                      ? ([
+                          {
+                            key: "inputType",
+                            name: "Type",
+                            filterType: "enum",
+                          },
+                        ] as const)
+                      : []),
+                    {
+                      key: "entrez",
+                      name: "Entrez ID",
+                      render: RenderID,
+                    },
+                    {
+                      key: "inNetwork",
+                      name: "In Network",
+                      render: YesNo,
+                      filterType: "boolean",
+                    },
+                  ]}
+                  rows={checkGenesData.table}
+                />
+              </Tab>
+            </Tabs>
+
+            {checkGenesData.success < geneMin && (
+              <Alert type="error">{geneMinMessage}</Alert>
+            )}
+          </>
         )}
       </Section>
 
@@ -553,10 +612,19 @@ const NewAnalysisPage = () => {
           Submit Analysis
         </Heading>
 
+        {!checkGenesData &&
+          splitGenes.length >= geneMin &&
+          splitGenes.length < geneMin * 2 && (
+            <Alert type="warning" className="narrow">
+              You haven't entered many genes and haven't pre-checked them. If
+              less than {geneMin} end up being valid, the analysis will fail.
+            </Alert>
+          )}
+
         <TextBox
           className="narrow"
           label="Name"
-          tooltip="(Optional) Give your analysis a name to remember it by"
+          tooltip="(Optional) A name to help you distinguish this analysis from others. Shown anywhere an analysis summary or details is shown, and used in downloaded file names."
           placeholder="analysis"
           value={name}
           onChange={(value) => setName(value.replaceAll(/[^\w\d-_ ]*/g, ""))}
@@ -565,6 +633,13 @@ const NewAnalysisPage = () => {
         <Button
           text="Submit"
           icon={<FaPaperPlane />}
+          style={{
+            opacity:
+              splitGenes.length < geneMin ||
+              (checkGenesData?.success || Infinity) < geneMin
+                ? 0.5
+                : 1,
+          }}
           onClick={submitAnalysis}
         />
       </Section>

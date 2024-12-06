@@ -1,4 +1,4 @@
 # An example requirements file. If your function has other dependencies,
 # add them below
 functions-framework==3.*
-geneplexus @ git+https://github.com/krishnanlab/PyGenePlexus@122aa2c
+geneplexus @ git+https://github.com/krishnanlab/PyGenePlexus@610ad9a
