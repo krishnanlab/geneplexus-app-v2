@@ -137,7 +137,7 @@ const genesetContextOptions: SelectOption<GenesetContext>[] = [
 ];
 
 const geneMin = 5;
-const geneMinMessage = `GenePlexus needs at least ${geneMin} genes to work properly`;
+const geneMinMessage = `GenePlexus needs at least ${geneMin} valid genes to work properly`;
 
 const NewAnalysisPage = () => {
   /** raw text list of input gene ids */
@@ -233,9 +233,16 @@ const NewAnalysisPage = () => {
       scrollTo("#enter-genes");
       return;
     }
+
     if (splitGenes.length < geneMin) {
       window.alert(geneMinMessage);
       scrollTo("#enter-genes");
+      return;
+    }
+
+    if ((checkGenesData?.success || Infinity) < geneMin) {
+      window.alert(geneMinMessage);
+      scrollTo("#pre-check-genes");
       return;
     }
 
@@ -490,6 +497,8 @@ const NewAnalysisPage = () => {
             placeholder="Comma, tab, or line-separated list of entrez IDs, symbols, or ensembl gene/protein/transcript IDs"
             tooltip="Genes to be used as negative training examples, in addition to those automatically selected by our algorithm."
           />
+
+          <span>{formatNumber(splitNegatives.length)} negative genes</span>
         </Collapsible>
       </Section>
 
@@ -518,7 +527,8 @@ const NewAnalysisPage = () => {
 
         {checkGenesStatus === "loading" && (
           <Alert type="loading">
-            Checking {formatNumber(splitGenes.length)} genes
+            Checking {formatNumber(splitGenes.length + splitNegatives.length)}{" "}
+            genes
           </Alert>
         )}
         {checkGenesStatus === "error" && (
@@ -623,7 +633,13 @@ const NewAnalysisPage = () => {
         <Button
           text="Submit"
           icon={<FaPaperPlane />}
-          style={{ opacity: splitGenes.length < geneMin ? 0.5 : 1 }}
+          style={{
+            opacity:
+              splitGenes.length < geneMin ||
+              (checkGenesData?.success || Infinity) < geneMin
+                ? 0.5
+                : 1,
+          }}
           onClick={submitAnalysis}
         />
       </Section>
