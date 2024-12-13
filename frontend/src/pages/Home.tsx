@@ -34,7 +34,7 @@ const HomePage = () => {
         </Flex>
 
         <p className="center">
-          <Link to={import.meta.env.VITE_OLD_URL}>
+          <Link to="https://pygeneplexus.readthedocs.io/en/latest/notes/faqs.html">
             Looking for the old GenePlexus?
           </Link>
         </p>

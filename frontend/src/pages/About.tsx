@@ -132,14 +132,12 @@ const AboutPage = () => {
 
         <p className="center">
           This web app is a re-imagined version of the initial version of
-          GenePlexus, which is still accessible (for a limited time) here:
+          GenePlexus, which has been{" "}
+          <Link to="https://pygeneplexus.readthedocs.io/en/latest/notes/faqs.html">
+            shut down
+          </Link>
+          .
         </p>
-
-        <Button
-          to={import.meta.env.VITE_OLD_URL}
-          text="Old Site"
-          icon={<FaArrowUpRightFromSquare />}
-        />
       </Section>
     </>
   );
