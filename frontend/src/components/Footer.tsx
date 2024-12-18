@@ -23,7 +23,7 @@ const Footer = () => (
       </Link>
       <Link to="/about#terms-of-use">Terms of Use</Link>
       <Link
-        to="https://pygeneplexus.readthedocs.io/en/latest/appendix/license.html"
+        to="https://pygeneplexus.readthedocs.io/en/v2.0.1/appendix/license.html"
         showArrow={false}
       >
         License
