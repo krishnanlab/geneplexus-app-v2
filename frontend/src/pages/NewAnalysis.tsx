@@ -263,7 +263,7 @@ const NewAnalysisPage = () => {
   };
 
   /** limit options based on species */
-  /** https://pygeneplexus.readthedocs.io/en/v2.0.1/notes/data.html#preprocessed-data */
+  /** https://pygeneplexus.readthedocs.io/en/v2.0.2/notes/data.html#preprocessed-data */
   const filteredNetworkOptions = networkOptions.filter((option) => {
     if (
       option.id === "BioGRID" &&
@@ -302,7 +302,7 @@ const NewAnalysisPage = () => {
     toast(
       <>
         Selected options changed to be compatible with selected species.{" "}
-        <Link to="https://pygeneplexus.readthedocs.io/en/v2.0.1/notes/data.html">
+        <Link to="https://pygeneplexus.readthedocs.io/en/v2.0.2/notes/data.html">
           Learn more
         </Link>
         .

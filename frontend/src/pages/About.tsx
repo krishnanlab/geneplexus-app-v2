@@ -67,7 +67,7 @@ const AboutPage = () => {
               flip
             />
             <Button
-              to="https://pygeneplexus.readthedocs.io/en/v2.0.1/"
+              to="https://pygeneplexus.readthedocs.io/en/v2.0.2/"
               text="Docs"
               icon={<FaBook />}
               tooltip="Detailed information on how to use the package and how to interpret results"
@@ -88,7 +88,7 @@ const AboutPage = () => {
               flip
             />
             <Button
-              to="https://pygeneplexus.readthedocs.io/en/v2.0.1/notes/faqs.html"
+              to="https://pygeneplexus.readthedocs.io/en/v2.0.2/notes/faqs.html"
               text="FAQs"
               icon={<FaQuestion />}
               tooltip="Detailed help on some frequently asked questions"
