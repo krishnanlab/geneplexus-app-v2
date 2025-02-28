@@ -136,7 +136,7 @@ const AnalysisPage = () => {
             <>
               <Summary results={results} />
 
-              <Link to="https://pygeneplexus.readthedocs.io/en/v2.0.2/">
+              <Link to="https://pygeneplexus.readthedocs.io/en/v2.0.4/">
                 Learn more
               </Link>
 
