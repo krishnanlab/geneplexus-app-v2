@@ -25,7 +25,7 @@ import Flex from "@/components/Flex";
 import type { Option } from "@/components/SelectSingle";
 import SelectSingle from "@/components/SelectSingle";
 import Slider from "@/components/Slider";
-import { theme } from "@/util/dom";
+import { theme } from "@/global/theme";
 import { downloadPng, downloadSvg } from "@/util/download";
 import { lerp } from "@/util/math";
 import { formatNumber } from "@/util/string";
@@ -51,16 +51,16 @@ const attractionStrength = 1;
 const springDistance = 40;
 /** node circle fill colors (keep light to allow dark text) */
 const nodeColors: Record<Node["classLabel"] | "Node", string> = {
-  Positive: theme("--deep-light"),
-  Negative: theme("--accent-light"),
-  Neutral: theme("--light-gray"),
+  Positive: theme["deep-light"],
+  Negative: theme["accent-light"],
+  Neutral: theme["light-gray"],
   /** fallback */
-  Node: theme("--light-gray"),
+  Node: theme["light-gray"],
 };
 /** edge line stroke color */
-const edgeColor = theme("--light-gray");
+const edgeColor = theme["light-gray"];
 /** selected edge line stroke color */
-const selectedEdgeColor = theme("--accent");
+const selectedEdgeColor = theme["accent"];
 /** legend square/text/other size */
 const legendCell = 15;
 /** legend line spacing factor */
@@ -502,7 +502,7 @@ const Network = ({ inputs, results }: Props) => {
                   )}
                   fill={nodeColors[node.classLabel || "Node"]}
                   stroke={
-                    node.entrez === selectedNode?.entrez ? theme("--black") : ""
+                    node.entrez === selectedNode?.entrez ? theme["black"] : ""
                   }
                   tabIndex={0}
                   onClick={() => setSelectedNode(node)}
@@ -533,6 +533,7 @@ const Network = ({ inputs, results }: Props) => {
                     else labelRefs.current.delete(index);
                   }}
                   stroke={nodeColors[node.classLabel]}
+                  dominantBaseline="central"
                 >
                   {(() => {
                     const label = node[labelKey];
@@ -548,7 +549,7 @@ const Network = ({ inputs, results }: Props) => {
           {/* legend */}
           <g ref={legendRef}>
             {/* background */}
-            <rect fill={theme("--white")} stroke={theme("--light-gray")} />
+            <rect fill={theme["white"]} stroke={theme["light-gray"]} />
 
             {/* info */}
             {legend?.map((group) => {
@@ -579,7 +580,7 @@ const Network = ({ inputs, results }: Props) => {
                         y={y}
                         fontSize={legendCell}
                         dominantBaseline="central"
-                        fill={theme("--dark-gray")}
+                        fill={theme["dark-gray"]}
                       >
                         {key}
                       </text>

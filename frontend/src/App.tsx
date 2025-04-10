@@ -1,4 +1,4 @@
-import "@/global/theme.css";
+import "@/global/theme.ts";
 import "@/global/styles.css";
 import "@/global/text.css";
 import "@/global/layout.css";

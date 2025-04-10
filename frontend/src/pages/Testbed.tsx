@@ -50,7 +50,7 @@ import TextBox from "@/components/TextBox";
 import Tile from "@/components/Tile";
 import { toast } from "@/components/Toasts";
 import Tooltip from "@/components/Tooltip";
-import { themeVariables } from "@/util/dom";
+import { theme } from "@/global/theme";
 import { formatDate, formatNumber } from "@/util/string";
 import tableData from "../../fixtures/table.json";
 
@@ -79,7 +79,7 @@ const TestbedPage = () => {
 
         {/* color palette */}
         <Flex gap="none">
-          {Object.entries(themeVariables)
+          {Object.entries(theme)
             .filter(
               ([, value]) => value.startsWith("#") || value.startsWith("hsl"),
             )
