@@ -1,3 +1,8 @@
+import "@/global/theme.ts";
+import "@/global/styles.css";
+import "@/global/text.css";
+import "@/global/layout.css";
+import "@/global/effects.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";

@@ -1,8 +1,3 @@
-import "@/global/theme.css";
-import "@/global/styles.css";
-import "@/global/text.css";
-import "@/global/layout.css";
-import "@/global/effects.css";
 import { useEffect } from "react";
 import { IconContext } from "react-icons";
 import {
